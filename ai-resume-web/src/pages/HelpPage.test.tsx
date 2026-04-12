@@ -7,6 +7,11 @@ import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { I18nextProvider } from 'react-i18next';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import zh from '../locales/zh.json';
+import en from '../locales/en.json';
 import HelpPage from './HelpPage';
 
 // Mock UIComponents
@@ -20,6 +25,18 @@ vi.mock('../components/SEO', () => ({
   SEO: () => null,
 }));
 
+// Create test-specific i18n instance
+const testI18n = i18n.createInstance();
+testI18n.use(initReactI18next).init({
+  resources: {
+    zh: { translation: zh },
+    en: { translation: en },
+  },
+  lng: 'zh',
+  fallbackLng: 'zh',
+  interpolation: { escapeValue: false },
+});
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { retry: false },
@@ -30,11 +47,13 @@ const queryClient = new QueryClient({
 describe('HelpPage', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <MemoryRouter>
-          {children}
-        </MemoryRouter>
-      </HelmetProvider>
+      <I18nextProvider i18n={testI18n}>
+        <HelmetProvider>
+          <MemoryRouter>
+            {children}
+          </MemoryRouter>
+        </HelmetProvider>
+      </I18nextProvider>
     </QueryClientProvider>
   );
 
@@ -83,6 +102,6 @@ describe('HelpPage', () => {
   it('有登录链接', () => {
     render(<HelpPage />, { wrapper });
 
-    expect(screen.getByText('登录')).toBeInTheDocument();
+    expect(screen.getAllByText('登录').length).toBeGreaterThan(0);
   });
 });
