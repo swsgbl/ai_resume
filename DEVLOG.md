@@ -5,6 +5,51 @@
 
 ---
 
+## [2026-04-12] 下载中心更新 — Linux .rpm + 鸿蒙 .hap 上线
+
+### 新增
+
+#### Linux .rpm 安装包
+- 复制 Tauri v2 构建产物 `AI Resume-1.0.0-1.x86_64.rpm` (2.9MB) 到 `public/downloads/`
+- 重命名为 `ai-resume-linux-amd64.rpm`
+
+#### 鸿蒙 HarmonyOS .hap 安装包
+- 通过 VS Code CodeArts 远程编译成功
+- `entry-default-signed.hap` (2.8MB) — 签名版，可直接安装到鸿蒙设备
+- 编译步骤：ohpm install → CompileArkTS (3.2s) → PackageResource (1.5s) → CompileResource (0.8s) → AssembleHap (8s)
+
+#### 下载页面更新
+- `DownloadSection.tsx` — Linux 拆分为 `.deb` (Ubuntu/Debian) + `.rpm` (Fedora/CentOS) 两个下载卡片
+- 鸿蒙状态从"即将推出"改为可下载
+- 当前可用下载：Web + Android APK + Linux .deb + Linux .rpm + HarmonyOS .hap
+
+### 部署
+- 已 scp 部署到 https://ndtool.cn/downloads/
+- 文件：ai-resume-android.apk (51MB), ai-resume-linux-amd64.deb (2.9MB), ai-resume-linux-amd64.rpm (2.9MB)
+- 鸿蒙 .hap 需从 CodeArts 环境手动复制到 `public/downloads/`
+
+---
+
+## [2026-04-12] 测试修复 - localStorage 支持性能监控测试
+
+### 修复
+
+#### 测试环境 localStorage 支持
+- `src/test/setup.ts` — 添加基于内存的 localStorage 实现
+- `src/utils/performance.test.ts` — 在 beforeAll hook 中设置 localStorage
+
+**问题**：performance 工具测试失败，localStorage 在测试环境中未定义
+
+**解决方案**：在 setup.ts 中提供完整的 localStorage 实现（使用内存存储）
+
+**测试结果**：
+- Test Files: 31 passed (31)
+- Tests: 362 passed | 3 skipped (365)
+- Build: 1.62s
+- Type Check: 0 errors
+
+---
+
 ## [2026-04-12] 测试修复 - i18n 支持公共页面测试
 
 ### 修复
