@@ -1,4 +1,4 @@
-/* Public Navbar — 全局导航组件样式 */
+/* Public Navbar — Impeccable Design System */
 
 .pub-nav {
   position: fixed;
@@ -10,15 +10,16 @@
   display: flex;
   align-items: center;
   padding: 0 24px;
-  background: rgba(5, 8, 22, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: background 0.3s, box-shadow 0.3s;
+  background: rgba(12, 12, 12, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
 }
 
 .pub-nav.scrolled {
-  background: rgba(5, 8, 22, 0.92);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(12, 12, 12, 0.95);
+  border-bottom-color: #252525;
 }
 
 .pub-nav-inner {
@@ -35,58 +36,71 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Playfair Display', 'Noto Serif SC', serif;
   font-weight: 700;
   font-size: 1.25rem;
-  color: #f1f5f9;
+  color: #E8E4DE;
   text-decoration: none;
   transition: color 0.2s;
+  letter-spacing: 0.02em;
 }
 
 .pub-nav-logo:hover {
-  color: #fbbf24;
+  color: #C84B31;
 }
 
 .pub-nav-logo-icon {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #f59e0b, #10b981);
+  background: #C84B31;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-size: 0.875rem;
   font-weight: 800;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+  font-family: 'Playfair Display', serif;
 }
 
 /* Navigation Links */
 .pub-nav-links {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .pub-nav-link {
-  padding: 6px 14px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #94a3b8;
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: #8A8580;
   text-decoration: none;
-  border-radius: 8px;
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s;
   white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .pub-nav-link:hover {
-  color: #f1f5f9;
-  background: rgba(255, 255, 255, 0.06);
+  color: #E8E4DE;
 }
 
 .pub-nav-link.active {
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.1);
+  color: #C84B31;
+}
+
+.pub-nav-lang {
+  font-size: 0.75rem;
+  border: 1px solid #252525;
+  border-radius: 2px;
+  padding: 4px 8px;
+  margin-left: 4px;
+}
+
+.pub-nav-lang:hover {
+  border-color: #5A5652;
 }
 
 /* Action Buttons */
@@ -98,34 +112,30 @@
 
 .pub-nav-login {
   padding: 6px 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #94a3b8;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: #8A8580;
   text-decoration: none;
-  border-radius: 8px;
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s;
 }
 
 .pub-nav-login:hover {
-  color: #f1f5f9;
-  background: rgba(255, 255, 255, 0.06);
+  color: #E8E4DE;
 }
 
 .pub-nav-cta {
-  padding: 8px 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #050816;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  border-radius: 8px;
+  padding: 7px 20px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #fff;
+  background: #C84B31;
   text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: background 0.2s;
   white-space: nowrap;
 }
 
 .pub-nav-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  background: #A63D28;
 }
 
 /* Hamburger */
@@ -142,9 +152,8 @@
 .pub-hamburger span {
   display: block;
   width: 22px;
-  height: 2px;
-  background: #94a3b8;
-  border-radius: 2px;
+  height: 1.5px;
+  background: #8A8580;
   transition: transform 0.3s, opacity 0.3s;
 }
 
@@ -168,13 +177,13 @@
   left: 0;
   right: 0;
   z-index: 999;
-  background: rgba(5, 8, 22, 0.98);
+  background: rgba(12, 12, 12, 0.98);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 16px 24px;
   flex-direction: column;
-  gap: 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 2px;
+  border-bottom: 1px solid #252525;
   transform: translateY(-10px);
   opacity: 0;
   pointer-events: none;
@@ -190,8 +199,7 @@
 .pub-mobile-menu .pub-nav-link {
   display: block;
   padding: 12px 16px;
-  font-size: 1rem;
-  border-radius: 8px;
+  font-size: 0.9375rem;
 }
 
 .pub-mobile-menu .pub-nav-cta {
@@ -199,7 +207,7 @@
   text-align: center;
   margin-top: 8px;
   padding: 12px 16px;
-  font-size: 1rem;
+  font-size: 0.9375rem;
 }
 
 /* Responsive */

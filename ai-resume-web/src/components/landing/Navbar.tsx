@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -21,14 +23,19 @@ export default function Navbar() {
           </Link>
 
           <div className="lp-nav-menu">
-            <Link to="/career" className="lp-nav-link">职业智能</Link>
-            <Link to="/about" className="lp-nav-link">关于</Link>
-            <Link to="/help" className="lp-nav-link">帮助</Link>
-            <Link to="/trae" className="lp-nav-link">Trae AI</Link>
-            <Link to="/terms" className="lp-nav-link">条款</Link>
-            <Link to="/privacy" className="lp-nav-link">隐私</Link>
-            <Link to="/login" className="lp-nav-link lp-nav-login">登录</Link>
-            <Link to="/register" className="lp-nav-cta">免费注册</Link>
+            <Link to="/career" className="lp-nav-link">{t('nav.career')}</Link>
+            <Link to="/resources" className="lp-nav-link">{t('nav.resources')}</Link>
+            <Link to="/trae" className="lp-nav-link">{t('nav.trae')}</Link>
+            <Link to="/about" className="lp-nav-link">{t('nav.about')}</Link>
+            <Link to="/help" className="lp-nav-link">{t('nav.help')}</Link>
+            <button
+              onClick={() => i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')}
+              className="lp-nav-link"
+            >
+              {t('nav.language')}
+            </button>
+            <Link to="/login" className="lp-nav-link lp-nav-login">{t('nav.login')}</Link>
+            <Link to="/register" className="lp-nav-cta">{t('nav.register')}</Link>
           </div>
 
           <button
@@ -42,14 +49,16 @@ export default function Navbar() {
       </nav>
 
       <div className={`lp-mobile-menu${menuOpen ? ' open' : ''}`}>
-        <Link to="/career" className="lp-nav-link" onClick={() => setMenuOpen(false)}>职业智能</Link>
-        <Link to="/about" className="lp-nav-link" onClick={() => setMenuOpen(false)}>关于</Link>
-        <Link to="/help" className="lp-nav-link" onClick={() => setMenuOpen(false)}>帮助</Link>
-        <Link to="/trae" className="lp-nav-link" onClick={() => setMenuOpen(false)}>Trae AI</Link>
-        <Link to="/terms" className="lp-nav-link" onClick={() => setMenuOpen(false)}>条款</Link>
-        <Link to="/privacy" className="lp-nav-link" onClick={() => setMenuOpen(false)}>隐私</Link>
-        <Link to="/login" className="lp-nav-link" onClick={() => setMenuOpen(false)}>登录</Link>
-        <Link to="/register" className="lp-nav-cta" onClick={() => setMenuOpen(false)}>免费注册</Link>
+        <Link to="/career" className="lp-nav-link" onClick={() => setMenuOpen(false)}>{t('nav.career')}</Link>
+        <Link to="/resources" className="lp-nav-link" onClick={() => setMenuOpen(false)}>{t('nav.resources')}</Link>
+        <Link to="/trae" className="lp-nav-link" onClick={() => setMenuOpen(false)}>{t('nav.trae')}</Link>
+        <Link to="/about" className="lp-nav-link" onClick={() => setMenuOpen(false)}>{t('nav.about')}</Link>
+        <Link to="/help" className="lp-nav-link" onClick={() => setMenuOpen(false)}>{t('nav.help')}</Link>
+        <button onClick={() => { i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh'); setMenuOpen(false); }} className="lp-nav-link">
+          {t('nav.language')}
+        </button>
+        <Link to="/login" className="lp-nav-link" onClick={() => setMenuOpen(false)}>{t('nav.login')}</Link>
+        <Link to="/register" className="lp-nav-cta" onClick={() => setMenuOpen(false)}>{t('nav.register')}</Link>
       </div>
     </>
   );

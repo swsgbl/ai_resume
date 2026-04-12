@@ -6,6 +6,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { initApiClient, getApiClient } from '@ai-resume/shared/api';
 import { storage } from '@ai-resume/shared';
 import App from './App';
+import './i18n';
 import './index.css';
 
 // 初始化API客户端，配置token获取

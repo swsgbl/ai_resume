@@ -5,6 +5,114 @@
 
 ---
 
+## [2026-04-12] 测试修复 - i18n 支持公共页面测试
+
+### 修复
+
+#### 测试 i18n 支持
+- `AboutPage.test.tsx` — 添加 I18nextProvider + testI18n 实例
+- `HelpPage.test.tsx` — 添加 I18nextProvider + testI18n 实例
+- `PrivacyPage.test.tsx` — 添加 I18nextProvider + testI18n 实例
+- `TermsPage.test.tsx` — 添加 I18nextProvider + testI18n 实例
+- 使用 `getAllByText` 替代 `getByText` 避免多元素匹配错误（导航栏 + 移动菜单）
+
+**问题**：测试失败是因为缺少 i18n provider，导致 `t()` 函数无法正常翻译文本
+
+**解决方案**：为每个测试文件创建独立的 i18n 实例，不依赖 LanguageDetector
+
+**测试结果**：
+- Test Files: 31 passed (31)
+- Tests: 362 passed | 3 skipped (365)
+- 测试覆盖率：99.2%
+
+---
+
+## [2026-04-12] 双项目合并 + Impeccable 重设计 + Tauri v2 升级
+
+### 新增
+
+#### 架构决策：合并为统一 React SPA
+- **决策**：将 `resource-activation-site`（静态 HTML 站点）合并到 `ai-resume-web`（React SPA）
+- **原因**：两个项目共用 ndtool.cn 域名，统一 SPA 提供一致的用户体验和导航
+- **影响**：所有页面共享同一套导航系统、设计语言和 i18n 支持
+
+#### 设计系统 — Impeccable
+- `.impeccable.md` — 项目设计上下文文件，定义品牌、受众、美学方向
+  - 色彩：印泥朱砂 `#C84B31` + 青瓷绿 `#8FAE8B` + 暖黑 `#0C0C0C`
+  - 字体：Noto Serif SC（标题）+ DM Sans（正文）+ Playfair Display（英文标题）
+  - 美学：水墨书房 + 精密工程，避免通用 AI 风格
+  - 参考：Linear.app 的克制，Vercel.com 的自信留白
+
+#### i18n 国际化系统
+- `src/i18n/index.ts` — i18next 配置，浏览器语言检测 + localStorage 持久化
+- `src/locales/zh.json` — 中文翻译（导航 + 着陆页 + 职业 + 资源 + 认证）
+- `src/locales/en.json` — 英文翻译
+- `src/main.tsx` — 添加 i18n 初始化导入
+
+#### 资源页面迁移（6 个静态页 → React 组件）
+- `src/pages/resources/ResourcesMainPage.tsx` — 资源首页，分类网格 + 搜索
+- `src/pages/resources/ToolboxPage.tsx` — 工具箱，系统/网络/软件工具列表 + 下载
+- `src/pages/resources/ResourcesListPage.tsx` — 资源中心，系统/开发/安全资源
+- `src/pages/resources/FeedbackPage.tsx` — 反馈表单 + 历史记录（localStorage 持久化）
+- `src/pages/resources/StatusPage.tsx` — 系统状态监控
+- `src/pages/resources/SecurityPage.tsx` — 安全信息 + 免责声明
+
+#### 资源页共享组件
+- `src/components/resources/ResourceLayout.tsx` — 子导航 + 语言切换
+- `src/components/resources/LanguageSwitcher.tsx` — CN/EN 切换按钮
+
+#### 数据迁移
+- `src/data/tools.json` — 从 resource-activation-site 迁移的工具配置（8 个工具）
+- `src/data/resources.ts` — 类型化数据导出，按类别过滤工具
+
+#### Tauri v2 升级（Linux 桌面端）
+- `ai-resume-desktop/src-tauri/Cargo.toml` — tauri 1.6→2, tauri-build 1.5→2
+- `ai-resume-desktop/src-tauri/tauri.conf.json` — v1 格式→v2 格式（allowlist→capabilities）
+- `ai-resume-desktop/src-tauri/capabilities/default.json` — v2 权限系统
+- `ai-resume-desktop/src-tauri/src/lib.rs` — v2 Builder API
+- `ai-resume-desktop/package.json` — @tauri-apps/api ^1.5→^2.0, @tauri-apps/cli ^1.5→^2.0
+- `ai-resume-desktop/src/services/fileSystem.ts` — @tauri-apps/api/tauri → /core
+- `ai-resume-desktop/src/main.tsx` — appWindow → getCurrentWindow()
+- `ai-resume-desktop/vite.config.ts` — safari13→safari14
+- **构建输出**: `ai-resume-linux-amd64.deb` (2.9MB), `.rpm` (2.9MB)
+
+### 修改
+
+#### 全局导航统一
+- `PublicNavbar.tsx` — 添加"资源工具"链接、语言切换器，Impeccable 设计
+- `PublicNavbar.css` — Impeccable 设计系统（朱砂 CTA + 暖黑背景 + 去掉圆角渐变）
+- `landing/Navbar.tsx` — 同步导航项 + 语言切换
+
+#### 路由系统
+- `App.tsx` — 添加 6 个资源页路由 + 懒加载
+
+#### 依赖更新
+- `package.json` — 添加 i18next, react-i18next, i18next-browser-languagedetector
+
+#### Impeccable 全站视觉重设计
+- `src/index.css` — 全局设计系统重写：赛博朋克 → 印泥朱砂/青瓷绿/暖黑宣纸
+  - 色彩：`#0ea5e9/#8b5cf6` → `#C84B31(vermillion)/#8FAE8B(celadon)/#0C0C0C(warm black)`
+  - 按钮：渐变发光 → 实色填充，去圆角
+  - 卡片：毛玻璃 → 纯色背景 + 细边框
+  - 滚动条：渐变 → 极简灰
+  - 输入框：圆角边框 → 底线式
+- `src/pages/LandingPage.css` — 首页 CSS 全面重写
+  - 字体：Space Grotesk → Playfair Display + Noto Serif SC（中文衬线）
+  - 动画：渐变移动/脉冲发光 → 淡入上浮，更克制
+  - 按钮：圆角胶囊 → 直角，实色背景
+  - 导航：毛玻璃 + 渐变 → 深色半透明 + 细线边框
+  - 间距：增加留白，减少视觉噪音
+- `tailwind.config.js` — 色彩和字体配置同步更新
+
+### 待办
+- [ ] Impeccable 全站视觉重设计（Phase 4：逐页优化）
+- [ ] 更新 nginx 配置支持 SPA fallback
+- [ ] 部署到 ndtool.cn 并验证所有路由
+- [ ] Windows/macOS 桌面端编译（需对应平台环境）
+- [ ] HarmonyOS/iOS 编译（需对应 SDK）
+
+---
+
 ## [2026-04-12] 官网修复 + 职业智能融合
 
 ### 新增

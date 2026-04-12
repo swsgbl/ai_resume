@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, useLocation } from 'react-router-dom';
-import { appWindow } from '@tauri-apps/api/window';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useEffect } from 'react';
 import { initApiClient } from '@ai-resume/shared/api';
 import { storage } from '@ai-resume/shared';
@@ -38,6 +38,7 @@ function AppWrapper() {
 
     const title = titles[location.pathname] || 'AI 简历';
     document.title = title;
+    const appWindow = getCurrentWindow();
     appWindow.setTitle(title).catch(console.error);
   }, [location]);
 

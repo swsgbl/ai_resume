@@ -23,12 +23,20 @@ const TemplatesPage = lazy(() => import('./pages/TemplatesPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
+// 资源工具页面
+const ResourcesMainPage = lazy(() => import('./pages/resources/ResourcesMainPage'));
+const ToolboxPage = lazy(() => import('./pages/resources/ToolboxPage'));
+const ResourcesListPage = lazy(() => import('./pages/resources/ResourcesListPage'));
+const FeedbackPage = lazy(() => import('./pages/resources/FeedbackPage'));
+const StatusPage = lazy(() => import('./pages/resources/StatusPage'));
+const SecurityPage = lazy(() => import('./pages/resources/SecurityPage'));
+
 // 页面加载包装器
 function PageLoader({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="min-h-screen flex items-center justify-center bg-[#0C0C0C]">
           <Spinner size="lg" />
         </div>
       }
@@ -56,7 +64,7 @@ function App() {
   // 显示加载状态
   if (isLoading && isAuthenticated === false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="min-h-screen flex items-center justify-center bg-[#0C0C0C]">
         <Spinner size="lg" />
       </div>
     );
@@ -164,6 +172,14 @@ function App() {
             </PageLoader>
           }
         />
+
+        {/* 资源工具页面 */}
+        <Route path="/resources" element={<PageLoader><ResourcesMainPage /></PageLoader>} />
+        <Route path="/resources/toolbox" element={<PageLoader><ToolboxPage /></PageLoader>} />
+        <Route path="/resources/list" element={<PageLoader><ResourcesListPage /></PageLoader>} />
+        <Route path="/resources/feedback" element={<PageLoader><FeedbackPage /></PageLoader>} />
+        <Route path="/resources/status" element={<PageLoader><StatusPage /></PageLoader>} />
+        <Route path="/resources/security" element={<PageLoader><SecurityPage /></PageLoader>} />
 
         {/* 受保护路由 */}
         <Route

@@ -3,488 +3,232 @@
 @tailwind utilities;
 
 /* ============================================
-   AI Resume Platform - Futuristic Tech Design
+   ndtool.cn — Impeccable Design System
+   印泥朱砂 + 青瓷绿 + 暖黑宣纸
    ============================================ */
 
 @layer base {
   :root {
-    /* Primary Colors - Cyberpunk Blue */
-    --color-primary-50: #e0f2fe;
-    --color-primary-100: #bae6fd;
-    --color-primary-200: #7dd3fc;
-    --color-primary-300: #38bdf8;
-    --color-primary-400: #0ea5e9;
-    --color-primary-500: #0284c7;
-    --color-primary-600: #0369a1;
-    --color-primary-700: #075985;
-    --color-primary-800: #0c4a6e;
-    --color-primary-900: #082f49;
+    /* Primary — Vermillion (印泥) */
+    --color-primary-400: #D4593F;
+    --color-primary-500: #C84B31;
+    --color-primary-600: #A63D28;
+    --color-primary-700: #843220;
 
-    /* Accent Colors - Electric Purple */
-    --color-accent-50: #f5f3ff;
-    --color-accent-100: #ede9fe;
-    --color-accent-200: #ddd6fe;
-    --color-accent-300: #c4b5fd;
-    --color-accent-400: #a78bfa;
-    --color-accent-500: #8b5cf6;
-    --color-accent-600: #7c3aed;
-    --color-accent-700: #6d28d9;
-    --color-accent-800: #5b21b6;
-    --color-accent-900: #4c1d95;
+    /* Accent — Celadon (青瓷) */
+    --color-accent-400: #A3C49E;
+    --color-accent-500: #8FAE8B;
+    --color-accent-600: #7A9A76;
 
-    /* Success Colors - Neon Green */
-    --color-success-50: #f0fdf4;
-    --color-success-400: #4ade80;
-    --color-success-500: #22c55e;
-    --color-success-600: #16a34a;
+    /* Surface */
+    --color-bg: #0C0C0C;
+    --color-surface: #161616;
+    --color-border: #252525;
+    --color-border-hover: #5A5652;
 
-    /* Warning Colors - Amber */
-    --color-warning-400: #fbbf24;
-    --color-warning-500: #f59e0b;
+    /* Text */
+    --color-text: #E8E4DE;
+    --color-text-secondary: #8A8580;
+    --color-text-muted: #5A5652;
 
-    /* Error Colors - Rose */
-    --color-error-50: #fef2f2;
-    --color-error-400: #fb7185;
-    --color-error-500: #ef4444;
-    --color-error-600: #dc2626;
-
-    /* Dark Mode Colors */
-    --color-dark-bg: #0a0a0f;
-    --color-dark-surface: #12121a;
-    --color-dark-card: #1a1a24;
-    --color-dark-border: #2a2a3a;
-
-    /* Glass Effect */
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-shadow: rgba(0, 0, 0, 0.1);
-
-    /* Dark Glass Effect */
-    --glass-dark-bg: rgba(26, 26, 36, 0.8);
-    --glass-dark-border: rgba(255, 255, 255, 0.1);
-    --glass-dark-shadow: rgba(0, 0, 0, 0.3);
-
-    /* Neon Glow */
-    --glow-primary: 0 0 20px rgba(14, 165, 233, 0.5);
-    --glow-accent: 0 0 20px rgba(139, 92, 246, 0.5);
-    --glow-success: 0 0 20px rgba(34, 197, 94, 0.5);
+    /* Functional */
+    --color-error-500: #C84B31;
+    --color-warning-500: #D4A041;
+    --color-success-500: #8FAE8B;
 
     /* Animation */
     --transition-fast: 150ms ease-out;
-    --transition-normal: 250ms ease-out;
-    --transition-slow: 350ms ease-out;
+    --transition-normal: 300ms ease-out;
+    --transition-slow: 500ms ease-out;
   }
 
   body {
-    @apply bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'DM Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.7;
   }
 
-  /* Scrollbar Styling */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.5);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #38bdf8, #8b5cf6);
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #0ea5e9, #7c3aed);
-  }
+  /* Scrollbar — minimal */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--color-border-hover); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
   /* Selection */
   ::selection {
-    background-color: rgba(139, 92, 246, 0.3);
+    background-color: rgba(200, 75, 49, 0.25);
     color: inherit;
   }
 }
 
 @layer components {
   /* ============================================
-     Button Components
+     Buttons
      ============================================ */
-
-  /* Primary Button - Cyberpunk Glow */
   .btn-primary {
-    @apply relative px-6 py-3 rounded-xl font-semibold text-white;
+    @apply relative px-6 py-3 font-semibold text-white;
     @apply transition-all duration-300;
-    background: linear-gradient(135deg, #0ea5e9, #7c3aed);
-    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
-    /* Touch target minimum size (44px for iOS, 48dp for Android) */
+    background: var(--color-primary-500);
     min-height: 44px;
     min-width: 44px;
   }
+  .btn-primary.w-full, button.w-full.btn-primary { width: 100% !important; }
+  .btn-primary:hover { background: var(--color-primary-600); }
+  .btn-primary:active { transform: scale(0.98); }
 
-  .btn-primary.w-full,
-  button.w-full.btn-primary {
-    width: 100% !important;
-  }
-
-  .btn-primary:hover {
-    @apply scale-105;
-    box-shadow: 0 6px 25px rgba(14, 165, 233, 0.5), 0 0 30px rgba(124, 58, 237, 0.3);
-  }
-
-  .btn-primary:active {
-    @apply scale-95;
-  }
-
-  /* Secondary Button - Glass Effect */
   .btn-secondary {
-    @apply px-6 py-3 rounded-xl font-semibold;
+    @apply px-6 py-3 font-semibold;
     @apply transition-all duration-300;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    /* Touch target minimum size */
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
     min-height: 44px;
     min-width: 44px;
   }
+  .btn-secondary.w-full, button.w-full.btn-secondary { width: 100% !important; }
+  .btn-secondary:hover { border-color: var(--color-border-hover); }
 
-  .btn-secondary.w-full,
-  button.w-full.btn-secondary {
-    width: 100% !important;
-  }
-
-  .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Ghost Button */
   .btn-ghost {
-    @apply px-6 py-3 rounded-xl font-semibold text-slate-300;
+    @apply px-6 py-3 font-semibold;
     @apply transition-all duration-300;
-    /* Touch target minimum size */
+    color: var(--color-text-secondary);
     min-height: 44px;
     min-width: 44px;
   }
+  .btn-ghost.w-full, button.w-full.btn-ghost { width: 100% !important; }
+  .btn-ghost:hover { color: var(--color-text); background: rgba(255,255,255,0.03); }
 
-  .btn-ghost.w-full,
-  button.w-full.btn-ghost {
-    width: 100% !important;
-  }
-
-  .btn-ghost:hover {
-    @apply text-white bg-white/5;
-  }
-
-  /* Accent Button - Purple Glow */
   .btn-accent {
-    @apply relative px-6 py-3 rounded-xl font-semibold text-white;
+    @apply relative px-6 py-3 font-semibold text-white;
     @apply transition-all duration-300;
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-    /* Touch target minimum size */
+    background: var(--color-accent-600);
     min-height: 44px;
     min-width: 44px;
   }
-
-  .btn-accent.w-full,
-  button.w-full.btn-accent {
-    width: 100% !important;
-  }
-
-  .btn-accent:hover {
-    @apply scale-105;
-    box-shadow: 0 6px 25px rgba(139, 92, 246, 0.5), 0 0 30px rgba(236, 72, 153, 0.3);
-  }
+  .btn-accent.w-full, button.w-full.btn-accent { width: 100% !important; }
+  .btn-accent:hover { background: var(--color-accent-500); }
 
   /* ============================================
-     Card Components
+     Cards
      ============================================ */
-
-  /* Glass Card */
   .card-glass {
-    @apply rounded-2xl p-6;
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    @apply p-6;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
   }
 
-  /* Neon Border Card */
   .card-neon {
-    @apply rounded-2xl p-6 bg-slate-900/50;
-    border: 1px solid transparent;
-    background-clip: padding-box;
+    @apply p-6;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     position: relative;
   }
+  .card-neon:hover { border-color: var(--color-primary-500); }
 
-  .card-neon::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, #0ea5e9, #8b5cf6, #ec4899);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0.5;
-    transition: opacity var(--transition-normal);
-  }
-
-  .card-neon:hover::before {
-    opacity: 1;
-  }
-
-  /* Hover Glow Card */
   .card-hover {
-    @apply rounded-2xl p-6 bg-slate-800/50 border border-slate-700/50;
-    @apply transition-all duration-300;
+    @apply p-6 transition-all duration-300;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
   }
-
   .card-hover:hover {
-    @apply border-sky-500/50;
-    box-shadow: 0 0 30px rgba(14, 165, 233, 0.2);
+    border-color: var(--color-border-hover);
     transform: translateY(-2px);
   }
 
   /* ============================================
-     Input Components
+     Inputs
      ============================================ */
-
   .input-cyber {
-    @apply w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700;
-    @apply text-white placeholder-slate-400;
+    @apply w-full px-4 py-3 text-white;
     @apply transition-all duration-300;
-    /* Ensure input takes at least 50% width on mobile */
+    background: var(--color-surface);
+    border: none;
+    border-bottom: 1px solid var(--color-border);
     min-width: 200px;
   }
-
-  /* Responsive input sizing - ensure at least 50% of viewport on mobile */
   @media (max-width: 640px) {
-    .input-cyber {
-      width: 100%;
-      min-width: 180px;
-    }
+    .input-cyber { width: 100%; min-width: 180px; }
   }
-
   .input-cyber:focus {
-    @apply outline-none border-sky-500;
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+    @apply outline-none;
+    border-bottom-color: var(--color-primary-500);
   }
-
   .input-cyber:hover:not(:focus) {
-    @apply border-slate-600;
+    border-bottom-color: var(--color-border-hover);
   }
 
   /* ============================================
-     Container Components
+     Text
      ============================================ */
-
-  .container-glow {
-    @apply relative;
-  }
-
-  .container-glow::before {
-    content: '';
-    position: absolute;
-    inset: -50%;
-    background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  /* ============================================
-     Navigation Components
-     ============================================ */
-
-  .nav-glass {
-    @apply fixed top-4 left-4 right-4 z-50;
-    @apply rounded-2xl px-6 py-4;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  }
-
-  /* ============================================
-     Badge Components
-     ============================================ */
-
-  .badge-neon {
-    @apply px-3 py-1 rounded-full text-xs font-semibold;
-    background: linear-gradient(135deg, #0ea5e9, #7c3aed);
-    box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
-  }
-
-  .badge-outline {
-    @apply px-3 py-1 rounded-full text-xs font-semibold;
-    @apply border border-sky-500/50 text-sky-400;
-  }
-
-  /* ============================================
-     Divider Components
-     ============================================ */
-
-  .divider-gradient {
-    @apply h-px w-full;
-    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.5), transparent);
-  }
-
-  /* ============================================
-     Text Gradient
-     ============================================ */
-
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #38bdf8, #8b5cf6, #ec4899);
+    background-image: linear-gradient(135deg, var(--color-primary-500), var(--color-accent-500));
   }
-
   .text-gradient-primary {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    background-image: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
   }
-
   .text-gradient-accent {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #a78bfa, #ec4899);
+    background-image: linear-gradient(135deg, var(--color-accent-400), var(--color-accent-600));
   }
 
   /* ============================================
-     Animation Classes
+     Animation
      ============================================ */
-
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
-
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-  }
-
-  .animate-pulse-glow {
-    animation: pulseGlow 2s ease-in-out infinite;
-  }
-
-  @keyframes pulseGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(14, 165, 233, 0.4); }
-    50% { box-shadow: 0 0 40px rgba(14, 165, 233, 0.8); }
+    50% { transform: translateY(-12px); }
   }
 
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
     background-size: 200% 100%;
-    animation: shimmer 2s infinite;
+    animation: shimmer 3s infinite;
   }
-
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
 
   /* ============================================
-     Background Patterns
+     Backgrounds
      ============================================ */
-
   .bg-grid {
     background-image:
-      linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
+      linear-gradient(rgba(200, 75, 49, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200, 75, 49, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
   }
-
   .bg-dots {
-    background-image: radial-gradient(rgba(14, 165, 233, 0.15) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  .bg-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(10px);
-    opacity: 0.15;
-    pointer-events: none;
-  }
-
-  .orb-primary {
-    background: radial-gradient(circle, #0ea5e9, transparent);
-  }
-
-  .orb-accent {
-    background: radial-gradient(circle, #8b5cf6, transparent);
+    background-image: radial-gradient(rgba(200, 75, 49, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
   /* ============================================
-     Loading States
+     Loading
      ============================================ */
-
-  .skeleton {
-    @apply bg-slate-800 rounded animate-pulse;
-  }
-
   .spinner {
-    @apply w-8 h-8 border-4 border-slate-700 border-t-sky-500 rounded-full;
-    animation: spin 1s linear infinite;
+    @apply w-8 h-8 border-4 rounded-full;
+    border-color: var(--color-border);
+    border-top-color: var(--color-primary-500);
+    animation: spin 0.8s linear infinite;
   }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ============================================
-     Utility Classes
+     Utilities
      ============================================ */
-
-  .text-glow {
-    text-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
-  }
-
-  .border-glow {
-    box-shadow: 0 0 15px rgba(14, 165, 233, 0.3), inset 0 0 15px rgba(14, 165, 233, 0.1);
-  }
-
-  .glass-effect {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  /* ============================================
-     Dark Mode Specific
-     ============================================ */
-
-  .dark body {
-    @apply bg-slate-950;
-  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 @layer utilities {
-  /* Custom glow utilities */
-  .glow-sm {
-    box-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
-  }
-
-  .glow-md {
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
-  }
-
-  .glow-lg {
-    box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
-  }
-
-  .glow-accent-sm {
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
-  }
-
-  .glow-accent-md {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
-  }
-
-  .glow-accent-lg {
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
-  }
 }

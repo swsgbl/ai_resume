@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const NAV_ITEMS = [
-  { path: '/', label: '首页' },
-  { path: '/career', label: '职业智能' },
-  { path: '/about', label: '关于' },
-  { path: '/help', label: '帮助' },
-  { path: '/trae', label: 'Trae AI' },
-  { path: '/terms', label: '条款' },
-  { path: '/privacy', label: '隐私' },
+  { path: '/', labelKey: 'nav.home' },
+  { path: '/career', labelKey: 'nav.career' },
+  { path: '/resources', labelKey: 'nav.resources' },
+  { path: '/trae', labelKey: 'nav.trae' },
+  { path: '/about', labelKey: 'nav.about' },
+  { path: '/help', labelKey: 'nav.help' },
+  { path: '/terms', labelKey: 'nav.terms' },
+  { path: '/privacy', labelKey: 'nav.privacy' },
 ] as const;
 
 export default function PublicNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -42,14 +45,21 @@ export default function PublicNavbar() {
                 to={item.path}
                 className={`pub-nav-link${location.pathname === item.path ? ' active' : ''}`}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
+            <button
+              onClick={() => i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')}
+              className="pub-nav-link pub-nav-lang"
+              aria-label="Switch language"
+            >
+              {t('nav.language')}
+            </button>
           </div>
 
           <div className="pub-nav-actions">
-            <Link to="/login" className="pub-nav-login">登录</Link>
-            <Link to="/register" className="pub-nav-cta">免费注册</Link>
+            <Link to="/login" className="pub-nav-login">{t('nav.login')}</Link>
+            <Link to="/register" className="pub-nav-cta">{t('nav.register')}</Link>
           </div>
 
           <button
@@ -70,11 +80,17 @@ export default function PublicNavbar() {
             className={`pub-nav-link${location.pathname === item.path ? ' active' : ''}`}
             onClick={() => setMenuOpen(false)}
           >
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         ))}
-        <Link to="/login" className="pub-nav-link" onClick={() => setMenuOpen(false)}>登录</Link>
-        <Link to="/register" className="pub-nav-cta" onClick={() => setMenuOpen(false)}>免费注册</Link>
+        <button
+          onClick={() => { i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh'); setMenuOpen(false); }}
+          className="pub-nav-link"
+        >
+          {t('nav.language')}
+        </button>
+        <Link to="/login" className="pub-nav-link" onClick={() => setMenuOpen(false)}>{t('nav.login')}</Link>
+        <Link to="/register" className="pub-nav-cta" onClick={() => setMenuOpen(false)}>{t('nav.register')}</Link>
       </div>
     </>
   );
