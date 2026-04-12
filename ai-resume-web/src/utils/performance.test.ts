@@ -1,7 +1,7 @@
 /**
  * 性能监控工具测试
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
 
 // Mock web-vitals
 vi.mock('web-vitals', () => ({
@@ -13,6 +13,30 @@ vi.mock('web-vitals', () => ({
 }));
 
 describe('performance utils', () => {
+  // Setup localStorage before all tests
+  const store: Record<string, string> = {};
+
+  beforeAll(() => {
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: (key: string) => store[key] || null,
+        setItem: (key: string, value: string) => {
+          store[key] = value.toString();
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+        clear: () => {
+          Object.keys(store).forEach((key) => delete store[key]);
+        },
+        get length() {
+          return Object.keys(store).length;
+        },
+        key: (index: number) => Object.keys(store)[index] || null,
+      },
+    });
+  });
+
   beforeEach(() => {
     // 清理 localStorage
     localStorage.clear();
