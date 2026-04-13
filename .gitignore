@@ -166,3 +166,21 @@ backend/htmlcov/
 backend/.pytest_cache/
 
 target/
+
+# Tauri (Desktop)
+**/src-tauri/gen/
+
+# HarmonyOS
+**/oh_modules/
+**/.hvigor/
+**/oh-package-lock.json5
+**/hvigor/
+**/entry/hvigor/
+
+# Download files (build artifacts)
+**/public/downloads/*.apk
+**/public/downloads/*.deb
+**/public/downloads/*.rpm
+**/public/downloads/*.hap
+**/public/downloads/*.exe
+**/public/downloads/*.dmg

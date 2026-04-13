@@ -5,6 +5,35 @@
 
 ---
 
+## [2026-04-13] HarmonyOS 编译环境搭建 + 下载页调整
+
+### 新增
+
+#### HarmonyOS Command Line Tools 安装
+- 下载 `commandline-tools-linux-x64-6.0.2.650.zip` (2.0GB) 到 `~/hw/`
+- 解压到 `~/hw/command-line-tools/`
+- 工具版本：ohpm 6.0.1, hvigorw 6.22.4, SDK API 22 (HarmonyOS 6.0.2)
+- 全局环境变量已配置到 `~/.bashrc`（HOS_CMDLINE_HOME）
+
+#### 编译尝试
+- `ohpm install --all` 成功安装依赖
+- `hvigorw assembleHap` 失败 — 项目 build-profile.json5 原配置 API 10，SDK 为 API 22
+- 更新 compileSdkVersion 到 22，但仍缺少 `@ohos/cangjie-build-support` 私有包
+- 结论：仓颉项目需要 DevEco Studio 完整 IDE 才能编译，命令行工具链不包含此私有包
+
+### 修改
+- `DownloadSection.tsx` — 鸿蒙状态改回"即将推出"，Linux 拆分为 .deb + .rpm 两个下载
+- `build-profile.json5` — compileSdkVersion 10→22, compatibleSdkVersion 10→12
+
+### 部署
+- 已 scp 部署到 https://ndtool.cn/
+
+### 待办
+- [ ] 安装 DevEco Studio 完整 IDE 解决鸿蒙编译
+- [ ] 鸿蒙 .hap 编译后上传到下载页
+
+---
+
 ## [2026-04-12] 下载中心更新 — Linux .rpm + 鸿蒙 .hap 上线
 
 ### 新增
