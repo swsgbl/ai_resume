@@ -1,0 +1,9 @@
+{
+  "name": "ai-resume-harmonyos",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@ohos/hvigor-ohos-plugin": "6.22.3",
+    "@ohos/hvigor": "6.22.3",
+    "@ohos/cangjie-build-support": "latest"
+  }
+}
