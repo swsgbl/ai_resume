@@ -37,9 +37,10 @@ DEFAULT_AI_PROVIDER=xiaomi
 ### 支持的模型
 | 模型名称 | 用途 | 上下文长度 | 成本 |
 |---------|------|-----------|------|
-| `mimo-pro` | 高质量生成 | 32K | 中等 |
-| `mimo-standard` | 标准生成 | 16K | 较低 |
-| `mimo-fast` | 快速响应 | 8K | 最低 |
+| `mimo-v2-pro` | 高质量生成 | 32K | 中等 |
+| `mimo-v2-omni` | 全能生成 | 16K | 较低 |
+| `mimo-v2-flash` | 快速响应 | 8K | 最低 |
+| `mimo-v2-tts` | 语音合成 | - | - |
 
 ---
 
@@ -100,7 +101,7 @@ async def call_xiaomi_api(prompt: str):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "mimo-pro",
+                "model": "mimo-v2-pro",
                 "messages": [
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
@@ -157,7 +158,7 @@ xiaomi_api_tokens = Counter('xiaomi_api_tokens_total', 'Total tokens used', ['mo
 # 在API调用中记录
 @xiaomi_api_duration.time()
 async def monitored_api_call():
-    xiaomi_api_calls.labels(model='mimo-pro', status='success').inc()
+    xiaomi_api_calls.labels(model='mimo-v2-pro', status='success').inc()
     # API调用逻辑
     pass
 ```
@@ -171,7 +172,7 @@ logger = logging.getLogger(__name__)
 async def api_call_with_logging(prompt: str):
     logger.info(f"开始调用小米AI API", extra={
         "provider": "xiaomi",
-        "model": "mimo-pro",
+        "model": "mimo-v2-pro",
         "prompt_length": len(prompt)
     })
     
@@ -235,7 +236,7 @@ curl -X POST "https://api.xiaomimimo.com/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-c0uo5p7vq8h9p0fm45978gvkky3dgtbhn68uai4y2pnyt12o" \
   -d '{
-    "model": "mimo-pro",
+    "model": "mimo-v2-pro",
     "messages": [{"role": "user", "content": "Hello"}],
     "max_tokens": 10
   }'
@@ -287,9 +288,9 @@ class CostTracker:
     """API使用成本跟踪"""
     
     COST_PER_1K_TOKENS = {
-        "mimo-pro": 0.02,
-        "mimo-standard": 0.01,
-        "mimo-fast": 0.005
+        "mimo-v2-pro": 0.02,
+        "mimo-v2-omni": 0.01,
+        "mimo-v2-flash": 0.005
     }
     
     def calculate_cost(self, model: str, tokens: int) -> float:
@@ -300,7 +301,7 @@ class CostTracker:
     def log_daily_cost(self):
         """记录每日成本"""
         daily_tokens = xiaomi_api_tokens._samples.sum()
-        daily_cost = self.calculate_cost("mimo-pro", daily_tokens)
+        daily_cost = self.calculate_cost("mimo-v2-pro", daily_tokens)
         logger.info(f"今日API成本: ¥{daily_cost:.2f}")
 ```
 
@@ -380,7 +381,7 @@ class XiaomiAIClient:
     async def chat(self, messages: list):
         """发送聊天请求"""
         response = await self.client.post("/chat/completions", json={
-            "model": "mimo-pro",
+            "model": "mimo-v2-pro",
             "messages": messages
         })
         return response.json()
