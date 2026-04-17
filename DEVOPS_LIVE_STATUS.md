@@ -1,6 +1,6 @@
 # AI Resume Platform - DevOps 实时状态监控
 
-**最后更新**: 2026-04-17 12:20
+**最后更新**: 2026-04-17 12:45
 **DevOps Agent**: 29126157-6833-4f1e-94bd-6493bd95d3f2
 
 ---
@@ -11,11 +11,11 @@
 
 | 服务 | 状态 | 运行时长 |
 |------|------|----------|
-| Backend | ✅ Healthy | 8分钟 |
-| Frontend | ✅ Healthy | 8分钟 |
-| Redis | ✅ Healthy | 8分钟 |
-| Postgres | ✅ Running | 8分钟 |
-| Traefik | ✅ Running | 8分钟 |
+| Backend | ✅ Healthy | 37分钟 |
+| Frontend | ✅ Healthy | 37分钟 |
+| Redis | ✅ Healthy | 37分钟 |
+| Postgres | ✅ Running | 37分钟 |
+| Traefik | ✅ Running | 37分钟 |
 
 ---
 
