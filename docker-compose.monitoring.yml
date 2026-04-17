@@ -102,26 +102,26 @@ services:
     profiles:
       - monitoring
 
-  # cAdvisor - 容器指标
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: ai-resume-cadvisor
-    command:
-      - '--housekeeping_interval=30s'
-      - '--storage_duration=1m'
-    ports:
-      - "8080:8080"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    restart: unless-stopped
-    networks:
-      - ai-resume-network
-    profiles:
-      - monitoring
+  # cAdvisor - 容器指标 (暂时禁用 - 代理问题)
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:latest
+  #   container_name: ai-resume-cadvisor
+  #   command:
+  #     - '--housekeeping_interval=30s'
+  #     - '--storage_duration=1m'
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker:/var/lib/docker:ro
+  #     - /dev/disk/:/dev/disk:ro
+  #   restart: unless-stopped
+  #   networks:
+  #     - ai-resume-network
+  #   profiles:
+  #     - monitoring
 
 volumes:
   prometheus_data:
