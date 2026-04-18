@@ -13,9 +13,14 @@ services:
       - HOST=0.0.0.0
       - PORT=8000
       - ENVIRONMENT=production
-      - SECRET_KEY=48f5ff7d1aa60c67f2a48636b4ee450fce688f9816f66dea152aa66745916ba9
-      - JWT_SECRET=7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b
-      - CORS_ORIGINS=["*"]
+      # ⚠️ 安全警告：生产环境必须通过 .env 文件或 secrets manager 设置这些值
+      # 使用以下命令生成安全密钥：
+      # python -c "import secrets; print(secrets.token_urlsafe(32))"
+      - SECRET_KEY=${SECRET_KEY:-change_this_in_production}
+      - JWT_SECRET=${JWT_SECRET:-change_this_in_production}
+      # CORS 配置：生产环境应限制为特定域名，不应使用通配符
+      # 示例: http://localhost:3000,https://yourdomain.com
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
       - DEFAULT_AI_PROVIDER=xiaomi
       - LOG_LEVEL=INFO
     volumes:

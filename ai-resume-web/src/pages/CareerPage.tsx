@@ -5,11 +5,25 @@ import PublicLayout from '../components/PublicLayout';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+interface CareerIntuition {
+  first_impression: string;
+  gut_score: number;
+  archetype: string;
+}
+
+interface CareerEvaluationResult {
+  intuition?: CareerIntuition;
+  overall_score?: number;
+  recommendation?: string;
+  one_line_summary?: string;
+  [key: string]: unknown;
+}
+
 export default function CareerPage() {
   const [activeTab, setActiveTab] = useState<'evaluate' | 'stories' | 'tailor'>('evaluate');
   const [jdText, setJdText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Record<string, any> | null>(null);
+  const [result, setResult] = useState<CareerEvaluationResult | null>(null);
   const [error, setError] = useState('');
 
   const handleEvaluate = async () => {
@@ -151,10 +165,10 @@ export default function CareerPage() {
                   {result.intuition && (
                     <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/20">
                       <h3 className="text-amber-400 font-semibold mb-2">直觉判断</h3>
-                      <p className="text-slate-300 text-sm">{(result.intuition as Record<string, string>).first_impression}</p>
+                      <p className="text-slate-300 text-sm">{result.intuition.first_impression}</p>
                       <div className="mt-3 flex items-center gap-4">
-                        <span className="text-2xl font-bold text-amber-400">{(result.intuition as Record<string, number>).gut_score}/5</span>
-                        <span className="text-slate-400 text-sm">原型: {(result.intuition as Record<string, string>).archetype}</span>
+                        <span className="text-2xl font-bold text-amber-400">{result.intuition.gut_score}/5</span>
+                        <span className="text-slate-400 text-sm">原型: {result.intuition.archetype}</span>
                       </div>
                     </div>
                   )}
