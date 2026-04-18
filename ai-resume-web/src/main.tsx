@@ -39,7 +39,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter basename={basename}>
+        <BrowserRouter basename={basename} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <App />
         </BrowserRouter>
       </QueryClientProvider>
