@@ -16,6 +16,7 @@ from app.api.v1.ai_config import router as ai_config_router
 from app.api.v1.ai_usage import router as ai_usage_router
 from app.api.v1.search import router as search_router
 from app.api.v1.career import router as career_router
+from app.api.v1.account import router as account_router  # 账号管理
 
 router = APIRouter()
 
@@ -23,6 +24,7 @@ router = APIRouter()
 router.include_router(auth_router)      # 基础认证 (/auth/*)
 router.include_router(wechat_router)    # 微信登录 (/auth/wechat/*)
 router.include_router(oauth_router)     # OAuth登录 (/auth/oauth/*)
+router.include_router(account_router)   # 账号管理 (/account/*)
 router.include_router(resume_router)
 router.include_router(template_router)
 router.include_router(export_router)

@@ -12,6 +12,9 @@ const CareerPage = lazy(() => import('./pages/CareerPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const UnifiedLoginPage = lazy(() => import('./pages/UnifiedLoginPage'));
+const OAuthCallbackPage = lazy(() => import('./pages/OAuthCallbackPage'));
+const AccountSettingsPage = lazy(() => import('./pages/AccountSettingsPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
@@ -141,6 +144,28 @@ function App() {
           }
         />
         <Route
+          path="/unified-login"
+          element={
+            <PageLoader>
+              {!isAuthenticated ? (
+                <PublicLayout>
+                  <UnifiedLoginPage />
+                </PublicLayout>
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )}
+            </PageLoader>
+          }
+        />
+        <Route
+          path="/oauth/callback"
+          element={
+            <PageLoader>
+              <OAuthCallbackPage />
+            </PageLoader>
+          }
+        />
+        <Route
           path="/terms"
           element={
             <PageLoader>
@@ -235,6 +260,14 @@ function App() {
           element={
             <PageLoader>
               {isAuthenticated ? <SettingsPage /> : <Navigate to="/login" replace />}
+            </PageLoader>
+          }
+        />
+        <Route
+          path="/account-settings"
+          element={
+            <PageLoader>
+              {isAuthenticated ? <AccountSettingsPage /> : <Navigate to="/login" replace />}
             </PageLoader>
           }
         />

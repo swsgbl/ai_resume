@@ -60,6 +60,13 @@ async def _authenticate_user(email: str, password: str, db: AsyncSession) -> Use
             detail="账户已被禁用"
         )
 
+    # 检查邮箱验证状态
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="请先验证邮箱后再登录"
+        )
+
     # 更新最后登录时间
     user.last_login_at = datetime.now(timezone.utc)
     await db.commit()
@@ -118,7 +125,18 @@ async def register(
     # 生成并发送验证码
     verification_code = email_service.generate_code()
     await email_service.save_code(user_data.email, verification_code, expire_minutes=5)
-    await email_service.send_verification_email(user_data.email, verification_code)
+
+    # 检查邮件发送结果
+    email_sent = await email_service.send_verification_email(user_data.email, verification_code)
+
+    if not email_sent:
+        # 邮件发送失败，回滚注册
+        await db.delete(user)
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="验证邮件发送失败，请稍后重试或联系客服"
+        )
 
     return Response(
         data={
@@ -275,3 +293,128 @@ async def verify_password_reset(
     await db.commit()
 
     return Response(message="密码重置成功，请使用新密码登录")
+
+
+# ==================== 短信验证码端点 ====================
+
+from app.services.sms_service import sms_service
+from app.schemas.user import SMSSendRequest, SMSLoginRequest, SMSRegisterRequest
+
+
+@router.post("/sms/send")
+@limiter.limit(RateLimit.AUTH_CODE_SEND)
+async def send_sms_code(
+    request: Request,
+    data: SMSSendRequest,
+):
+    """发送短信验证码"""
+    phone = data.phone
+
+    # 频率限制
+    if not sms_service.rate_limiter.can_send_phone(phone):
+        cooldown = sms_service.rate_limiter.get_cooldown(phone)
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"发送过于频繁，请{cooldown}秒后重试"
+        )
+
+    client_ip = request.client.host if request.client else "unknown"
+    if not sms_service.rate_limiter.can_send_ip(client_ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="IP请求过于频繁，请稍后重试"
+        )
+
+    # 调用阿里云 SDK 发送验证码（SDK 自动生成并管理验证码）
+    result = await sms_service.send_verification_code(phone)
+    if not result.get("success"):
+        detail = result.get("message", "短信发送失败")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=detail
+        )
+
+    cooldown = sms_service.rate_limiter.get_cooldown(phone)
+    return Response(
+        data={
+            "cooldown": max(cooldown, 60),
+            "sms_token": result.get("sms_token", ""),
+        },
+        message="验证码已发送"
+    )
+
+
+@router.post("/sms/login")
+@limiter.limit(RateLimit.AUTH_LOGIN)
+async def sms_login(
+    request: Request,
+    data: SMSLoginRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """手机号+验证码登录"""
+    # 校验验证码
+    if not await sms_service.verify_code(data.phone, data.code, data.sms_token):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="验证码错误或已过期"
+        )
+
+    # 查找手机号对应的用户
+    result = await db.execute(select(User).where(User.phone == data.phone))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="该手机号未注册，请先注册"
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="账户已被禁用"
+        )
+
+    user.last_login_at = datetime.now(timezone.utc)
+    await db.commit()
+
+    return Response(data=_create_token_response(user), message="登录成功")
+
+
+@router.post("/sms/register")
+@limiter.limit(RateLimit.AUTH_REGISTER)
+async def sms_register(
+    request: Request,
+    data: SMSRegisterRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """手机号+验证码注册"""
+    # 校验验证码
+    if not await sms_service.verify_code(data.phone, data.code, data.sms_token):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="验证码错误或已过期"
+        )
+
+    # 检查手机号是否已注册
+    result = await db.execute(select(User).where(User.phone == data.phone))
+    if result.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="该手机号已注册，请直接登录"
+        )
+
+    # 创建用户
+    user = User(
+        phone=data.phone,
+        username=data.username or f"用户{data.phone[-4:]}",
+        email=f"phone_{data.phone}@phone.local",
+        password_hash=get_password_hash(data.password),
+        is_verified=True,
+        is_active=True,
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+
+    return Response(data=_create_token_response(user), message="注册成功")

@@ -46,15 +46,26 @@ class User(Base):
     github_login = Column(String(100), nullable=True)
     github_email = Column(String(255), nullable=True)
 
+    # Gitee OAuth 相关
+    gitee_id = Column(Integer, unique=True, nullable=True, index=True)
+    gitee_login = Column(String(100), nullable=True)
+    gitee_email = Column(String(255), nullable=True)
+
+    # Discord OAuth 相关
+    discord_id = Column(String(50), unique=True, nullable=True, index=True)
+    discord_username = Column(String(100), nullable=True)
+    discord_email = Column(String(255), nullable=True)
+    discord_avatar = Column(String(500), nullable=True)
+
     # 角色和状态
     role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
 
     # 时间戳
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
-    last_login_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    last_login_at = Column(DateTime(timezone=True), nullable=True)
 
     # 关系
     resumes = relationship("Resume", back_populates="user", lazy="dynamic")

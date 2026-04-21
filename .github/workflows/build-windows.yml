@@ -1,0 +1,40 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: |
+          cd ai-resume-shared && npm install && cd ..
+          cd ai-resume-desktop && npm install
+
+      - name: Build Tauri
+        uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: ai-resume-desktop
+          tagName: ${{ github.ref_name }}
+          releaseName: 'AI Resume ${{ github.ref_name }}'
+          releaseBody: 'See the assets to download this version.'
+          releaseDraft: true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: ai-resume-desktop/src-tauri/target/release/bundle/msi/*.msi

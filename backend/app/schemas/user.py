@@ -66,6 +66,13 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    # OAuth 绑定状态（只返回是否绑定，不暴露 ID）
+    has_google: bool = False
+    has_github: bool = False
+    has_gitee: bool = False
+    has_discord: bool = False
+    has_wechat: bool = False
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -160,3 +167,58 @@ class OAuthAuthorizeRequest(BaseModel):
     """OAuth 授权请求模式 - 获取授权URL"""
     redirect_uri: Optional[str] = Field(None, description="授权后重定向的URI")
     state: Optional[str] = Field(None, description="自定义状态参数（可选，系统会自动生成）")
+
+
+# ==================== 短信验证码 Schemas ====================
+
+class SMSSendRequest(BaseModel):
+    """发送短信验证码请求"""
+    phone: str = Field(..., description="手机号（中国大陆11位）")
+
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        if not re.match(r'^1[3-9]\d{9}$', v):
+            raise ValueError('请输入正确的11位手机号')
+        return v
+
+
+class SMSLoginRequest(BaseModel):
+    """手机号+验证码登录请求"""
+    phone: str = Field(..., description="手机号")
+    code: str = Field(..., min_length=4, max_length=6, description="短信验证码")
+    sms_token: str = Field("", description="发送验证码时返回的token")
+
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        if not re.match(r'^1[3-9]\d{9}$', v):
+            raise ValueError('请输入正确的11位手机号')
+        return v
+
+
+class SMSRegisterRequest(BaseModel):
+    """手机号注册请求"""
+    phone: str = Field(..., description="手机号")
+    code: str = Field(..., min_length=4, max_length=6, description="短信验证码")
+    sms_token: str = Field("", description="发送验证码时返回的token")
+    password: str = Field(..., min_length=6, max_length=50, description="密码")
+    username: Optional[str] = Field(None, description="用户名（可选）")
+
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        if not re.match(r'^1[3-9]\d{9}$', v):
+            raise ValueError('请输入正确的11位手机号')
+        return v
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 6:
+            raise ValueError('密码长度至少6个字符')
+        if not re.search(r'[A-Za-z]', v):
+            raise ValueError('密码必须包含字母')
+        if not re.search(r'\d', v):
+            raise ValueError('密码必须包含数字')
+        return v

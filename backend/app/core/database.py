@@ -6,19 +6,25 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy.pool import NullPool
 from app.core.config import settings
 
+# 自动修正异步驱动前缀
+_db_url = settings.DATABASE_URL
+if _db_url.startswith("postgresql://"):
+    _db_url = _db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif _db_url.startswith("postgres://"):
+    _db_url = _db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+
 # 根据数据库类型选择不同的连接池配置
-if settings.USE_SQLITE or "sqlite" in settings.DATABASE_URL.lower():
+if settings.USE_SQLITE or "sqlite" in _db_url.lower():
     # SQLite 使用 NullPool
     engine = create_async_engine(
-        settings.DATABASE_URL,
+        _db_url,
         echo=settings.DEBUG,
         poolclass=NullPool,
         connect_args={"check_same_thread": False},
     )
 else:
-    # MySQL 使用默认连接池 (async 引擎自动使用 AsyncAdaptedQueuePool)
     engine = create_async_engine(
-        settings.DATABASE_URL,
+        _db_url,
         echo=settings.DEBUG,
         pool_size=settings.DATABASE_POOL_SIZE,
         max_overflow=settings.DATABASE_MAX_OVERFLOW,

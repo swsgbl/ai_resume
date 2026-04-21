@@ -4,9 +4,9 @@
 import os
 import secrets
 import hashlib
-from typing import Optional, List
+from typing import Optional, List, Union
 from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from functools import lru_cache
 
 
@@ -86,13 +86,36 @@ class Settings(BaseSettings):
     
     # CORS配置 - 生产环境应只允许特定域名
     # 开发环境使用localhost，生产环境使用实际域名
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"]
+    CORS_ORIGINS: Union[str, List[str]] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"]
+
+    @field_validator('CORS_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            # 支持逗号分隔或JSON数组格式
+            if v.startswith('['):
+                import json
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass
+            return [origin.strip() for origin in v.split(',')]
+        return v
     
     # 邮件配置（可选）
     SMTP_HOST: Optional[str] = None
     SMTP_PORT: Optional[int] = None
     SMTP_USER: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
+
+    # ========== 短信验证码配置 ==========
+    # 阿里云短信认证（个人免企业资质）
+    # 开通教程: https://dysms.console.aliyun.com/ -> 国内消息 -> 添加签名和模板
+    SMS_ALIBABA_ACCESS_KEY_ID: Optional[str] = None
+    SMS_ALIBABA_ACCESS_KEY_SECRET: Optional[str] = None
+    SMS_SIGN_NAME: str = "AI简历平台"          # 短信签名（需在阿里云审核通过）
+    SMS_TEMPLATE_CODE: Optional[str] = None     # 验证码模板 CODE（如 SMS_123456789）
+    SMS_ENABLED: bool = False                    # 是否启用短信验证码（未配置时走开发模式）
 
     # 微信登录配置（可选）
     WECHAT_APP_ID: Optional[str] = None
@@ -104,13 +127,25 @@ class Settings(BaseSettings):
     # 获取凭证: https://console.cloud.google.com/apis/credentials
     GOOGLE_CLIENT_ID: Optional[str] = None
     GOOGLE_CLIENT_SECRET: Optional[str] = None
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/google/callback"
 
     # GitHub OAuth 配置
     # 创建 OAuth App: https://github.com/settings/developers
     GITHUB_CLIENT_ID: Optional[str] = None
     GITHUB_CLIENT_SECRET: Optional[str] = None
-    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/github/callback"
+    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/github/callback"
+
+    # Gitee OAuth 配置
+    # 创建应用: https://gitee.com/oauth/applications
+    GITEE_CLIENT_ID: Optional[str] = None
+    GITEE_CLIENT_SECRET: Optional[str] = None
+    GITEE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/gitee/callback"
+
+    # Discord OAuth 配置
+    # 创建应用: https://discord.com/developers/applications
+    DISCORD_CLIENT_ID: Optional[str] = None
+    DISCORD_CLIENT_SECRET: Optional[str] = None
+    DISCORD_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/discord/callback"
 
     # OAuth 状态存储（用于 CSRF 保护）
     # 开发环境使用内存存储，生产环境应使用 Redis

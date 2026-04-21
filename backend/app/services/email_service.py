@@ -6,6 +6,7 @@
 """
 import secrets
 import string
+import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import smtplib
@@ -55,41 +56,46 @@ class EmailService:
         return ''.join(secrets.choice(string.digits) for _ in range(length))
 
     async def save_code(self, email: str, code: str, expire_minutes: int = 5) -> None:
-        """保存验证码到 Redis（带过期时间）"""
+        """保存验证码到 Redis（加密存储，带过期时间）"""
         redis_client = await self.get_redis()
 
         if redis_client:
             try:
-                # 使用 Redis 存储验证码，自动过期
+                # 使用 SHA-256 哈希存储验证码
+                code_hash = hashlib.sha256(code.encode()).hexdigest()
                 key = f"verification_code:{email}"
-                await redis_client.setex(key, expire_minutes * 60, code)
+                await redis_client.setex(key, expire_minutes * 60, code_hash)
                 return
             except (redis.RedisError, RuntimeError):
                 # Redis 失败，使用内存后备
                 pass
 
-        # 内存后备存储
+        # 内存后备存储（也使用哈希）
         expire_time = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
+        code_hash = hashlib.sha256(code.encode()).hexdigest()
         self._verification_codes[email] = {
-            'code': code,
+            'code_hash': code_hash,
             'expire_time': expire_time,
             'used': False
         }
 
     async def verify_code(self, email: str, code: str) -> bool:
-        """验证验证码"""
+        """验证验证码（使用哈希比较）"""
         redis_client = await self.get_redis()
 
         if redis_client:
             try:
                 key = f"verification_code:{email}"
-                stored_code = await redis_client.get(key)
+                stored_hash = await redis_client.get(key)
 
-                if stored_code is None:
+                if stored_hash is None:
                     # 验证码不存在或已过期
                     return False
 
-                if stored_code == code:
+                # 计算输入验证码的哈希
+                code_hash = hashlib.sha256(code.encode()).hexdigest()
+
+                if code_hash == stored_hash:
                     # 验证成功，删除验证码（一次性使用）
                     await redis_client.delete(key)
                     return True
@@ -115,10 +121,11 @@ class EmailService:
             del self._verification_codes[email]
             return False
 
-        # 验证码匹配
-        if stored_data['code'] == code:
-            # 标记为已使用
-            stored_data['used'] = True
+        # 验证码匹配（比较哈希）
+        code_hash = hashlib.sha256(code.encode()).hexdigest()
+        if code_hash == stored_data['code_hash']:
+            # 立即删除，防止重用
+            del self._verification_codes[email]
             return True
 
         return False
@@ -165,19 +172,23 @@ class EmailService:
                 return True
 
             # 生产环境：实际发送邮件
-            # TODO: 配置SMTP服务器
-            # msg = MIMEMultipart('alternative')
-            # msg['Subject'] = subject
-            # msg['From'] = settings.SMTP_USER
-            # msg['To'] = email
-            #
-            # html_part = MIMEText(body, 'html')
-            # msg.attach(html_part)
-            #
-            # with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-            #     server.starttls()
-            #     server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-            #     server.send_message(msg)
+            smtp_host = getattr(settings, 'SMTP_HOST', None)
+            if not smtp_host:
+                print(f"⚠️ SMTP 未配置，验证码邮件未发送给 {email}")
+                return False
+
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = settings.SMTP_USER
+            msg['To'] = email
+
+            html_part = MIMEText(body, 'html')
+            msg.attach(html_part)
+
+            with smtplib.SMTP(smtp_host, settings.SMTP_PORT) as server:
+                server.starttls()
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                server.send_message(msg)
 
             return True
 
@@ -204,7 +215,24 @@ class EmailService:
                 return True
 
             # 生产环境：实际发送邮件
-            # TODO: 实现邮件发送
+            smtp_host = getattr(settings, 'SMTP_HOST', None)
+            if not smtp_host:
+                print(f"⚠️ SMTP 未配置，通知邮件未发送给 {email}")
+                return False
+
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = settings.SMTP_USER
+            msg['To'] = email
+
+            html_part = MIMEText(content, 'html')
+            msg.attach(html_part)
+
+            with smtplib.SMTP(smtp_host, settings.SMTP_PORT) as server:
+                server.starttls()
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                server.send_message(msg)
+
             return True
 
         except Exception as e:
@@ -222,48 +250,47 @@ class EmailService:
             del self._verification_codes[email]
 
     async def save_reset_code(self, email: str, code: str, expire_minutes: int = 15) -> None:
-        """保存密码重置码到 Redis（带过期时间）"""
+        """保存密码重置码到 Redis（哈希存储，带过期时间）"""
         redis_client = await self.get_redis()
 
         if redis_client:
             try:
-                # 使用 Redis 存储重置码，自动过期
+                # 使用 SHA-256 哈希存储重置码
+                code_hash = hashlib.sha256(code.encode()).hexdigest()
                 key = f"reset_code:{email}"
-                await redis_client.setex(key, expire_minutes * 60, code)
+                await redis_client.setex(key, expire_minutes * 60, code_hash)
                 return
             except (redis.RedisError, RuntimeError):
-                # Redis 失败，使用内存后备
                 pass
 
-        # 内存后备存储
+        # 内存后备存储（也使用哈希）
         expire_time = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
+        code_hash = hashlib.sha256(code.encode()).hexdigest()
         self._reset_codes[email] = {
-            'code': code,
+            'code_hash': code_hash,
             'expire_time': expire_time,
             'used': False
         }
 
     async def verify_reset_code(self, email: str, code: str) -> bool:
-        """验证密码重置码"""
+        """验证密码重置码（使用哈希比较）"""
         redis_client = await self.get_redis()
 
         if redis_client:
             try:
                 key = f"reset_code:{email}"
-                stored_code = await redis_client.get(key)
+                stored_hash = await redis_client.get(key)
 
-                if stored_code is None:
-                    # 重置码不存在或已过期
+                if stored_hash is None:
                     return False
 
-                if stored_code == code:
-                    # 验证成功，删除重置码（一次性使用）
+                code_hash = hashlib.sha256(code.encode()).hexdigest()
+                if code_hash == stored_hash:
                     await redis_client.delete(key)
                     return True
 
                 return False
             except (redis.RedisError, RuntimeError):
-                # Redis 失败，使用内存后备
                 pass
 
         # 内存后备验证
@@ -272,20 +299,16 @@ class EmailService:
 
         stored_data = self._reset_codes[email]
 
-        # 检查是否已使用
         if stored_data['used']:
             return False
 
-        # 检查是否过期
         if datetime.now(timezone.utc) > stored_data['expire_time']:
-            # 清除过期重置码
             del self._reset_codes[email]
             return False
 
-        # 验证码匹配
-        if stored_data['code'] == code:
-            # 标记为已使用
-            stored_data['used'] = True
+        code_hash = hashlib.sha256(code.encode()).hexdigest()
+        if code_hash == stored_data['code_hash']:
+            del self._reset_codes[email]
             return True
 
         return False
@@ -332,7 +355,24 @@ class EmailService:
                 return True
 
             # 生产环境：实际发送邮件
-            # TODO: 配置SMTP服务器
+            smtp_host = getattr(settings, 'SMTP_HOST', None)
+            if not smtp_host:
+                print(f"⚠️ SMTP 未配置，密码重置邮件未发送给 {email}")
+                return False
+
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = settings.SMTP_USER
+            msg['To'] = email
+
+            html_part = MIMEText(body, 'html')
+            msg.attach(html_part)
+
+            with smtplib.SMTP(smtp_host, settings.SMTP_PORT) as server:
+                server.starttls()
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                server.send_message(msg)
+
             return True
 
         except Exception as e:

@@ -12,6 +12,7 @@ interface AuthState {
 
   // Actions
   login: (email: string, password: string) => Promise<void>;
+  loginWithOAuth: (accessToken: string, refreshToken?: string) => void;
   register: (email: string, password: string, data?: {
     phone?: string;
     username?: string;
@@ -58,6 +59,31 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      loginWithOAuth: (accessToken: string, refreshToken?: string) => {
+        // OAuth登录成功后，保存token
+        storage.setToken(accessToken);
+        if (refreshToken) {
+          storage.setRefreshToken(refreshToken);
+        }
+
+        // 设置认证状态
+        set({
+          token: accessToken,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+
+        // 后台获取用户信息
+        api.auth.getCurrentUser().then((userData) => {
+          const user = userData as User;
+          storage.setUser(user);
+          set({ user });
+        }).catch(() => {
+          // 获取用户信息失败，但保持登录状态
+          console.error('Failed to fetch user info after OAuth login');
+        });
+      },
+
       register: async (email: string, password: string, data) => {
         set({ isLoading: true, error: null });
         try {
@@ -66,6 +92,20 @@ export const useAuthStore = create<AuthState>()(
             password,
             ...data,
           });
+
+          // 检查是否需要邮箱验证
+          if ((response as unknown as Record<string, unknown>).require_verification) {
+            set({
+              user: null,
+              token: null,
+              isAuthenticated: false,
+              isLoading: false,
+            });
+            // 不自动登录，返回提示需要验证
+            throw new Error('注册成功，请查收邮件并验证邮箱后再登录');
+          }
+
+          // 不需要验证的情况才自动登录
           const { access_token, user } = response;
 
           storage.setToken(access_token);

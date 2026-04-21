@@ -49,6 +49,7 @@ class RateLimit:
     AUTH_LOGIN = "20/minute"        # 登录:每分钟20次
     AUTH_PASSWORD_RESET = "3/hour"  # 密码重置:每小时3次
     AUTH_CODE_SEND = "10/hour"      # 验证码发送:每小时10次
+    AUTH_CODE_VERIFY = "5/5minutes" # 验证码验证:每5分钟5次（防暴力破解）
 
     # 简历操作 - 中等限制
     RESUME_CREATE = "30/hour"       # 创建简历:每小时30次

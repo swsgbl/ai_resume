@@ -184,3 +184,4 @@ target/
 **/public/downloads/*.hap
 **/public/downloads/*.exe
 **/public/downloads/*.dmg
+DEVOPS_*.md
