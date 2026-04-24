@@ -1,10 +1,16 @@
 {
   "src": [
     "pages/LoginPage",
-    "pages/HomePage",
+    "pages/UnifiedLoginPage",
     "pages/RegisterPage",
+    "pages/ForgotPasswordPage",
+    "pages/HomePage",
+    "pages/ResumeListPage",
     "pages/ResumeEditorPage",
+    "pages/AIGeneratePage",
     "pages/TemplateSelectPage",
-    "pages/ProfilePage"
+    "pages/ProfilePage",
+    "pages/SettingsPage",
+    "pages/AccountSettingsPage"
   ]
 }

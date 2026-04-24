@@ -1,18 +1,28 @@
-// Template.cj - 简历模板数据模型
+// Template.cj - 简历模板数据模型（同步自 Web 版 @ai-resume/shared/types Template）
 package models
 
 import std.collection.*
 
+/**
+ * 模板模型 - 同步自 Web 版 Template
+ */
 public class Template {
     public var id: Int64 = 0
     public var name: String = ""
     public var description: String = ""
     public var category: String = ""
+    public var subCategory: String = ""
+    public var level: String = ""
+    public var layout: String = "single"  // 'single' | 'double'
+    public var thumbnailUrl: String = ""
+    public var previewUrl: String = ""
     public var preview: String = ""
-    public var style: TemplateStyle = TemplateStyle()
     public var isPremium: Bool = false
+    public var isFavorited: Bool = false
     public var isActive: Bool = true
-    public var usageCount: Int64 = 0
+    public var useCount: Int64 = 0
+    public var styleConfig: String = ""  // JSON字符串
+    public var style: TemplateStyle = TemplateStyle()
     public var createdAt: String = ""
 
     public init() {}
@@ -26,7 +36,7 @@ public class Template {
         style: TemplateStyle,
         isPremium: Bool,
         isActive: Bool,
-        usageCount: Int64,
+        useCount: Int64,
         createdAt: String
     ) {
         this.id = id
@@ -37,11 +47,14 @@ public class Template {
         this.style = style
         this.isPremium = isPremium
         this.isActive = isActive
-        this.usageCount = usageCount
+        this.useCount = useCount
         this.createdAt = createdAt
     }
 }
 
+/**
+ * 模板样式 - 同步自 Web 版 style_config
+ */
 public class TemplateStyle {
     public var primaryColor: String = "#2563eb"
     public var secondaryColor: String = "#64748b"
@@ -78,6 +91,9 @@ public class TemplateStyle {
     }
 }
 
+/**
+ * 模板分类 - 同步自 Web 版
+ */
 public class TemplateCategory {
     public var id: String = ""
     public var name: String = ""
@@ -92,4 +108,20 @@ public class TemplateCategory {
         this.icon = icon
         this.count = count
     }
+}
+
+/**
+ * 模板筛选条件 - 同步自 Web 版 TemplateFilter
+ */
+public class TemplateFilter {
+    public var category: String = ""
+    public var subCategory: String = ""
+    public var level: String = ""
+    public var isPremium: Bool = false
+    public var search: String = ""
+    public var sortBy: String = ""
+    public var page: Int32 = 1
+    public var pageSize: Int32 = 20
+
+    public init() {}
 }

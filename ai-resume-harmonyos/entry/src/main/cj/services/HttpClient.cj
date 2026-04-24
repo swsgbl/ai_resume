@@ -1,4 +1,4 @@
-// HttpClient.cj - HTTP客户端封装
+// HttpClient.cj - HTTP客户端封装（增强版，支持多种Content-Type）
 package services
 
 import std.net.*
@@ -26,26 +26,31 @@ public class HttpClient {
 
     // GET请求
     public func get(endpoint: String): HttpResponse {
-        return request("GET", endpoint, "")
+        return request("GET", endpoint, "", "application/json")
     }
 
-    // POST请求
+    // POST请求（JSON）
     public func post(endpoint: String, body: String): HttpResponse {
-        return request("POST", endpoint, body)
+        return request("POST", endpoint, body, "application/json")
+    }
+
+    // POST请求（自定义Content-Type）- 支持form-data等
+    public func postWithContentType(endpoint: String, body: String, contentType: String): HttpResponse {
+        return request("POST", endpoint, body, contentType)
     }
 
     // PUT请求
     public func put(endpoint: String, body: String): HttpResponse {
-        return request("PUT", endpoint, body)
+        return request("PUT", endpoint, body, "application/json")
     }
 
     // DELETE请求
     public func delete(endpoint: String): HttpResponse {
-        return request("DELETE", endpoint, "")
+        return request("DELETE", endpoint, "", "application/json")
     }
 
     // 通用请求方法
-    private func request(method: String, endpoint: String, body: String): HttpResponse {
+    private func request(method: String, endpoint: String, body: String, contentType: String): HttpResponse {
         let url = baseUrl + endpoint
         var response = HttpResponse()
 
@@ -54,7 +59,7 @@ public class HttpClient {
             let httpRequest = HttpRequest()
             httpRequest.setMethod(method)
             httpRequest.setUrl(url)
-            httpRequest.setHeader("Content-Type", "application/json")
+            httpRequest.setHeader("Content-Type", contentType)
             httpRequest.setHeader("Accept", "application/json")
 
             // 添加认证头

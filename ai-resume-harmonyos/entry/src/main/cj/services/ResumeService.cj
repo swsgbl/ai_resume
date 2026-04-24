@@ -1,4 +1,4 @@
-// ResumeService.cj - 简历服务
+// ResumeService.cj - 简历服务（同步自 Web 版 ResumeApi）
 package services
 
 import models.*
@@ -12,7 +12,26 @@ public class ResumeService {
         this.httpClient = httpClient
     }
 
-    // 获取所有简历
+    // ==================== 获取简历列表 ====================
+    // 同步自 Web 版 ResumeApi.getResumes
+    public func getResumes(filter: ResumeFilter): Result<PaginatedResponse<Resume>> {
+        var params = HashMap<String, String>()
+        if (filter.status != "") { params.put("status", filter.status) }
+        if (filter.search != "") { params.put("search", filter.search) }
+        params.put("page", filter.page.toString())
+        params.put("page_size", filter.pageSize.toString())
+
+        let response = httpClient.get(ApiConfig.RESUMES)
+
+        if (response.isSuccess()) {
+            let result = parsePaginatedResumes(response.body)
+            return result
+        }
+
+        return Result<PaginatedResponse<Resume>>.failure(response.error)
+    }
+
+    // 获取所有简历（简化版）
     public func getResumes(): Result<ArrayList<Resume>> {
         let response = httpClient.get(ApiConfig.RESUMES)
 
@@ -24,7 +43,8 @@ public class ResumeService {
         return Result<ArrayList<Resume>>.failure(response.error)
     }
 
-    // 获取单个简历
+    // ==================== 获取单个简历 ====================
+    // 同步自 Web 版 ResumeApi.getResume
     public func getResume(id: Int64): Result<Resume> {
         let endpoint = ApiConfig.RESUME_BY_ID.replace("{id}", id.toString())
         let response = httpClient.get(endpoint)
@@ -37,10 +57,13 @@ public class ResumeService {
         return Result<Resume>.failure(response.error)
     }
 
-    // 创建简历
+    // ==================== 创建简历 ====================
+    // 同步自 Web 版 ResumeApi.createResume
     public func createResume(title: String, templateId: Int64): Result<Resume> {
-        let body = "{\"title\": \"${title}\", \"template_id\": ${templateId}}"
-        let response = httpClient.post(ApiConfig.RESUMES, body)
+        let obj = JsonObject()
+        obj.put("title", title)
+        obj.put("template_id", templateId)
+        let response = httpClient.post(ApiConfig.RESUMES, obj.toJson())
 
         if (response.isSuccess()) {
             let resume = parseResume(response.body)
@@ -50,7 +73,8 @@ public class ResumeService {
         return Result<Resume>.failure(response.error)
     }
 
-    // 更新简历
+    // ==================== 更新简历 ====================
+    // 同步自 Web 版 ResumeApi.updateResume
     public func updateResume(id: Int64, resume: Resume): Result<Resume> {
         let endpoint = ApiConfig.RESUME_BY_ID.replace("{id}", id.toString())
         let body = serializeResume(resume)
@@ -64,7 +88,8 @@ public class ResumeService {
         return Result<Resume>.failure(response.error)
     }
 
-    // 删除简历
+    // ==================== 删除简历 ====================
+    // 同步自 Web 版 ResumeApi.deleteResume
     public func deleteResume(id: Int64): Result<Bool> {
         let endpoint = ApiConfig.RESUME_BY_ID.replace("{id}", id.toString())
         let response = httpClient.delete(endpoint)
@@ -76,20 +101,94 @@ public class ResumeService {
         return Result<Bool>.failure(response.error)
     }
 
-    // AI生成简历内容
-    public func generateResume(request: AIGenerateRequest): Result<AIGenerateResponse> {
-        let body = serializeAIGenerateRequest(request)
-        let response = httpClient.post(ApiConfig.RESUME_GENERATE, body)
+    // ==================== 复制简历 ====================
+    // 新增：同步自 Web 版 ResumeApi.copyResume
+    public func copyResume(id: Int64): Result<Resume> {
+        let endpoint = ApiConfig.RESUME_COPY.replace("{id}", id.toString())
+        let response = httpClient.post(endpoint, "{}")
 
         if (response.isSuccess()) {
-            let aiResponse = parseAIGenerateResponse(response.body)
-            return Result<AIGenerateResponse>.success(aiResponse)
+            let resume = parseResume(response.body)
+            return Result<Resume>.success(resume)
         }
 
-        return Result<AIGenerateResponse>.failure(response.error)
+        return Result<Resume>.failure(response.error)
     }
 
-    // 解析简历列表
+    // ==================== AI 生成简历 ====================
+    // 同步自 Web 版 ResumeApi.aiGenerateResume
+    public func aiGenerateResume(id: Int64, request: AIGenerateRequest): Result<Resume> {
+        let endpoint = ApiConfig.RESUME_AI_GENERATE.replace("{id}", id.toString())
+        let obj = JsonObject()
+        obj.put("target_position", request.targetPosition)
+        obj.put("user_background", request.userBackground)
+        obj.put("style", request.style)
+        obj.put("language", request.language)
+        let response = httpClient.post(endpoint, obj.toJson())
+
+        if (response.isSuccess()) {
+            let resume = parseResume(response.body)
+            return Result<Resume>.success(resume)
+        }
+
+        return Result<Resume>.failure(response.error)
+    }
+
+    // ==================== AI 优化内容 ====================
+    // 同步自 Web 版 ResumeApi.aiOptimizeContent
+    public func aiOptimizeContent(request: AIOptimizeRequest): Result<String> {
+        let obj = JsonObject()
+        obj.put("content", request.content)
+        obj.put("optimization_type", request.optimizationType)
+        obj.put("context", request.context)
+        let response = httpClient.post(ApiConfig.RESUME_AI_OPTIMIZE, obj.toJson())
+
+        if (response.isSuccess()) {
+            try {
+                let jsonObj = JsonParser.parse(response.body)
+                let optimized = jsonObj.getString("optimized", "")
+                return Result<String>.success(optimized)
+            } catch (e: Exception) {
+                return Result<String>.failure("解析优化结果失败")
+            }
+        }
+
+        return Result<String>.failure(response.error)
+    }
+
+    // ==================== 解析方法 ====================
+
+    private func parsePaginatedResumes(json: String): Result<PaginatedResponse<Resume>> {
+        try {
+            let obj = JsonParser.parse(json)
+            var dataObj = obj
+            if (obj.containsKey("data")) {
+                dataObj = obj.getObject("data")
+            }
+
+            let result = PaginatedResponse<Resume>()
+            result.total = dataObj.getInt64("total", 0)
+            result.page = dataObj.getInt32("page", 1)
+            result.pageSize = dataObj.getInt32("page_size", 20)
+            result.totalPages = dataObj.getInt32("total_pages", 0)
+
+            let arr = dataObj.getArray("data")
+            for (i in 0..arr.size()) {
+                let itemObj = arr.getObject(i)
+                result.data.add(parseResumeFromObject(itemObj))
+            }
+
+            return Result<PaginatedResponse<Resume>>.success(result)
+        } catch (e: Exception) {
+            // 降级：尝试作为数组解析
+            let resumes = parseResumeList(json)
+            let result = PaginatedResponse<Resume>()
+            result.data = resumes
+            result.total = Int64(resumes.size())
+            return Result<PaginatedResponse<Resume>>.success(result)
+        }
+    }
+
     private func parseResumeList(json: String): ArrayList<Resume> {
         let resumes = ArrayList<Resume>()
         try {
@@ -104,10 +203,14 @@ public class ResumeService {
         return resumes
     }
 
-    // 解析单个简历
     private func parseResume(json: String): Resume {
         try {
             let obj = JsonParser.parse(json)
+            // 处理嵌套的 data 字段
+            if (obj.containsKey("data")) {
+                let dataObj = obj.getObject("data")
+                return parseResumeFromObject(dataObj)
+            }
             return parseResumeFromObject(obj)
         } catch (e: Exception) {
             println("Failed to parse resume: ${e.message}")
@@ -115,62 +218,42 @@ public class ResumeService {
         }
     }
 
-    // 从JSON对象解析简历
     private func parseResumeFromObject(obj: JsonObject): Resume {
         let resume = Resume()
         resume.id = obj.getInt64("id", 0)
         resume.userId = obj.getInt64("user_id", 0)
         resume.title = obj.getString("title", "")
-        resume.content = obj.getString("content", "")
+        resume.contentRaw = obj.getString("content", "")
         resume.templateId = obj.getInt64("template_id", 0)
         resume.templateName = obj.getString("template_name", "")
         resume.status = obj.getString("status", "draft")
+        resume.description = obj.getString("description", "")
         resume.version = obj.getInt32("version", 1)
         resume.createdAt = obj.getString("created_at", "")
         resume.updatedAt = obj.getString("updated_at", "")
 
         // 解析标签
-        let tagsArr = obj.getArray("tags")
-        for (i in 0..tagsArr.size()) {
-            resume.tags.add(tagsArr.getString(i))
-        }
+        try {
+            let tagsArr = obj.getArray("tags")
+            for (i in 0..tagsArr.size()) {
+                resume.tags.add(tagsArr.getString(i))
+            }
+        } catch (_: Exception) {}
 
         return resume
     }
 
-    // 序列化简历 - 使用安全的 JSON 序列化
     private func serializeResume(resume: Resume): String {
         let obj = JsonObject()
         obj.put("title", resume.title)
-        obj.put("content", resume.content)
+        if (resume.contentRaw != "") {
+            obj.put("content", resume.contentRaw)
+        }
         obj.put("template_id", resume.templateId)
         obj.put("status", resume.status)
-        return obj.toJson()
-    }
-
-    // 序列化AI生成请求 - 使用安全的 JSON 序列化
-    private func serializeAIGenerateRequest(request: AIGenerateRequest): String {
-        let obj = JsonObject()
-        obj.put("resume_id", request.resumeId)
-        obj.put("section", request.section)
-        obj.put("prompt", request.prompt)
-        obj.put("context", request.context)
-        obj.put("template_id", request.templateId)
-        return obj.toJson()
-    }
-
-    // 解析AI生成响应
-    private func parseAIGenerateResponse(json: String): AIGenerateResponse {
-        let response = AIGenerateResponse()
-        try {
-            let obj = JsonParser.parse(json)
-            response.content = obj.getString("content", "")
-            response.tokens = obj.getInt64("tokens", 0)
-            response.provider = obj.getString("provider", "")
-            response.model = obj.getString("model", "")
-        } catch (e: Exception) {
-            println("Failed to parse AI response: ${e.message}")
+        if (resume.description != "") {
+            obj.put("description", resume.description)
         }
-        return response
+        return obj.toJson()
     }
 }
