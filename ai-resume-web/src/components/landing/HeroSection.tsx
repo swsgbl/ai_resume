@@ -19,18 +19,17 @@ export default function HeroSection() {
       <div className="lp-hero-content">
         <div className="lp-hero-badge">
           <Sparkle />
-          AI 驱动 · 智能简历生成平台
+          30秒生成 · 多模型AI驱动 · 完全免费
         </div>
 
         <h1 className="lp-hero-title">
-          AI 赋能，<br />
-          <span className="gradient-text">简历重生</span>
+          30秒<span className="gradient-text">AI生成</span>专业简历
         </h1>
 
         <p className="lp-hero-subtitle">
-          200+ 专业模板 · AI 智能优化排版 · 一键导出 PDF/Word
+          支持 DeepSeek · OpenAI · 小米 MiMo 三大模型
           <br />
-          让每一份简历都成为你的职场敲门砖
+          200+ 模板 · AI 智能优化 · 一键导出 PDF/Word
         </p>
 
         <div className="lp-hero-actions">
