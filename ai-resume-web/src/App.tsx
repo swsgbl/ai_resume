@@ -4,6 +4,7 @@ import { useAuthStore } from './store/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Spinner } from './components/UIComponents';
 import PublicLayout from './components/PublicLayout';
+import { Analytics } from './components/Analytics';
 
 // 懒加载页面组件 - 代码分割优化
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -75,6 +76,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <Analytics />
       <Routes>
         {/* 公开首页 - Landing Page（独立导航） */}
         <Route
