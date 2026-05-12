@@ -30,14 +30,14 @@ describe('SEO Component', () => {
     // 验证标题包含在 Helmet 中
     const helmet = screen.getByTestId('helmet');
     expect(helmet.innerHTML).toContain('首页');
-    expect(helmet.innerHTML).toContain('ndtool AI简历生成器');
+    expect(helmet.innerHTML).toContain('ndtool AI简历智能生成平台');
   });
 
   it('使用默认站点名称', () => {
     render(<SEO />);
 
     const helmet = screen.getByTestId('helmet');
-    expect(helmet.innerHTML).toContain('ndtool AI简历生成器');
+    expect(helmet.innerHTML).toContain('ndtool AI简历智能生成平台');
   });
 
   it('设置描述', () => {
@@ -122,8 +122,8 @@ describe('SEO Component', () => {
     render(<SEO title="关于我们" />);
 
     const helmet = screen.getByTestId('helmet');
-    // 标题应该是 "关于我们 | ndtool AI简历生成器"
-    const titleContent = helmet.innerHTML.match(/关于我们.*ndtool AI简历生成器/);
+    // 标题应该是 "关于我们 | ndtool AI简历智能生成平台"
+    const titleContent = helmet.innerHTML.match(/关于我们.*ndtool AI简历智能生成平台/);
     expect(titleContent).toBeTruthy();
   });
 
