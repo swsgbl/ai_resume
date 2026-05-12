@@ -46,7 +46,7 @@ class TestCareerJDEvaluate:
             }
         }
 
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(return_value=json.dumps(mock_response, ensure_ascii=False))
             mock_get_provider.return_value = mock_ai
@@ -63,7 +63,7 @@ class TestCareerJDEvaluate:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0  # Response schema uses 0 for success
         assert data["message"] == "评估完成"
 
     async def test_evaluate_jd_resume_not_found(
@@ -101,7 +101,7 @@ class TestCareerJDEvaluate:
         self, client: AsyncClient, test_resume, auth_headers: dict
     ):
         """测试 AI 服务失败"""
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(side_effect=Exception("AI 服务不可用"))
             mock_get_provider.return_value = mock_ai
@@ -143,7 +143,7 @@ class TestCareerStoryBank:
             "叙事建议": "在面试中强调危机处理经验"
         }
 
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(return_value=json.dumps(mock_response, ensure_ascii=False))
             mock_get_provider.return_value = mock_ai
@@ -160,7 +160,7 @@ class TestCareerStoryBank:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0  # Response schema uses 0 for success
         assert data["message"] == "故事挖掘完成"
 
     async def test_generate_story_bank_with_existing_stories(
@@ -181,7 +181,7 @@ class TestCareerStoryBank:
             "关联建议": "可以将优化故事与故障处理故事串联"
         }
 
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(return_value=json.dumps(mock_response, ensure_ascii=False))
             mock_get_provider.return_value = mock_ai
@@ -243,7 +243,7 @@ class TestCareerSmartTailor:
             "confidence_notes": "建议用户确认组件库经验"
         }
 
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(return_value=json.dumps(mock_response, ensure_ascii=False))
             mock_get_provider.return_value = mock_ai
@@ -259,7 +259,7 @@ class TestCareerSmartTailor:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0  # Response schema uses 0 for success
         assert "tailored_content" in data["data"]
         assert "changes_made" in data["data"]
         assert len(data["data"]["keywords_injected"]) > 0
@@ -283,7 +283,7 @@ class TestCareerSmartTailor:
         self, client: AsyncClient, test_resume, auth_headers: dict
     ):
         """测试 AI 返回格式错误时的容错处理"""
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(return_value="这不是有效的JSON")
             mock_get_provider.return_value = mock_ai
@@ -348,7 +348,7 @@ class TestCareerAPIIntegration:
             "薪资研究": {"预估范围": "35-50k"}
         }
 
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(return_value=json.dumps(evaluate_response, ensure_ascii=False))
             mock_get_provider.return_value = mock_ai
@@ -370,7 +370,7 @@ class TestCareerAPIIntegration:
             "面试故事": [{"title": "优化接口性能"}]
         }
 
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(return_value=json.dumps(story_response, ensure_ascii=False))
             mock_get_provider.return_value = mock_ai
@@ -390,7 +390,7 @@ class TestCareerAPIIntegration:
             "narrative_angle": "强调学习能力和转型潜力"
         }
 
-        with patch("app.api.v1.career.get_ai_provider") as mock_get_provider:
+        with patch("app.services.ai.ai_service_factory.get_ai_provider") as mock_get_provider:
             mock_ai = AsyncMock()
             mock_ai.generate_content = AsyncMock(return_value=json.dumps(tailor_response, ensure_ascii=False))
             mock_get_provider.return_value = mock_ai

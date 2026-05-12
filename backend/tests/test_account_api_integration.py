@@ -39,7 +39,8 @@ class TestAccountBindings:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        # Account bindings returns Response schema with no code field
+        assert "data" in data
         assert "email" in data["data"]
         assert data["data"]["email"]["bound"] is True
         assert data["data"]["phone"]["bound"] is False
@@ -266,15 +267,30 @@ class TestAccountUnbinding:
         assert "密码错误" in response.json()["detail"]
 
     async def test_unbind_not_bound(
-        self, client: AsyncClient, test_user: User, auth_headers: dict
+        self, client: AsyncClient, db_session: AsyncSession
     ):
         """测试解绑未绑定的账号类型"""
+        from app.core.security import create_access_token, get_password_hash
+
+        # 创建有邮箱和手机号的用户
+        user = User(
+            username="multi_bind",
+            email="multi@test.com",
+            phone="13900000000",
+            password_hash=get_password_hash("Pass123!"),
+            is_verified=True
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        token = create_access_token(data={"sub": str(user.id)})
         response = await client.post(
             "/api/v1/account/unbind",
-            headers=auth_headers,
+            headers={"Authorization": f"Bearer {token}"},
             json={
                 "account_type": "wechat",
-                "password": "TestPassword123!"
+                "password": "Pass123!"
             }
         )
 
@@ -369,15 +385,30 @@ class TestAccountUnbinding:
         assert user.google_email is None
 
     async def test_unbind_unsupported_type(
-        self, client: AsyncClient, test_user: User, auth_headers: dict
+        self, client: AsyncClient, db_session: AsyncSession
     ):
         """测试解绑不支持的账号类型"""
+        from app.core.security import create_access_token, get_password_hash
+
+        # 创建有邮箱和手机号的用户
+        user = User(
+            username="unsupported_test",
+            email="unsupported@test.com",
+            phone="13900000001",
+            password_hash=get_password_hash("Pass123!"),
+            is_verified=True
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        token = create_access_token(data={"sub": str(user.id)})
         response = await client.post(
             "/api/v1/account/unbind",
-            headers=auth_headers,
+            headers={"Authorization": f"Bearer {token}"},
             json={
                 "account_type": "unsupported",
-                "password": "TestPassword123!"
+                "password": "Pass123!"
             }
         )
 

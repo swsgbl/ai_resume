@@ -428,7 +428,8 @@ class TestEmailService:
             await service.save_code("test@example.com", "123456", expire_minutes=5)
 
         assert "test@example.com" in service._verification_codes
-        assert service._verification_codes["test@example.com"]["code"] == "123456"
+        # 验证码以哈希形式存储，不存储明文
+        assert "code_hash" in service._verification_codes["test@example.com"]
         assert service._verification_codes["test@example.com"]["used"] is False
 
     async def test_verify_code_valid_memory(
@@ -442,8 +443,8 @@ class TestEmailService:
             is_valid = await service.verify_code("test@example.com", "654321")
 
         assert is_valid is True
-        # 验证后应标记为已使用
-        assert service._verification_codes["test@example.com"]["used"] is True
+        # 验证后立即删除，防止重用（一次性使用）
+        assert "test@example.com" not in service._verification_codes
 
     async def test_verify_code_invalid_memory(
         self,
@@ -501,7 +502,8 @@ class TestEmailService:
             await service.save_reset_code("test@example.com", "999888", expire_minutes=15)
 
         assert "test@example.com" in service._reset_codes
-        assert service._reset_codes["test@example.com"]["code"] == "999888"
+        # 重置码也以哈希形式存储，不存储明文
+        assert "code_hash" in service._reset_codes["test@example.com"]
 
     async def test_verify_reset_code_valid(self, service: EmailService):
         """测试: 验证有效重置码"""

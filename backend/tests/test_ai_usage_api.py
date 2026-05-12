@@ -44,7 +44,7 @@ class TestAIUsageStats:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0  # Response schema uses 0 for success
         assert data["data"]["period_days"] == 30
         assert data["data"]["total_calls"] == 100
         assert data["data"]["total_cost"] == 0.5
