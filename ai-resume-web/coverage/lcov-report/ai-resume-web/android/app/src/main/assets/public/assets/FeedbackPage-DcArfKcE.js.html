@@ -1,0 +1,88 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for ai-resume-web/android/app/src/main/assets/public/assets/FeedbackPage-DcArfKcE.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../../../../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../../../../../../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../../../../../../../index.html">All files</a> / <a href="index.html">ai-resume-web/android/app/src/main/assets/public/assets</a> FeedbackPage-DcArfKcE.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import{u as x,j as e,P as N}from"./index-DF1w3JRo.js";import{r as a}from"./vendor-react-DS7XCilm.js";import{R as p}from"./ResourceLayout-DONiZCcD.js";import"./vendor-state-BNDFFAWu.js";function P(){const{t:r}=x(),[t,m]=a.useState(""),[b,i]=a.useState(""),[u,c]=a.useState(""),[d,l]=a.useState(!1),[o,h]=a.useState(()=&gt;{try{return JSON.parse(localStorage.getItem("feedback_history")||"[]")}catch(s){return[]}}),f=s=&gt;{if(s.preventDefault(),!t.trim()||!u.trim())return;const n=[{id:Date.now().toString(),name:t.trim(),question:u.trim(),date:new Date().toLocaleString("zh-CN"),status:"pending"},...o];h(n),localStorage.setItem("feedback_history",JSON.stringify(n)),m(""),i(""),c(""),l(!0),setTimeout(()=&gt;l(!1),3e3)},g={pending:"text-amber-400",processing:"text-blue-400",resolved:"text-[#8FAE8B]",closed:"text-[#5A5652]"};return e.jsxDEV(N,{children:e.jsxDEV(p,{children:[e.jsxDEV("h1",{className:"text-3xl font-bold text-[#E8E4DE] mb-8",children:r("resources.feedback.title")},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:58,columnNumber:9},this),e.jsxDEV("form",{onSubmit:f,className:"mb-10 space-y-4",children:[e.jsxDEV("div",{children:[e.jsxDEV("label",{className:"block text-sm text-[#8A8580] mb-1",children:r("resources.feedback.name")},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:63,columnNumber:13},this),e.jsxDEV("input",{type:"text",value:t,onChange:s=&gt;m(s.target.value),placeholder:r("resources.feedback.namePlaceholder"),required:!0,className:"w-full bg-[#161616] border-b border-[#252525] px-3 py-2 text-sm text-[#E8E4DE] placeholder-[#5A5652] focus:outline-none focus:border-[#C84B31] transition-colors"},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:64,columnNumber:13},this)]},void 0,!0,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:62,columnNumber:11},this),e.jsxDEV("div",{children:[e.jsxDEV("label",{className:"block text-sm text-[#8A8580] mb-1",children:r("resources.feedback.contact")},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:74,columnNumber:13},this),e.jsxDEV("input",{type:"text",value:b,onChange:s=&gt;i(s.target.value),placeholder:r("resources.feedback.contactPlaceholder"),className:"w-full bg-[#161616] border-b border-[#252525] px-3 py-2 text-sm text-[#E8E4DE] placeholder-[#5A5652] focus:outline-none focus:border-[#C84B31] transition-colors"},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:75,columnNumber:13},this)]},void 0,!0,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:73,columnNumber:11},this),e.jsxDEV("div",{children:[e.jsxDEV("label",{className:"block text-sm text-[#8A8580] mb-1",children:r("resources.feedback.question")},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:84,columnNumber:13},this),e.jsxDEV("textarea",{value:u,onChange:s=&gt;c(s.target.value),placeholder:r("resources.feedback.questionPlaceholder"),required:!0,rows:4,className:"w-full bg-[#161616] border-b border-[#252525] px-3 py-2 text-sm text-[#E8E4DE] placeholder-[#5A5652] focus:outline-none focus:border-[#C84B31] transition-colors resize-y"},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:85,columnNumber:13},this)]},void 0,!0,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:83,columnNumber:11},this),e.jsxDEV("button",{type:"submit",className:"px-6 py-2 bg-[#C84B31] text-white text-sm font-medium rounded hover:bg-[#A63D28] transition-colors",children:r("resources.feedback.submit")},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:94,columnNumber:11},this),d&amp;&amp;e.jsxDEV("p",{className:"text-[#8FAE8B] text-sm",children:r("resources.feedback.success")},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:101,columnNumber:13},this)]},void 0,!0,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:61,columnNumber:9},this),e.jsxDEV("section",{children:[e.jsxDEV("h2",{className:"text-lg font-semibold text-[#E8E4DE] mb-4 pb-2 border-b border-[#252525]",children:r("resources.feedback.history")},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:107,columnNumber:11},this),o.length===0?e.jsxDEV("p",{className:"text-[#5A5652] text-sm",children:r("resources.feedback.noData")},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:111,columnNumber:13},this):e.jsxDEV("div",{className:"space-y-3",children:o.map(s=&gt;e.jsxDEV("div",{className:"p-4 bg-[#161616] border border-[#252525] rounded",children:[e.jsxDEV("div",{className:"flex justify-between items-start mb-2",children:[e.jsxDEV("span",{className:"text-[#E8E4DE] text-sm font-medium",children:s.name},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:117,columnNumber:21},this),e.jsxDEV("span",{className:`text-xs ${g[s.status]}`,children:r(`resources.feedback.status.${s.status}`)},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:118,columnNumber:21},this)]},void 0,!0,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:116,columnNumber:19},this),e.jsxDEV("p",{className:"text-sm text-[#8A8580]",children:s.question},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",</span></span>lineNumber:122,columnNumber:19},this),e.jsxDEV("p",{className:"text-xs text-[#5A5652] mt-2",children:s.date},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:123,columnNumber:19},this)]},s.id,!0,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:115,columnNumber:17},this))},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:113,columnNumber:13},this)]},void 0,!0,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:106,columnNumber:9},this)]},void 0,!0,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:57,columnNumber:7},this)},void 0,!1,{fileName:"/home/hongfu/ai-resume/ai-resume-web/src/pages/resources/FeedbackPage.tsx",lineNumber:56,columnNumber:5},this)}export{P as default};</span>
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-05-12T23:01:58.732Z
+            </div>
+        <script src="../../../../../../../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../../../../../../../sorter.js"></script>
+        <script src="../../../../../../../../block-navigation.js"></script>
+    </body>
+</html>
+    

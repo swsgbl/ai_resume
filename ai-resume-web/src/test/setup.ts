@@ -45,3 +45,12 @@ const localStorageImpl = {
 Object.defineProperty(window, 'localStorage', {
   value: localStorageImpl,
 });
+
+// Mock window.scrollTo
+Object.defineProperty(window, 'scrollTo', {
+  value: vi.fn(() => {}),
+  writable: true,
+});
+
+// Mock window.scrollTo 的备用方法
+window.scrollTo = vi.fn();

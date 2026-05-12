@@ -81,8 +81,8 @@ async def evaluate_jd(
         .build()
 
     try:
-        from app.services.ai.ai_service_factory import AIServiceFactory
-        ai_service = AIServiceFactory.get_service()
+        from app.services.ai.ai_service_factory import get_ai_provider
+        ai_service = get_ai_provider()
         ai_response = await ai_service.generate_content(
             system_prompt=prompt["system"],
             user_prompt=prompt["user"],
@@ -141,8 +141,8 @@ async def generate_story_bank(
         .build()
 
     try:
-        from app.services.ai.ai_service_factory import AIServiceFactory
-        ai_service = AIServiceFactory.get_service()
+        from app.services.ai.ai_service_factory import get_ai_provider
+        ai_service = get_ai_provider()
         ai_response = await ai_service.generate_content(
             system_prompt=prompt["system"],
             user_prompt=prompt["user"],
@@ -212,8 +212,8 @@ async def smart_tailor_resume(
 }}"""
 
     try:
-        from app.services.ai.ai_service_factory import AIServiceFactory
-        ai_service = AIServiceFactory.get_service()
+        from app.services.ai.ai_service_factory import get_ai_provider
+        ai_service = get_ai_provider()
         ai_response = await ai_service.generate_content(
             system_prompt="你是一位融合了 career-ops 评估智慧的简历定制专家，同时具备 Polanyi 默会知识的直觉判断力。",
             user_prompt=tailor_prompt,
