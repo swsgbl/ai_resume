@@ -48,9 +48,6 @@ Object.defineProperty(window, 'localStorage', {
 
 // Mock window.scrollTo
 Object.defineProperty(window, 'scrollTo', {
-  value: vi.fn(() => {}),
+  value: vi.fn((_x?: number | ScrollToOptions, _y?: number) => {}),
   writable: true,
 });
-
-// Mock window.scrollTo 的备用方法
-window.scrollTo = vi.fn();
