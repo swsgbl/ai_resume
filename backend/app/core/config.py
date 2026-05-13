@@ -86,7 +86,7 @@ class Settings(BaseSettings):
     
     # CORS配置 - 生产环境应只允许特定域名
     # 开发环境使用localhost，生产环境使用实际域名
-    CORS_ORIGINS: Union[str, List[str]] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"]
+    CORS_ORIGINS: Union[str, List[str]] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080", "http://127.0.0.1:5173", "http://127.0.0.1:3000", "http://127.0.0.1:8080"]
 
     @field_validator('CORS_ORIGINS', mode='before')
     @classmethod
