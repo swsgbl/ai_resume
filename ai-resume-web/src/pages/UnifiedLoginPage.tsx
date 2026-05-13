@@ -20,6 +20,7 @@ export default function UnifiedLoginPage() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [smsCode, setSmsCode] = useState('');
+  const [smsToken, setSmsToken] = useState('');
   const [oauthLoading, setOAuthLoading] = useState<string | null>(null);
 
   const enabledProviders = getEnabledProviders();
@@ -50,7 +51,7 @@ export default function UnifiedLoginPage() {
       const res = await fetch(`${API_BASE()}/api/v1/auth/sms/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, code: smsCode }),
+        body: JSON.stringify({ phone, code: smsCode, sms_token: smsToken }),
       });
       const data = await res.json();
 
@@ -177,12 +178,13 @@ export default function UnifiedLoginPage() {
                   phone={phone}
                   code={smsCode}
                   onCodeChange={setSmsCode}
+                  onSmsTokenChange={setSmsToken}
                 />
                 <Button type="submit" variant="primary" size="md" loading={isLoading} className="w-full">
                   {isLoading ? '登录中...' : '验证码登录'}
                 </Button>
                 <p className="text-center text-slate-500 text-xs">
-                  未注册手机号将自动创建账号
+                  未注册手机号请先<a href="/register" className="text-amber-400 hover:text-amber-300 ml-1">注册账号</a>
                 </p>
               </form>
             )}

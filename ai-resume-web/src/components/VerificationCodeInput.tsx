@@ -4,6 +4,7 @@ import { Button, Input } from './UIComponents';
 interface VerificationCodeInputProps {
   phone: string;
   onCodeChange: (code: string) => void;
+  onSmsTokenChange?: (token: string) => void;
   code: string;
 }
 
@@ -12,7 +13,7 @@ const API_BASE = () => import.meta.env.VITE_API_URL || '';
 /**
  * 短信验证码输入 + 发送按钮 + 60秒冷却
  */
-export default function VerificationCodeInput({ phone, onCodeChange, code }: VerificationCodeInputProps) {
+export default function VerificationCodeInput({ phone, onCodeChange, onSmsTokenChange, code }: VerificationCodeInputProps) {
   const [countdown, setCountdown] = useState(0);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
@@ -50,9 +51,11 @@ export default function VerificationCodeInput({ phone, onCodeChange, code }: Ver
       }
 
       setSendSuccess(true);
-      // 从后端响应获取冷却时间，默认60秒
       const cooldown = data?.data?.cooldown || 60;
       setCountdown(cooldown);
+      if (data?.data?.sms_token && onSmsTokenChange) {
+        onSmsTokenChange(data.data.sms_token);
+      }
     } catch (err) {
       setSendError(err instanceof Error ? err.message : '发送失败');
     } finally {
