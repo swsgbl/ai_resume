@@ -23,23 +23,27 @@
 ### 部署命令
 
 ```bash
-# 完整部署（同步代码+重建容器+验证）
-./deploy-cloud.sh full
+# 同步后端代码到服务器
+rsync -avz --exclude='venv' --exclude='__pycache__' --exclude='*.pyc' --exclude='data' --exclude='*.db' \
+  -e "ssh -i ~/.ssh/id_ed25519" backend/ root@113.45.64.145:/var/www/ai-resume/backend/
 
-# 仅同步代码（不重建容器）
-./deploy-cloud.sh sync
+# 同步前端 dist 到服务器
+rsync -avz --delete -e "ssh -i ~/.ssh/id_ed25519" ai-resume-web/dist/ root@113.45.64.145:/var/www/ai-resume/frontend/dist/
 
-# 重启云端容器
-./deploy-cloud.sh restart
+# 重启后端服务
+ssh -i ~/.ssh/id_ed25519 root@113.45.64.145 "systemctl restart ai-resume-backend"
 
-# 查看云端状态
-./deploy-cloud.sh status
+# 重启 nginx
+ssh -i ~/.ssh/id_ed25519 root@113.45.64.145 "systemctl restart nginx"
 
-# 查看日志
-./deploy-cloud.sh logs [backend|redis|frontend]
+# 查看后端状态
+ssh -i ~/.ssh/id_ed25519 root@113.45.64.145 "systemctl status ai-resume-backend"
+
+# 查看后端日志
+ssh -i ~/.ssh/id_ed25519 root@113.45.64.145 "journalctl -u ai-resume-backend -f"
 
 # 验证部署
-./deploy-cloud.sh verify
+ssh -i ~/.ssh/id_ed25519 root@113.45.64.145 "curl -s http://localhost:8001/health && curl -sI http://localhost:8081/ | head -3"
 ```
 
 ### 本地开发规则
@@ -47,13 +51,25 @@
 1. **禁止** `docker compose up` — 本地不做容器部署
 2. **禁止** 在本地启动 backend/frontend 服务占用端口
 3. 本地开发可用 `python -m pytest` 跑测试
-4. 代码完成后运行 `./deploy-cloud.sh full` 部署到云端
-5. 小改动可用 `./deploy-cloud.sh sync` 快速同步
+4. 同步后端代码后需 `systemctl restart ai-resume-backend`
+5. 同步前端 dist 后 nginx 自动生效（静态文件）
+6. **禁止** rsync 同步 venv 目录（服务器独立管理 venv）
 
-### 云端 Docker 架构
+### 云端直接部署架构（systemd + nginx）
 
 ```
-ai-resume-backend  → 8001:8000 (FastAPI)
-ai-resume-redis    → 6379 (内部)
-ai-resume-frontend → 8081:80  (Nginx 静态文件)
+后端: systemd (ai-resume-backend.service)
+  → /var/www/ai-resume/backend/venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+
+前端: nginx (ai-resume site)
+  → 监听 8081，静态文件 /var/www/ai-resume/frontend/dist/
+  → /api/v1/ 反向代理到 127.0.0.1:8001
+
+Redis: systemd (redis-server.service)
+  → 127.0.0.1:6379
+
+配置文件:
+  → systemd: /etc/systemd/system/ai-resume-backend.service
+  → nginx: /etc/nginx/sites-available/ai-resume
+  → 环境变量: /var/www/ai-resume/.env
 ```

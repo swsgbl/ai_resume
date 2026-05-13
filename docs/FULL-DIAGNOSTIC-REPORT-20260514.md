@@ -115,4 +115,38 @@
 
 ---
 
-*诊断完成 | 2026-05-14 02:15*
+## 6. 部署方式变更 (2026-05-14 07:50)
+
+### 从 Docker 迁移到直接部署 ✅
+
+**原因**: Docker 构建在国内服务器网络不稳定（pip 超时），直接部署更轻量可靠
+
+| 组件 | 之前 (Docker) | 现在 (直接部署) |
+|------|---------------|-----------------|
+| 后端 | docker-compose 容器 | systemd 服务 |
+| 前端 | nginx 容器 | nginx 直接服务 |
+| Redis | docker-compose 容器 | 系统 redis-server |
+
+### 直接部署架构
+
+```
+systemd: ai-resume-backend.service
+  → venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+
+nginx: /etc/nginx/sites-available/ai-resume (listen 8081)
+  → 静态文件: /var/www/ai-resume/frontend/dist/
+  → API代理: /api/v1/ → 127.0.0.1:8001
+
+redis: redis-server.service (127.0.0.1:6379)
+```
+
+### 验证结果
+- 注册 API ✅
+- 登录 API ✅
+- SMS 发送 ✅ (开发模式)
+- 前端页面 ✅
+- nginx 代理 ✅
+
+---
+
+*诊断更新 | 2026-05-14 07:50*
