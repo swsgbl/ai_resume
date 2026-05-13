@@ -23,7 +23,7 @@ class TestAuthRegister:
         assert data["code"] == 0
         assert "user" in data["data"]
         assert data["data"]["user"]["email"] == "newuser@example.com"
-        assert data["data"]["require_verification"] is True
+        assert data["data"]["require_verification"] is False
 
     async def test_register_duplicate_email(self, client: AsyncClient, test_user):
         """测试重复邮箱注册"""

@@ -60,12 +60,7 @@ async def _authenticate_user(email: str, password: str, db: AsyncSession) -> Use
             detail="账户已被禁用"
         )
 
-    # 检查邮箱验证状态
-    if not user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="请先验证邮箱后再登录"
-        )
+    # 邮箱未验证不阻断登录（降低使用门槛）
 
     # 更新最后登录时间
     user.last_login_at = datetime.now(timezone.utc)
@@ -110,40 +105,32 @@ async def register(
             detail="该邮箱已被注册"
         )
 
-    # 创建用户
+    # 创建用户（自动验证，降低注册门槛）
     user = User(
         email=user_data.email,
         username=user_data.username,
         password_hash=get_password_hash(user_data.password),
-        is_verified=False,  # 需要邮箱验证
+        is_verified=True,
         is_active=True,
     )
     db.add(user)
     await db.commit()
     await db.refresh(user)
 
-    # 生成并发送验证码
-    verification_code = email_service.generate_code()
-    await email_service.save_code(user_data.email, verification_code, expire_minutes=5)
-
-    # 检查邮件发送结果
-    email_sent = await email_service.send_verification_email(user_data.email, verification_code)
-
-    if not email_sent:
-        # 邮件发送失败，回滚注册
-        await db.delete(user)
-        await db.commit()
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="验证邮件发送失败，请稍后重试或联系客服"
-        )
+    # 异步发送欢迎验证邮件（不阻塞注册流程）
+    try:
+        verification_code = email_service.generate_code()
+        await email_service.save_code(user_data.email, verification_code, expire_minutes=5)
+        await email_service.send_verification_email(user_data.email, verification_code)
+    except Exception:
+        pass  # 邮件发送失败不影响注册
 
     return Response(
         data={
             "user": UserResponse.model_validate(user),
-            "require_verification": True
+            "require_verification": False
         },
-        message="注册成功，验证码已发送到您的邮箱"
+        message="注册成功"
     )
 
 
