@@ -34,7 +34,7 @@ Object.defineProperty(window, 'location', {
 describe('ProfilePage', () => {
   it('渲染个人中心页面', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ProfilePage />
       </MemoryRouter>
     );
@@ -44,7 +44,7 @@ describe('ProfilePage', () => {
 
   it('显示用户信息', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ProfilePage />
       </MemoryRouter>
     );
@@ -56,7 +56,7 @@ describe('ProfilePage', () => {
 
   it('显示会员升级卡片', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ProfilePage />
       </MemoryRouter>
     );
@@ -67,7 +67,7 @@ describe('ProfilePage', () => {
 
   it('显示功能菜单', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ProfilePage />
       </MemoryRouter>
     );
@@ -82,7 +82,7 @@ describe('ProfilePage', () => {
 
   it('有导航链接', () => {
     const { container } = render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ProfilePage />
       </MemoryRouter>
     );

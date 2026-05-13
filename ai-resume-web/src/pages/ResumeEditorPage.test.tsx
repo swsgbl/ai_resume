@@ -84,7 +84,7 @@ describe('ResumeEditorPage Component', () => {
   const renderWithProviders = (ui: React.ReactNode, initialEntries = ['/resumes/1']) => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={initialEntries}>
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }} initialEntries={initialEntries}>
           <Routes>
             <Route path="/resumes/:id" element={ui} />
             <Route path="/resumes/new" element={ui} />

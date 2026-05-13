@@ -49,7 +49,7 @@ describe('HelpPage', () => {
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={testI18n}>
         <HelmetProvider>
-          <MemoryRouter>
+          <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             {children}
           </MemoryRouter>
         </HelmetProvider>

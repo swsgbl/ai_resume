@@ -42,7 +42,7 @@ describe('PrivacyPage', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={testI18n}>
-        <MemoryRouter>
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           {children}
         </MemoryRouter>
       </I18nextProvider>

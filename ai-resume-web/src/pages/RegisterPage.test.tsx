@@ -106,7 +106,7 @@ describe('RegisterPage Component', () => {
   const renderWithProviders = (ui: React.ReactNode) => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/register']}>
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }} initialEntries={['/register']}>
           <Routes>
             <Route path="/register" element={ui} />
             <Route path="/" element={<div>Home</div>} />

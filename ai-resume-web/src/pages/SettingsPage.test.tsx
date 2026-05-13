@@ -54,7 +54,7 @@ describe('SettingsPage', () => {
 
   it('渲染设置页面', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SettingsPage />
       </MemoryRouter>
     );
@@ -64,7 +64,7 @@ describe('SettingsPage', () => {
 
   it('显示服务器配置', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SettingsPage />
       </MemoryRouter>
     );
@@ -75,7 +75,7 @@ describe('SettingsPage', () => {
 
   it('显示 AI 提供商选择', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SettingsPage />
       </MemoryRouter>
     );
@@ -89,7 +89,7 @@ describe('SettingsPage', () => {
 
   it('默认显示 OpenAI 配置', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SettingsPage />
       </MemoryRouter>
     );
@@ -101,7 +101,7 @@ describe('SettingsPage', () => {
 
   it('有导航链接', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SettingsPage />
       </MemoryRouter>
     );
@@ -113,7 +113,7 @@ describe('SettingsPage', () => {
 
   it('显示操作按钮', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SettingsPage />
       </MemoryRouter>
     );
@@ -124,7 +124,7 @@ describe('SettingsPage', () => {
 
   it('显示其他设置链接', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SettingsPage />
       </MemoryRouter>
     );

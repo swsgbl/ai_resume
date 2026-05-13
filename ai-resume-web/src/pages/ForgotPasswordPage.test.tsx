@@ -59,7 +59,7 @@ describe('ForgotPasswordPage', () => {
   vi.setConfig({ testTimeout: 10000 });
   it('渲染重置密码页面', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ForgotPasswordPage />
       </MemoryRouter>
     );
@@ -69,7 +69,7 @@ describe('ForgotPasswordPage', () => {
 
   it('默认显示邮箱输入步骤', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ForgotPasswordPage />
       </MemoryRouter>
     );
@@ -81,7 +81,7 @@ describe('ForgotPasswordPage', () => {
 
   it('显示返回登录链接', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ForgotPasswordPage />
       </MemoryRouter>
     );
@@ -91,7 +91,7 @@ describe('ForgotPasswordPage', () => {
 
   it('有进度指示器', () => {
     const { container } = render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ForgotPasswordPage />
       </MemoryRouter>
     );

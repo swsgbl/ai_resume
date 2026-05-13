@@ -53,7 +53,7 @@ describe('TemplatesPage', () => {
 
     return ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           {children}
         </MemoryRouter>
       </QueryClientProvider>

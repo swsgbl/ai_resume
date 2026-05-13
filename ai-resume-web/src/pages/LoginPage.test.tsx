@@ -100,7 +100,7 @@ describe('LoginPage Component', () => {
   const renderWithProviders = (ui: React.ReactNode) => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/login']}>
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }} initialEntries={['/login']}>
           <Routes>
             <Route path="/login" element={ui} />
             <Route path="/" element={<div>Home</div>} />
