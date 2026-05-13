@@ -119,10 +119,30 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 
     app.dependency_overrides[get_db] = override_get_db
 
+    # Mock email service for testing
+    from app.services.email_service import email_service
+    original_send_verification = email_service.send_verification_email
+    original_send_reset = email_service.send_password_reset_email
+
+    async def mock_send_verification(email, code):
+        print(f"📧 [MOCK] 验证码邮件发送给 {email}: {code}")
+        return True
+
+    async def mock_send_reset(email, code):
+        print(f"📧 [MOCK] 密码重置邮件发送给 {email}: {code}")
+        return True
+
+    # Replace with mock functions
+    email_service.send_verification_email = mock_send_verification
+    email_service.send_password_reset_email = mock_send_reset
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
+    # Restore original functions
+    email_service.send_verification_email = original_send_verification
+    email_service.send_password_reset_email = original_send_reset
     app.dependency_overrides.clear()
 
 

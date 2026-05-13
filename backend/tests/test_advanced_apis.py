@@ -581,7 +581,18 @@ class TestIntegratedScenarios:
         )
         assert register_response.status_code == 200
 
-        # 2. 登录
+        # 2. 手动验证用户（模拟邮箱验证成功）
+        from sqlalchemy import select
+        from app.models.user import User
+
+        result = await db_session.execute(
+            select(User).where(User.email == "flowtest@example.com")
+        )
+        user = result.scalar_one()
+        user.is_verified = True
+        await db_session.commit()
+
+        # 3. 登录
         login_response = await client.post(
             "/api/v1/auth/login/json",
             json={
@@ -594,7 +605,7 @@ class TestIntegratedScenarios:
 
         headers = {"Authorization": f"Bearer {token}"}
 
-        # 3. 创建简历
+        # 4. 创建简历
         create_response = await client.post(
             "/api/v1/resumes",
             headers=headers,
