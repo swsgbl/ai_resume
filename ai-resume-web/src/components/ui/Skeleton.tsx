@@ -1,6 +1,10 @@
 /**
- * 骨架屏组件 - 用于加载状态的占位符
- * 提供更好的用户体验
+ * 骨架屏组件 - Design System v2.0
+ *
+ * 使用表面层级系统：
+ * - 基础背景: surface-1
+ * - 卡片背景: surface-2/surface-3
+ * - 边框: border 令牌
  */
 
 interface SkeletonProps {
@@ -48,7 +52,7 @@ export function Skeleton({
   return (
     <div
       className={cn(
-        'bg-slate-800',
+        'bg-[var(--color-surface-1)]',
         variantClasses[variant],
         animationClasses[animation],
         className
@@ -82,7 +86,7 @@ export function TextSkeleton({ lines = 3, className }: { lines?: number; classNa
 export function AvatarSkeleton({ size = 40 }: { size?: number }) {
   return (
     <div
-      className="rounded-full bg-slate-800 animate-pulse"
+      className="rounded-full bg-[var(--color-surface-1)] animate-pulse"
       style={{ width: size, height: size }}
       aria-hidden="true"
     />
@@ -94,7 +98,7 @@ export function AvatarSkeleton({ size = 40 }: { size?: number }) {
  */
 export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('p-4 rounded-xl bg-slate-900/50 border border-slate-800', className)}>
+    <div className={cn('p-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-1', className)}>
       <div className="flex items-start gap-4">
         <AvatarSkeleton size={48} />
         <div className="flex-1 space-y-2">
@@ -127,7 +131,7 @@ export function TemplateGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="rounded-xl bg-slate-900/50 border border-slate-800 overflow-hidden">
+        <div key={i} className="rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden shadow-1">
           <Skeleton variant="rectangular" className="w-full h-48 rounded-none" />
           <div className="p-4 space-y-2">
             <Skeleton variant="text" className="w-3/4 h-5" />
@@ -144,7 +148,7 @@ export function TemplateGridSkeleton({ count = 6 }: { count?: number }) {
  */
 export function NavbarSkeleton() {
   return (
-    <nav className="border-b border-slate-800 bg-slate-950/50 backdrop-blur-sm">
+    <nav className="border-b border-[var(--color-border)] bg-[var(--color-surface-0)]/80 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Skeleton variant="rectangular" width={120} height={32} className="rounded-lg" />
@@ -167,7 +171,7 @@ export function NavbarSkeleton() {
  */
 export function PageLoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       <NavbarSkeleton />
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">

@@ -1,5 +1,13 @@
 import { ReactNode } from 'react';
 
+/**
+ * Container 组件 - Design System v2.0
+ *
+ * 使用 4px 间距网格令牌：
+ * - Section 默认使用 py-section-lg (96px)
+ * - 符合 Mobile First 响应式设计
+ */
+
 interface GlassContainerProps {
   children: ReactNode;
   className?: string;
@@ -28,7 +36,7 @@ export function NeonContainer({ children, color = 'blue', className = '' }: Neon
   };
 
   return (
-    <div className={`rounded-2xl p-6 bg-slate-900/50 border ${colorClasses[color]} ${className}`}>
+    <div className={`rounded-2xl p-6 bg-[var(--color-surface-2)] border border-[var(--color-border)] ${colorClasses[color]} ${className}`}>
       {children}
     </div>
   );
@@ -38,11 +46,19 @@ interface SectionProps {
   children: ReactNode;
   className?: string;
   container?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export function Section({ children, className = '', container = true }: SectionProps) {
+export function Section({ children, className = '', container = true, size = 'lg' }: SectionProps) {
+  const sizeClasses = {
+    sm: 'py-section-sm',  // 48px
+    md: 'py-section',     // 64px
+    lg: 'py-section-lg',  // 96px
+    xl: 'py-section-xl',  // 120px
+  };
+
   return (
-    <section className={`py-20 ${className}`}>
+    <section className={`${sizeClasses[size]} ${className}`}>
       {container ? (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {children}

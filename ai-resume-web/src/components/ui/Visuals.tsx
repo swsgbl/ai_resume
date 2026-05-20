@@ -31,6 +31,16 @@ interface IconWrapperProps {
   className?: string;
 }
 
+/**
+ * IconWrapper - Design System v2.0
+ *
+ * 使用设计系统颜色：
+ * - primary: primary-500/20 背景
+ * - accent: accent-500/20 背景
+ * - glass: 半透明玻璃效果
+ *
+ * 符合 Touch Target 标准
+ */
 export function IconWrapper({ children, variant = 'glass', size = 'md', className = '' }: IconWrapperProps) {
   const sizeClasses = {
     sm: 'w-10 h-10',
@@ -39,13 +49,13 @@ export function IconWrapper({ children, variant = 'glass', size = 'md', classNam
   };
 
   const variantClasses = {
-    primary: 'bg-primary-500/20 text-primary-400',
-    accent: 'bg-accent-500/20 text-accent-400',
-    glass: 'glass-effect text-slate-300',
+    primary: 'bg-[var(--color-primary-500)]/20 text-[var(--color-primary-400)]',
+    accent: 'bg-[var(--color-accent-500)]/20 text-[var(--color-accent-400)]',
+    glass: 'glass-effect text-[var(--color-text-secondary)]',
   };
 
   return (
-    <div className={`${sizeClasses[size]} ${variantClasses[variant]} rounded-xl flex items-center justify-center ${className}`}>
+    <div className={`${sizeClasses[size]} ${variantClasses[variant]} rounded-xl flex items-center justify-center min-w-touch min-h-touch ${className}`}>
       {children}
     </div>
   );
@@ -56,12 +66,21 @@ interface StatusIndicatorProps {
   showText?: boolean;
 }
 
+/**
+ * StatusIndicator - Design System v2.0
+ *
+ * 使用语义颜色系统：
+ * - online: success-500
+ * - offline: text-muted
+ * - away: warning-500
+ * - busy: error-500
+ */
 export function StatusIndicator({ status, showText = false }: StatusIndicatorProps) {
   const statusConfig = {
-    online: { color: 'bg-green-500', text: '在线' },
-    offline: { color: 'bg-slate-500', text: '离线' },
-    away: { color: 'bg-amber-500', text: '离开' },
-    busy: { color: 'bg-rose-500', text: '忙碌' },
+    online: { color: 'bg-[var(--color-success-500)]', text: '在线' },
+    offline: { color: 'bg-[var(--color-text-muted)]', text: '离线' },
+    away: { color: 'bg-[var(--color-warning-500)]', text: '离开' },
+    busy: { color: 'bg-[var(--color-error-500)]', text: '忙碌' },
   };
 
   const config = statusConfig[status];
@@ -72,7 +91,7 @@ export function StatusIndicator({ status, showText = false }: StatusIndicatorPro
         <span className={`absolute inline-flex h-full w-full rounded-full ${config.color} opacity-75 animate-ping`}></span>
         <span className={`relative inline-flex rounded-full h-3 w-3 ${config.color}`}></span>
       </span>
-      {showText && <span className="text-sm text-slate-400">{config.text}</span>}
+      {showText && <span className="text-sm text-[var(--color-text-secondary)]">{config.text}</span>}
     </div>
   );
 }
