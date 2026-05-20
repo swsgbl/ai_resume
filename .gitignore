@@ -188,3 +188,4 @@ DEVOPS_*.md
 .codelin/
 # 部署文档归档
 #.devops-archive/
+.jcode
