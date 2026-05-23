@@ -61,7 +61,7 @@ export default function VerificationCodeInput({ phone, onCodeChange, onSmsTokenC
     } finally {
       setSending(false);
     }
-  }, [phone, countdown]);
+  }, [phone, countdown, onSmsTokenChange]);
 
   return (
     <div className="space-y-2">
