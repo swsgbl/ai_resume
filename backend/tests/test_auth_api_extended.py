@@ -117,46 +117,52 @@ class TestRegisterEndpoint:
         self, client: AsyncClient, test_user
     ):
         """测试: 邮箱已存在"""
-        response = await client.post(
-            "/api/v1/auth/register",
-            json={
-                "email": test_user.email,
-                "username": "newuser",
-                "password": "newpass123"
-            }
-        )
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.verify_code = AsyncMock(return_value=True)
+
+            response = await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": test_user.email,
+                    "username": "newuser",
+                    "password": "newpass123",
+                    "verification_code": "123456"
+                }
+            )
 
         assert response.status_code == 400
         data = response.json()
         assert "已被注册" in data["detail"]
+        mock_email.verify_code.assert_not_called()
 
-    async def test_register_success_with_verification(
+    async def test_register_success_consumes_verification_code(
         self, client: AsyncClient, db_session
     ):
-        """测试: 注册成功并发送验证码"""
+        """测试: 注册成功时消费验证码并直接创建已验证用户"""
         new_email = "newuser@register.com"
 
         with patch("app.api.v1.auth.email_service") as mock_email:
-            mock_email.generate_code.return_value = "123456"
-            mock_email.save_code = AsyncMock()
-            mock_email.send_verification_email = AsyncMock()
+            mock_email.verify_code = AsyncMock(return_value=True)
 
             response = await client.post(
                 "/api/v1/auth/register",
                 json={
                     "email": new_email,
                     "username": "newuser",
-                    "password": "newpass123"
+                    "password": "newpass123",
+                    "verification_code": "123456"
                 }
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert data["data"]["require_verification"] is True
             assert data["data"]["user"]["email"] == new_email
+            assert data["data"]["user"]["is_verified"] is True
+            assert data["data"]["access_token"]
 
-            # 验证邮件服务被调用
-            mock_email.send_verification_email.assert_called_once()
+            # 注册只消费验证码，不再事后补发邮件
+            mock_email.verify_code.assert_called_once_with(new_email, "123456")
+            mock_email.send_verification_email.assert_not_called()
 
             # 清理测试用户
             result = await db_session.execute(
@@ -167,37 +173,30 @@ class TestRegisterEndpoint:
                 await db_session.delete(user)
                 await db_session.commit()
 
-    async def test_register_creates_inactive_user(
+    async def test_register_invalid_code_creates_no_user(
         self, client: AsyncClient, db_session
     ):
-        """测试: 新注册用户需要验证"""
-        new_email = "inactive@register.com"
+        """测试: 验证码无效时不创建用户"""
+        new_email = "invalid-code@register.com"
 
         with patch("app.api.v1.auth.email_service") as mock_email:
-            mock_email.generate_code.return_value = "654321"
-            mock_email.save_code = AsyncMock()
-            mock_email.send_verification_email = AsyncMock()
+            mock_email.verify_code = AsyncMock(return_value=False)
 
             await client.post(
                 "/api/v1/auth/register",
                 json={
                     "email": new_email,
-                    "username": "inactive",
-                    "password": "pass123"
+                    "username": "invalid",
+                    "password": "pass123",
+                    "verification_code": "000000"
                 }
             )
 
-            # 检查用户是否创建且未验证
             result = await db_session.execute(
                 select(User).where(User.email == new_email)
             )
             user = result.scalar_one_or_none()
-            assert user is not None
-            assert user.is_verified is False
-
-            # 清理
-            await db_session.delete(user)
-            await db_session.commit()
+            assert user is None
 
 
 class TestLoginEndpoints:

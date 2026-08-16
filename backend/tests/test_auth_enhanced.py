@@ -377,14 +377,18 @@ class TestRegisterEdgeCases:
         self, client: AsyncClient
     ):
         """测试: 最小有效注册数据"""
-        response = await client.post(
-            "/api/v1/auth/register",
-            json={
-                "email": "minimal@example.com",
-                "username": "minimal",
-                "password": "Password123!"
-            }
-        )
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.verify_code = AsyncMock(return_value=True)
+
+            response = await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "minimal@example.com",
+                    "username": "minimal",
+                    "password": "Password123!",
+                    "verification_code": "123456"
+                }
+            )
 
         assert response.status_code == 200
         data = response.json()
@@ -395,14 +399,18 @@ class TestRegisterEdgeCases:
     ):
         """测试: 重复用户名（如果有限制）"""
         # 当前实现只检查邮箱，不检查用户名
-        response = await client.post(
-            "/api/v1/auth/register",
-            json={
-                "email": "different@example.com",
-                "username": test_user.username,  # 重复用户名
-                "password": "Password123!"
-            }
-        )
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.verify_code = AsyncMock(return_value=True)
+
+            response = await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "different@example.com",
+                    "username": test_user.username,  # 重复用户名
+                    "password": "Password123!",
+                    "verification_code": "123456"
+                }
+            )
 
         # 可能成功（当前不检查用户名重复）或失败
         assert response.status_code in [200, 400]

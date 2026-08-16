@@ -121,6 +121,7 @@ describe('Auth Store', () => {
       await act(async () => {
         await result.current.register('new@example.com', 'password123', {
           username: 'newuser',
+          verification_code: '123456',
         });
       });
 

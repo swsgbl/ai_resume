@@ -33,10 +33,7 @@ async def send_verification_code(request: Request, body: SendCodeRequest):
         # 生成验证码
         code = email_service.generate_code(length=6)
 
-        # 保存验证码到 Redis（5分钟有效期）
-        await email_service.save_code(body.email, code, expire_minutes=5)
-
-        # 发送邮件
+        # 只有 SMTP 接受投递后才保存验证码，避免产生永远收不到的验证码
         success = await email_service.send_verification_email(
             email=body.email,
             code=code
@@ -47,6 +44,9 @@ async def send_verification_code(request: Request, body: SendCodeRequest):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="发送验证码失败，请稍后重试"
             )
+
+        # 保存验证码到 Redis（5分钟有效期）
+        await email_service.save_code(body.email, code, expire_minutes=5)
 
         return {
             "code": 200,

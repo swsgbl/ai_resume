@@ -13,10 +13,10 @@ interface AuthState {
   // Actions
   login: (email: string, password: string) => Promise<void>;
   loginWithOAuth: (accessToken: string, refreshToken?: string) => void;
-  register: (email: string, password: string, data?: {
+  register: (email: string, password: string, data: {
     phone?: string;
     username?: string;
-    verification_code?: string;
+    verification_code: string;
   }) => Promise<void>;
   logout: () => void;
   clearError: () => void;

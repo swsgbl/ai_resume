@@ -545,6 +545,55 @@ class TestEmailService:
             captured = capsys.readouterr()
             assert "111222" in captured.out
 
+    async def test_send_verification_email_uses_threaded_smtp(
+        self,
+        service: EmailService
+    ):
+        """测试: SMTP 使用线程池、STARTTLS 和超时"""
+        with patch("app.services.email_service.settings") as mock_settings:
+            mock_settings.DEBUG = False
+            mock_settings.SMTP_HOST = "smtp.example.com"
+            mock_settings.SMTP_PORT = 465
+            mock_settings.SMTP_USER = "sender@example.com"
+            mock_settings.SMTP_PASSWORD = "test-password"
+
+            with patch("app.services.email_service.smtplib.SMTP") as mock_smtp:
+                result = await service.send_verification_email(
+                    "test@example.com",
+                    "123456"
+                )
+
+        assert result is True
+        mock_smtp.assert_called_once_with("smtp.example.com", 465, timeout=10)
+        smtp_context = mock_smtp.return_value.__enter__.return_value
+        smtp_context.starttls.assert_called_once_with()
+        smtp_context.login.assert_called_once_with(
+            "sender@example.com",
+            "test-password"
+        )
+        smtp_context.send_message.assert_called_once()
+
+    async def test_send_email_requires_complete_smtp_config(
+        self,
+        service: EmailService
+    ):
+        """测试: SMTP 配置缺失时发送失败且不连接服务器"""
+        with patch("app.services.email_service.settings") as mock_settings:
+            mock_settings.DEBUG = False
+            mock_settings.SMTP_HOST = "smtp.example.com"
+            mock_settings.SMTP_PORT = None
+            mock_settings.SMTP_USER = "sender@example.com"
+            mock_settings.SMTP_PASSWORD = "test-password"
+
+            with patch("app.services.email_service.smtplib.SMTP") as mock_smtp:
+                result = await service.send_verification_email(
+                    "test@example.com",
+                    "123456"
+                )
+
+        assert result is False
+        mock_smtp.assert_not_called()
+
     async def test_cleanup_expired_codes(self, service: EmailService):
         """测试: 清理过期验证码"""
         service._redis = None

@@ -13,10 +13,14 @@ class TestSendVerificationCode:
 
     async def test_send_code_success(self, client: AsyncClient):
         """测试成功发送验证码"""
+        delivery_events = []
+
         with patch("app.api.v1.email_verification.email_service") as mock_service:
             mock_service.generate_code = lambda length: "123456"
-            mock_service.save_code = AsyncMock()
-            mock_service.send_verification_email = AsyncMock(return_value=True)
+            mock_service.save_code = AsyncMock(side_effect=lambda *args, **kwargs: delivery_events.append("save"))
+            mock_service.send_verification_email = AsyncMock(
+                side_effect=lambda *args, **kwargs: delivery_events.append("send") or "sent",
+            )
 
             response = await client.post(
                 "/api/v1/email/send-code",
@@ -28,6 +32,7 @@ class TestSendVerificationCode:
         assert data["code"] == 200
         assert "验证码已发送" in data["message"]
         assert data["data"]["expire_in"] == 300
+        assert delivery_events == ["send", "save"]
 
     async def test_send_code_email_service_failure(self, client: AsyncClient):
         """测试邮件发送失败"""
@@ -43,6 +48,7 @@ class TestSendVerificationCode:
 
         assert response.status_code == 500
         assert "发送验证码失败" in response.json()["detail"]
+        mock_service.save_code.assert_not_called()
 
     async def test_send_code_invalid_email(self, client: AsyncClient):
         """测试无效邮箱格式"""

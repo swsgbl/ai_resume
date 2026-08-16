@@ -116,6 +116,25 @@ describe('RegisterPage Component', () => {
     );
   };
 
+  const fillRegistrationForm = async (
+    user: ReturnType<typeof userEvent.setup>,
+    options: { email?: string; code?: string; agreeToTerms?: boolean } = {}
+  ) => {
+    const email = options.email ?? 'test@example.com';
+    const code = options.code ?? '123456';
+
+    await user.type(screen.getByTestId('register-email-input'), email);
+    await user.type(screen.getByTestId('confirm-email-input'), email);
+    if (code) {
+      await user.type(screen.getByTestId('code-input'), code);
+    }
+    await user.type(screen.getByTestId('register-password-input'), 'password123');
+    await user.type(screen.getByTestId('confirm-password-input'), 'password123');
+    if (options.agreeToTerms ?? true) {
+      await user.click(screen.getByTestId('terms-checkbox'));
+    }
+  };
+
   it('渲染注册页面', () => {
     renderWithProviders(<RegisterPage />);
 
@@ -127,6 +146,7 @@ describe('RegisterPage Component', () => {
     renderWithProviders(<RegisterPage />);
 
     expect(screen.getByTestId('register-email-input')).toBeInTheDocument();
+    expect(screen.getByTestId('confirm-email-input')).toBeInTheDocument();
     expect(screen.getByTestId('code-input')).toBeInTheDocument();
     expect(screen.getByTestId('username-input')).toBeInTheDocument();
     expect(screen.getByTestId('register-password-input')).toBeInTheDocument();
@@ -181,9 +201,7 @@ describe('RegisterPage Component', () => {
 
     const passwordInput = screen.getByTestId('register-password-input');
     const confirmPasswordInput = screen.getByTestId('confirm-password-input');
-    const emailInput = screen.getByTestId('register-email-input');
-
-    await user.type(emailInput, 'test@example.com');
+    await fillRegistrationForm(user, { agreeToTerms: false });
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
 
@@ -197,15 +215,7 @@ describe('RegisterPage Component', () => {
     const user = userEvent.setup();
     renderWithProviders(<RegisterPage />);
 
-    const emailInput = screen.getByTestId('register-email-input');
-    const passwordInput = screen.getByTestId('register-password-input');
-    const confirmPasswordInput = screen.getByTestId('confirm-password-input');
-    const termsCheckbox = screen.getByTestId('terms-checkbox');
-
-    await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'password123');
-    await user.type(confirmPasswordInput, 'password123');
-    await user.click(termsCheckbox);
+    await fillRegistrationForm(user);
 
     await waitFor(() => {
       const submitButton = screen.getByTestId('register-button');
@@ -265,27 +275,60 @@ describe('RegisterPage Component', () => {
     expect(sendCodeButton).toBeDisabled();
   });
 
-  it('输入邮箱后验证码按钮可点击', async () => {
+  it('仅输入一次邮箱后验证码按钮仍禁用', async () => {
     const user = userEvent.setup();
     renderWithProviders(<RegisterPage />);
 
-    const emailInput = screen.getByTestId('register-email-input');
-    await user.type(emailInput, 'test@example.com');
+    await user.type(screen.getByTestId('register-email-input'), 'test@example.com');
 
     await waitFor(() => {
       const sendCodeButton = screen.getByTestId('send-code-button');
-      expect(sendCodeButton).not.toBeDisabled();
+      expect(sendCodeButton).toBeDisabled();
     });
+  });
+
+  it('两次邮箱一致后验证码按钮可点击', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterPage />);
+
+    await user.type(screen.getByTestId('register-email-input'), 'test@example.com');
+    await user.type(screen.getByTestId('confirm-email-input'), 'test@example.com');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('send-code-button')).not.toBeDisabled();
+    });
+  });
+
+  it('两次邮箱不一致时禁止发送验证码并显示错误', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterPage />);
+
+    await user.type(screen.getByTestId('register-email-input'), 'test@example.com');
+    await user.type(screen.getByTestId('confirm-email-input'), 'other@example.com');
+
+    const sendCodeButton = screen.getByTestId('send-code-button');
+    expect(sendCodeButton).toBeDisabled();
+    expect(api.auth.sendVerificationCode).not.toHaveBeenCalled();
+    expect(await screen.findByTestId('email-error')).toHaveTextContent('两次输入的邮箱不一致');
+  });
+
+  it('验证码不是6位数字时禁止提交', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterPage />);
+
+    await fillRegistrationForm(user, { code: '12345' });
+
+    expect(screen.getByTestId('register-button')).toBeDisabled();
   });
 
   it('发送验证码成功后开始60秒倒计时', async () => {
     const user = userEvent.setup();
     renderWithProviders(<RegisterPage />);
 
-    const emailInput = screen.getByTestId('register-email-input');
     const sendCodeButton = screen.getByTestId('send-code-button');
 
-    await user.type(emailInput, 'test@example.com');
+    await user.type(screen.getByTestId('register-email-input'), 'test@example.com');
+    await user.type(screen.getByTestId('confirm-email-input'), 'test@example.com');
     await user.click(sendCodeButton);
 
     await waitFor(() => {
@@ -324,22 +367,15 @@ describe('RegisterPage Component', () => {
     const user = userEvent.setup();
     renderWithProviders(<RegisterPage />);
 
-    const emailInput = screen.getByTestId('register-email-input');
-    const passwordInput = screen.getByTestId('register-password-input');
-    const confirmPasswordInput = screen.getByTestId('confirm-password-input');
-    const termsCheckbox = screen.getByTestId('terms-checkbox');
     const submitButton = screen.getByTestId('register-button');
 
-    await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'password123');
-    await user.type(confirmPasswordInput, 'password123');
-    await user.click(termsCheckbox);
+    await fillRegistrationForm(user);
     await user.click(submitButton);
 
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith('test@example.com', 'password123', {
         username: undefined,
-        verification_code: undefined,
+        verification_code: '123456',
       });
     });
   });
@@ -348,24 +384,17 @@ describe('RegisterPage Component', () => {
     const user = userEvent.setup();
     renderWithProviders(<RegisterPage />);
 
-    const emailInput = screen.getByTestId('register-email-input');
     const usernameInput = screen.getByTestId('username-input');
-    const passwordInput = screen.getByTestId('register-password-input');
-    const confirmPasswordInput = screen.getByTestId('confirm-password-input');
-    const termsCheckbox = screen.getByTestId('terms-checkbox');
     const submitButton = screen.getByTestId('register-button');
 
-    await user.type(emailInput, 'test@example.com');
     await user.type(usernameInput, 'testuser');
-    await user.type(passwordInput, 'password123');
-    await user.type(confirmPasswordInput, 'password123');
-    await user.click(termsCheckbox);
+    await fillRegistrationForm(user);
     await user.click(submitButton);
 
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith('test@example.com', 'password123', {
         username: 'testuser',
-        verification_code: undefined,
+        verification_code: '123456',
       });
     });
   });
@@ -374,24 +403,15 @@ describe('RegisterPage Component', () => {
     const user = userEvent.setup();
     renderWithProviders(<RegisterPage />);
 
-    const emailInput = screen.getByTestId('register-email-input');
-    const codeInput = screen.getByTestId('code-input');
-    const passwordInput = screen.getByTestId('register-password-input');
-    const confirmPasswordInput = screen.getByTestId('confirm-password-input');
-    const termsCheckbox = screen.getByTestId('terms-checkbox');
     const submitButton = screen.getByTestId('register-button');
 
-    await user.type(emailInput, 'test@example.com');
-    await user.type(codeInput, '123456');
-    await user.type(passwordInput, 'password123');
-    await user.type(confirmPasswordInput, 'password123');
-    await user.click(termsCheckbox);
+    await fillRegistrationForm(user, { code: '654321' });
     await user.click(submitButton);
 
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith('test@example.com', 'password123', {
         username: undefined,
-        verification_code: '123456',
+        verification_code: '654321',
       });
     });
   });

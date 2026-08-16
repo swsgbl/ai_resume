@@ -571,17 +571,23 @@ class TestIntegratedScenarios:
     ):
         """测试完整简历创建流程: 注册 -> 验证 -> 登录 -> 创建简历"""
         # 1. 注册
-        register_response = await client.post(
-            "/api/v1/auth/register",
-            json={
-                "email": "flowtest@example.com",
-                "username": "flowtest",
-                "password": "FlowTest123!"
-            }
-        )
+        from unittest.mock import AsyncMock, patch
+
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.verify_code = AsyncMock(return_value=True)
+
+            register_response = await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "flowtest@example.com",
+                    "username": "flowtest",
+                    "password": "FlowTest123!",
+                    "verification_code": "123456"
+                }
+            )
         assert register_response.status_code == 200
 
-        # 2. 手动验证用户（模拟邮箱验证成功）
+        # 2. 注册前验证码已验证用户身份
         from sqlalchemy import select
         from app.models.user import User
 

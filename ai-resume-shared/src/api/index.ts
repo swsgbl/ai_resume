@@ -43,10 +43,10 @@ export class AuthApi {
     const payload: Record<string, string> = {
       email: data.email,
       password: data.password,
+      verification_code: data.verification_code,
     };
     if (data.phone) payload.phone = data.phone;
     if (data.username) payload.username = data.username;
-    if (data.verification_code) payload.verification_code = data.verification_code;
 
     return this.client.post<AuthResponse>('/auth/register', payload);
   }

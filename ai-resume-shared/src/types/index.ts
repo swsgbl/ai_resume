@@ -245,7 +245,7 @@ export interface RegisterRequest {
   password: string;
   phone?: string;
   username?: string;
-  verification_code?: string;
+  verification_code: string;
 }
 
 /**

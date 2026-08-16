@@ -7,14 +7,41 @@
 import secrets
 import string
 import hashlib
+import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import smtplib
+from html import escape
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import redis.asyncio as redis
 
 from app.core.config import settings
+
+
+def _deliver_html_email(recipient: str, subject: str, html_body: str) -> None:
+    """在线程池中同步投递邮件，避免阻塞事件循环。"""
+    smtp_host = getattr(settings, "SMTP_HOST", None)
+    smtp_port = getattr(settings, "SMTP_PORT", None)
+    smtp_user = getattr(settings, "SMTP_USER", None)
+    smtp_password = getattr(settings, "SMTP_PASSWORD", None)
+
+    if not all((smtp_host, smtp_port, smtp_user, smtp_password)):
+        print(f"⚠️ SMTP 未完整配置，邮件未发送给 {recipient}")
+        raise ValueError("SMTP is not fully configured")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = smtp_user
+    msg["To"] = recipient
+
+    html_part = MIMEText(html_body, "html")
+    msg.attach(html_part)
+
+    with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        server.send_message(msg)
 
 
 class EmailService:
@@ -171,25 +198,7 @@ class EmailService:
                 print(f"{'='*50}\n")
                 return True
 
-            # 生产环境：实际发送邮件
-            smtp_host = getattr(settings, 'SMTP_HOST', None)
-            if not smtp_host:
-                print(f"⚠️ SMTP 未配置，验证码邮件未发送给 {email}")
-                return False
-
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = settings.SMTP_USER
-            msg['To'] = email
-
-            html_part = MIMEText(body, 'html')
-            msg.attach(html_part)
-
-            with smtplib.SMTP(smtp_host, settings.SMTP_PORT) as server:
-                server.starttls()
-                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-                server.send_message(msg)
-
+            await asyncio.to_thread(_deliver_html_email, email, subject, body)
             return True
 
         except Exception as e:
@@ -214,25 +223,17 @@ class EmailService:
                 print(f"{'='*50}\n")
                 return True
 
-            # 生产环境：实际发送邮件
-            smtp_host = getattr(settings, 'SMTP_HOST', None)
-            if not smtp_host:
-                print(f"⚠️ SMTP 未配置，通知邮件未发送给 {email}")
-                return False
-
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = settings.SMTP_USER
-            msg['To'] = email
-
-            html_part = MIMEText(content, 'html')
-            msg.attach(html_part)
-
-            with smtplib.SMTP(smtp_host, settings.SMTP_PORT) as server:
-                server.starttls()
-                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-                server.send_message(msg)
-
+            html_content = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #333;">{escape(subject)}</h2>
+                    <p style="color: #333;">{escape(content)}</p>
+                </div>
+            </body>
+            </html>
+            """
+            await asyncio.to_thread(_deliver_html_email, email, subject, html_content)
             return True
 
         except Exception as e:
@@ -354,25 +355,7 @@ class EmailService:
                 print(f"{'='*50}\n")
                 return True
 
-            # 生产环境：实际发送邮件
-            smtp_host = getattr(settings, 'SMTP_HOST', None)
-            if not smtp_host:
-                print(f"⚠️ SMTP 未配置，密码重置邮件未发送给 {email}")
-                return False
-
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = settings.SMTP_USER
-            msg['To'] = email
-
-            html_part = MIMEText(body, 'html')
-            msg.attach(html_part)
-
-            with smtplib.SMTP(smtp_host, settings.SMTP_PORT) as server:
-                server.starttls()
-                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-                server.send_message(msg)
-
+            await asyncio.to_thread(_deliver_html_email, email, subject, body)
             return True
 
         except Exception as e:

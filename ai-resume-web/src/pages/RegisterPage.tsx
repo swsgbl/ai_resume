@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const { register, isLoading, error, clearError } = useAuthStore();
   const [email, setEmail] = useState('');
+  const [confirmEmail, setConfirmEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -27,7 +28,14 @@ export default function RegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordMismatchError, setPasswordMismatchError] = useState<string | null>(null);
+  const [emailMismatchError, setEmailMismatchError] = useState<string | null>(null);
   const [codeSending, setCodeSending] = useState(false);
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedConfirmEmail = confirmEmail.trim().toLowerCase();
+  const normalizedVerificationCode = verificationCode.trim();
+  const isEmailMismatch = normalizedConfirmEmail.length > 0 && normalizedEmail !== normalizedConfirmEmail;
+  const isVerificationCodeValid = /^\d{6}$/.test(normalizedVerificationCode);
 
   const validatePassword = useCallback((): string | null => {
     // 先检查字母和数字，因为测试期望这些错误先出现
@@ -48,11 +56,13 @@ export default function RegisterPage() {
   }, [countdown]);
 
   const handleSendCode = async () => {
-    if (!email || countdown > 0) return;
+    clearError();
+    setPasswordMismatchError(null);
+    if (!normalizedEmail || normalizedEmail !== normalizedConfirmEmail || countdown > 0) return;
 
     try {
       setCodeSending(true);
-      await api.auth.sendVerificationCode(email);
+      await api.auth.sendVerificationCode(normalizedEmail);
       setCountdown(VALIDATION_CONFIG.VERIFICATION_CODE.COUNTDOWN_SECONDS);
     } catch (error) {
       const message = error instanceof Error ? error.message : '发送验证码失败，请稍后重试';
@@ -68,6 +78,17 @@ export default function RegisterPage() {
     e.preventDefault();
     clearError();
     setPasswordMismatchError(null);
+    setEmailMismatchError(null);
+
+    if (normalizedEmail !== normalizedConfirmEmail) {
+      setEmailMismatchError('两次输入的邮箱不一致');
+      return;
+    }
+
+    if (!isVerificationCodeValid) {
+      setEmailMismatchError('请输入6位数字验证码');
+      return;
+    }
 
     // 修复：添加密码不匹配的错误提示
     if (password !== confirmPassword) {
@@ -84,9 +105,9 @@ export default function RegisterPage() {
     setPasswordError(null);
 
     try {
-      await register(email, password, {
+      await register(normalizedEmail, password, {
         username: username || undefined,
-        verification_code: verificationCode || undefined,
+        verification_code: normalizedVerificationCode,
       });
       navigate('/dashboard');
     } catch {
@@ -95,6 +116,9 @@ export default function RegisterPage() {
   };
 
   const canSubmit = password === confirmPassword &&
+    normalizedEmail.length > 0 &&
+    normalizedEmail === normalizedConfirmEmail &&
+    isVerificationCodeValid &&
     password.length > 0 &&
     agreedToTerms &&
     !isLoading;
@@ -174,6 +198,30 @@ export default function RegisterPage() {
                 data-testid="register-email-input"
               />
 
+              <Input
+                id="confirm-email-input"
+                label="确认邮箱地址"
+                type="email"
+                value={confirmEmail}
+                onChange={(e) => {
+                  setConfirmEmail(e.target.value);
+                  clearError();
+                }}
+                placeholder="请再次输入邮箱"
+                required
+                icon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                }
+                data-testid="confirm-email-input"
+              />
+              {(emailMismatchError || isEmailMismatch) && (
+                <p className="text-rose-400 text-xs" data-testid="email-error">
+                  {emailMismatchError || '两次输入的邮箱不一致'}
+                </p>
+              )}
+
               <div className="space-y-1">
                 <label htmlFor="code-input" className="block text-xs font-medium text-slate-300">
                   验证码
@@ -186,6 +234,8 @@ export default function RegisterPage() {
                     onChange={(e) => setVerificationCode(e.target.value)}
                     placeholder="请输入验证码"
                     maxLength={6}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
                     className="flex-1"
                     data-testid="code-input"
                   />
@@ -194,7 +244,12 @@ export default function RegisterPage() {
                     variant="secondary"
                     size="sm"
                     onClick={handleSendCode}
-                    disabled={countdown > 0 || !email || codeSending}
+                    disabled={
+                      countdown > 0 ||
+                      !normalizedEmail ||
+                      normalizedEmail !== normalizedConfirmEmail ||
+                      codeSending
+                    }
                     loading={codeSending}
                     className="whitespace-nowrap min-w-[80px] text-xs"
                     data-testid="send-code-button"

@@ -3,6 +3,7 @@
 """
 import pytest
 from httpx import AsyncClient
+from unittest.mock import AsyncMock, patch
 
 
 class TestAuthRegister:
@@ -10,34 +11,72 @@ class TestAuthRegister:
 
     async def test_register_success(self, client: AsyncClient):
         """测试成功注册"""
-        response = await client.post(
-            "/api/v1/auth/register",
-            json={
-                "email": "newuser@example.com",
-                "username": "newuser",
-                "password": "NewPassword123!"
-            }
-        )
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.verify_code = AsyncMock(return_value=True)
+
+            response = await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "newuser@example.com",
+                    "username": "newuser",
+                    "password": "NewPassword123!",
+                    "verification_code": "123456"
+                }
+            )
+
         assert response.status_code == 200
         data = response.json()
         assert data["code"] == 0
         assert "user" in data["data"]
         assert data["data"]["user"]["email"] == "newuser@example.com"
-        assert data["data"]["require_verification"] is False
+        assert data["data"]["user"]["is_verified"] is True
+        assert data["data"]["access_token"]
+        assert data["data"]["refresh_token"]
+        mock_email.verify_code.assert_called_once_with("newuser@example.com", "123456")
 
     async def test_register_duplicate_email(self, client: AsyncClient, test_user):
         """测试重复邮箱注册"""
-        response = await client.post(
-            "/api/v1/auth/register",
-            json={
-                "email": test_user.email,
-                "username": "another",
-                "password": "Password123!"
-            }
-        )
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.verify_code = AsyncMock(return_value=True)
+
+            response = await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": test_user.email,
+                    "username": "another",
+                    "password": "Password123!",
+                    "verification_code": "123456"
+                }
+            )
+
         assert response.status_code == 400
         data = response.json()
         assert "该邮箱已被注册" in data["detail"]
+        mock_email.verify_code.assert_not_called()
+
+    async def test_register_invalid_verification_code(self, client: AsyncClient, db_session):
+        """测试注册验证码错误时不创建用户"""
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.verify_code = AsyncMock(return_value=False)
+
+            response = await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "invalid-code@example.com",
+                    "username": "newuser",
+                    "password": "NewPassword123!",
+                    "verification_code": "000000"
+                }
+            )
+
+        assert response.status_code == 400
+        assert "验证码错误或已过期" in response.json()["detail"]
+
+        from sqlalchemy import select
+        from app.models.user import User
+
+        result = await db_session.execute(select(User).where(User.email == "invalid-code@example.com"))
+        assert result.scalar_one_or_none() is None
 
     async def test_register_invalid_email(self, client: AsyncClient):
         """测试无效邮箱"""
@@ -46,7 +85,8 @@ class TestAuthRegister:
             json={
                 "email": "invalid-email",
                 "username": "test",
-                "password": "Password123!"
+                "password": "Password123!",
+                "verification_code": "123456"
             }
         )
         assert response.status_code == 422  # Validation error
@@ -58,7 +98,8 @@ class TestAuthRegister:
             json={
                 "email": "test@example.com",
                 "username": "test",
-                "password": "123"  # 弱密码
+                "password": "123",  # 弱密码
+                "verification_code": "123456"
             }
         )
         # 应该被验证拦截或业务逻辑拒绝

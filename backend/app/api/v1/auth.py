@@ -96,7 +96,7 @@ async def register(
     request: Request,
     db: AsyncSession = Depends(get_db)
 ):
-    """用户注册"""
+    """用户注册 - 邮箱验证通过后自动登录"""
     # 检查邮箱是否已存在
     result = await db.execute(select(User).where(User.email == user_data.email))
     if result.scalar_one_or_none():
@@ -105,7 +105,12 @@ async def register(
             detail="该邮箱已被注册"
         )
 
-    # 创建用户（自动验证，降低注册门槛）
+    if not await email_service.verify_code(user_data.email, user_data.verification_code):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="验证码错误或已过期"
+        )
+
     user = User(
         email=user_data.email,
         username=user_data.username,
@@ -117,18 +122,12 @@ async def register(
     await db.commit()
     await db.refresh(user)
 
-    # 异步发送欢迎验证邮件（不阻塞注册流程）
-    try:
-        verification_code = email_service.generate_code()
-        await email_service.save_code(user_data.email, verification_code, expire_minutes=5)
-        await email_service.send_verification_email(user_data.email, verification_code)
-    except Exception:
-        pass  # 邮件发送失败不影响注册
+    token_response = _create_token_response(user)
 
     return Response(
         data={
             "user": UserResponse.model_validate(user),
-            "require_verification": False
+            **token_response.model_dump()
         },
         message="注册成功"
     )

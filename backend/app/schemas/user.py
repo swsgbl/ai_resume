@@ -18,6 +18,7 @@ class UserCreate(BaseModel):
     """用户注册模式"""
     email: EmailStr
     password: str = Field(..., min_length=6, max_length=50)
+    verification_code: str = Field(..., min_length=6, max_length=6)
     phone: Optional[str] = None
     username: Optional[str] = None
     
