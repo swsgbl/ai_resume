@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { storage, } from '@ai-resume/shared';
 import { getApiClient } from '@ai-resume/shared/api';
+import ModelConfigCard from '../agent/ModelConfigCard';
 
 type AIProvider = 'openai' | 'deepseek' | 'xiaomi';
 
@@ -274,6 +275,18 @@ export default function SettingsPage() {
               </p>
             </div>
           )}
+        </div>
+
+        {/* 简历 OS · 模型配置(本机) */}
+        <div className="card p-6 mb-6">
+          <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-slate-100">
+            <span>🛠️</span>
+            简历 OS · 模型配置(本机)
+          </h2>
+          <p className="text-xs text-slate-500 mb-4">
+            「简历生成车间」(/os) Agent 流水线所用的模型:OpenAI 兼容端点,密钥仅保存在本机浏览器。
+          </p>
+          <ModelConfigCard />
         </div>
 
         {/* 操作按钮 */}

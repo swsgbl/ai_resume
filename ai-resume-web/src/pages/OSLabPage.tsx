@@ -2,41 +2,120 @@ import { useRef, useState } from 'react';
 import { SEO } from '../components/SEO';
 import PublicLayout from '../components/PublicLayout';
 import { GradientText, Orb } from '../components/UIComponents';
-import { loadModelConfig, saveModelConfig, runAgent, type AgentModelConfig, type AgentRunEvent } from '../agent/runner';
+import { gsap, useGSAP, MOTION_OK } from '../animation/motion';
+import { loadModelConfig, runAgent, type AgentRunEvent } from '../agent/runner';
 import { extractAgent, evaluateAgent, tailorAgent, type EvaluateResult, type TailorResult } from '../agent/agents';
 import { addApplication } from '../agent/applications';
 import ApplicationsPanel from '../agent/ApplicationsPanel';
-import TabsRow, { type OsTab } from '../agent/TabsRow';
+import ModelConfigCard from '../agent/ModelConfigCard';
 import { jsonResumeSchema } from '@ai-resume/shared/schema';
 
-const PRESETS = [
-  { label: 'DeepSeek', baseUrl: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
-  { label: 'OpenAI', baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
-  { label: '小米 MiMo', baseUrl: 'https://api.xiaomi.com/v1', model: 'mimo-pro' },
-];
+type StationKind = 'extract' | 'evaluate' | 'tailor';
+type Busy = StationKind | 'pipeline' | null;
+
+type StationStatus = 'idle' | 'running' | 'done';
+
+function StatusChip({ status }: { status: StationStatus }) {
+  if (status === 'running')
+    return (
+      <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary-500/10 px-2.5 py-1 text-[11px] text-primary-400">
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-400" />
+        运行中
+      </span>
+    );
+  if (status === 'done')
+    return (
+      <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-400">
+        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+        </svg>
+        完成
+      </span>
+    );
+  return (
+    <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1 text-[11px] text-slate-500">
+      <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
+      待命
+    </span>
+  );
+}
+
+function FlowArrow({ active }: { active: boolean }) {
+  return (
+    <div className="hidden w-8 shrink-0 items-center justify-center self-center lg:flex" aria-hidden>
+      <svg
+        className={`h-6 w-6 transition-colors duration-500 ${active ? 'text-accent-500' : 'text-slate-700'}`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 6l6 6-6 6M5 6l6 6-6 6" />
+      </svg>
+    </div>
+  );
+}
+
+function StationCard({
+  no,
+  title,
+  sub,
+  status,
+  children,
+}: {
+  no: string;
+  title: string;
+  sub: string;
+  status: StationStatus;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="os-station card-glass flex min-h-[460px] flex-col rounded-2xl p-5 lg:min-h-[calc(100vh-320px)]">
+      <header className="mb-4 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary-400/30 bg-primary-500/10 text-sm font-bold text-primary-400">
+              {no}
+            </span>
+            <h2 className="truncate text-base font-semibold text-white">{title}</h2>
+          </div>
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{sub}</p>
+        </div>
+        <StatusChip status={status} />
+      </header>
+      <div className="flex min-h-0 flex-1 flex-col gap-3">{children}</div>
+    </section>
+  );
+}
 
 export default function OSLabPage() {
-  const [tab, setTab] = useState<OsTab>('extract');
-  const [config, setConfig] = useState<AgentModelConfig>(
-    () => loadModelConfig() ?? { baseUrl: PRESETS[0].baseUrl, apiKey: '', model: PRESETS[0].model }
-  );
-  const [configSaved, setConfigSaved] = useState(() => !!loadModelConfig());
-
   const [resumeText, setResumeText] = useState('');
   const [jdText, setJdText] = useState('');
   const [extracted, setExtracted] = useState<Record<string, unknown> | null>(null);
   const [evaluation, setEvaluation] = useState<EvaluateResult | null>(null);
   const [tailoring, setTailoring] = useState<TailorResult | null>(null);
   const [events, setEvents] = useState<AgentRunEvent[]>([]);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState('');
   const [appsVersion, setAppsVersion] = useState(0);
-  const [evalCtx, setEvalCtx] = useState(''); // 评估→定制闭环:评估结果自动作为定制上下文
+  const [evalCtx, setEvalCtx] = useState(''); // 质检台产出 → 加工台上下文(闭环关键)
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  /* 工位入场:鱼贯升起 */
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(MOTION_OK, () => {
+        gsap.from('.os-station', { y: 30, autoAlpha: 0, duration: 0.7, stagger: 0.12, ease: 'ink' });
+      });
+      return () => mm.revert();
+    },
+    { scope: rootRef }
+  );
 
   const pushEvent = (e: AgentRunEvent) => setEvents((prev) => [...prev.slice(-7), e]);
 
-  /** 把评估结果浓缩为定制 Agent 的上下文(闭环关键) */
+  /** 质检报告浓缩为加工台的输入上下文 */
   const buildEvalContext = (ev: EvaluateResult): string => {
     const weak = ev.dimensions
       .filter((d) => d.score < 70)
@@ -52,75 +131,102 @@ export default function OSLabPage() {
       .join('\n');
   };
 
+  /** 运行前取本机配置;未配置则给出人话指引 */
+  const requireConfig = () => {
+    const cfg = loadModelConfig();
+    if (!cfg || !cfg.apiKey) {
+      setError('请先点击右上角「⚙ 模型」填写 API Key(仅保存本机浏览器),也可在「设置」页管理。');
+      return null;
+    }
+    return cfg;
+  };
+
+  const runExtract = async () => {
+    const cfg = requireConfig();
+    if (!cfg) return;
+    if (resumeText.trim().length < 20) {
+      setError('原料台需要至少 20 字的经历描述或旧简历文本。');
+      return;
+    }
+    setBusy('extract');
+    setError('');
+    try {
+      const result = await runAgent(extractAgent, cfg, resumeText, { onEvent: pushEvent });
+      setExtracted(jsonResumeSchema.passthrough().parse(result) as Record<string, unknown>);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const runEvaluate = async (): Promise<EvaluateResult | null> => {
     const input = `简历:\n${resumeText}\n\n职位描述:\n${jdText}`;
-    const ev = await runAgent(evaluateAgent, config, input, { onEvent: pushEvent });
+    const ev = await runAgent(evaluateAgent, loadModelConfig()!, input, { onEvent: pushEvent });
     setEvaluation(ev);
     setEvalCtx(buildEvalContext(ev));
     return ev;
   };
 
+  const runEvaluateStation = async () => {
+    const cfg = requireConfig();
+    if (!cfg) return;
+    if (!resumeText.trim() || !jdText.trim()) {
+      setError('质检台需要 ① 的简历原料与本台的岗位 JD。');
+      return;
+    }
+    setBusy('evaluate');
+    setError('');
+    try {
+      await runEvaluate();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const runTailor = async (extraCtx = '') => {
     const ctx = extraCtx || evalCtx;
     const input = [`简历:\n${resumeText}`, `目标职位描述:\n${jdText}`, ctx ? `\n${ctx}` : ''].join('\n');
-    setTailoring(await runAgent(tailorAgent, config, input, { onEvent: pushEvent }));
+    setTailoring(await runAgent(tailorAgent, loadModelConfig()!, input, { onEvent: pushEvent }));
   };
 
-  /** 一键流水线:评估 → (评估上下文) → 定制,闭环全自动化 */
-  const runFullPipeline = async () => {
-    if (busy) return;
-    if (!config.apiKey) {
-      setError('请先在上方填写模型 API Key(仅保存在本机浏览器)');
-      return;
-    }
+  const runTailorStation = async () => {
+    const cfg = requireConfig();
+    if (!cfg) return;
     if (!resumeText.trim() || !jdText.trim()) {
-      setError('简历与 JD 都需要填写');
+      setError('加工台需要 ① 的简历原料与 ② 的岗位 JD。');
       return;
     }
-    setBusy(true);
+    setBusy('tailor');
     setError('');
-    setTab('evaluate');
+    try {
+      await runTailor();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  /** 总闸:质检 → (质检报告) → 加工,一键闭环 */
+  const runFullPipeline = async () => {
+    const cfg = requireConfig();
+    if (!cfg) return;
+    if (!resumeText.trim() || !jdText.trim()) {
+      setError('一键闭环需要 ① 的简历原料与 ② 的岗位 JD。');
+      return;
+    }
+    setBusy('pipeline');
+    setError('');
     try {
       const ev = await runEvaluate();
       if (ev) await runTailor(buildEvalContext(ev));
-      setTab('tailor');
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setBusy(false);
-    }
-  };
-
-  const runPipeline = async (kind: OsTab) => {
-    if (busy) return;
-    if (!config.apiKey) {
-      setError('请先在上方填写模型 API Key(仅保存在本机浏览器)');
-      return;
-    }
-    if (kind === 'extract' && resumeText.trim().length < 20) {
-      setError('请粘贴至少 20 字的经历描述或旧简历');
-      return;
-    }
-    if (kind !== 'extract' && (!resumeText.trim() || !jdText.trim())) {
-      setError('简历与 JD 都需要填写');
-      return;
-    }
-
-    setBusy(true);
-    setError('');
-    try {
-      if (kind === 'extract') {
-        const result = await runAgent(extractAgent, config, resumeText, { onEvent: pushEvent });
-        setExtracted(jsonResumeSchema.passthrough().parse(result) as Record<string, unknown>);
-      } else if (kind === 'evaluate') {
-        await runEvaluate();
-      } else {
-        await runTailor();
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
@@ -164,11 +270,30 @@ export default function OSLabPage() {
     reader.readAsText(file);
   };
 
+  /** 把①的数据砖显式替换为下游原料(人控,不偷改) */
+  const useExtractedAsMaterial = () => {
+    if (!extracted) return;
+    setResumeText(JSON.stringify(extracted, null, 2));
+  };
+
+  const st1: StationStatus = busy === 'extract' ? 'running' : extracted ? 'done' : 'idle';
+  const st2: StationStatus =
+    busy === 'evaluate' || busy === 'pipeline' ? 'running' : evaluation ? 'done' : 'idle';
+  const st3: StationStatus = busy === 'tailor' || busy === 'pipeline' ? 'running' : tailoring ? 'done' : 'idle';
+  const busyLabel =
+    busy === 'pipeline'
+      ? '闭环流水线运行中…'
+      : busy === 'extract'
+        ? '原料台抽取中…'
+        : busy === 'evaluate'
+          ? '质检台评估中…'
+          : '加工台定制中…';
+
   return (
     <PublicLayout>
       <SEO
-        title="AI 简历 OS 实验室"
-        description="结构化简历数据核心 + 本地 AI Agent 流水线:抽取、JD 匹配评估、岗位定制与投递回流校准。"
+        title="简历生成车间 · AI 简历 OS"
+        description="原料 → 质检 → 加工:三工位流水线完成结构化抽取、JD 匹配评估与岗位定制,投递回流持续校准。密钥与数据仅存本机。"
         noIndex
       />
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -177,165 +302,279 @@ export default function OSLabPage() {
       </div>
       <div className="fixed inset-0 bg-grid pointer-events-none opacity-5" />
 
-      <div className="relative z-10">
-        <main className="max-w-5xl mx-auto px-4 py-12">
-          {/* Header */}
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold mb-3">
-              <GradientText>AI 简历 OS 实验室</GradientText>
-            </h1>
-            <p className="text-slate-400 text-lg">简历即数据 · Agent 即流水线 · 投递即校准</p>
-            <p className="text-slate-500 text-sm mt-2">
-              JSON Resume 开放标准数据核心,模型密钥与数据仅存本机浏览器
-            </p>
-          </div>
-
-          {/* 模型配置 */}
-          <div className="card-glass mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">模型配置(本机)</h2>
-              <span
-                className={`text-xs px-2 py-1 rounded ${
-                  configSaved ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                }`}
-              >
-                {configSaved ? '已配置' : '未配置'}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.label}
-                  onClick={() => setConfig((c) => ({ ...c, baseUrl: p.baseUrl, model: p.model }))}
-                  className={`px-3 py-1.5 text-xs rounded-md border transition-colors ${
-                    config.baseUrl === p.baseUrl
-                      ? 'border-primary-400/50 text-primary-400 bg-primary-500/10'
-                      : 'border-slate-700 text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-            <div className="grid md:grid-cols-3 gap-3">
-              <input
-                className="input flex-1"
-                placeholder="Base URL (OpenAI 兼容)"
-                value={config.baseUrl}
-                onChange={(e) => {
-                  setConfig({ ...config, baseUrl: e.target.value });
-                  setConfigSaved(false);
-                }}
-              />
-              <input
-                className="input flex-1"
-                placeholder="模型名,如 deepseek-chat"
-                value={config.model}
-                onChange={(e) => {
-                  setConfig({ ...config, model: e.target.value });
-                  setConfigSaved(false);
-                }}
-              />
-              <input
-                className="input flex-1"
-                type="password"
-                placeholder="API Key(仅存本机)"
-                value={config.apiKey}
-                onChange={(e) => {
-                  setConfig({ ...config, apiKey: e.target.value });
-                  setConfigSaved(false);
-                }}
-              />
-            </div>
-            <button
-              className="btn btn-primary text-sm mt-3"
-              onClick={() => {
-                saveModelConfig(config);
-                setConfigSaved(true);
-              }}
-            >
-              保存配置
-            </button>
-          </div>
-
-          {/* Tabs */}
-          <TabsRow tab={tab} onChange={setTab} />
-
-          {/* 输入区 */}
-          <div className="card-glass mb-6">
-            <div className={tab === 'extract' ? '' : 'grid md:grid-cols-2 gap-4'}>
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  {tab === 'extract' ? '经历描述 / 旧简历文本' : '简历(JSON Resume 或文本)'}
-                </label>
-                <textarea
-                  className="input min-h-[180px] font-mono text-xs"
-                  placeholder={tab === 'extract' ? '粘贴你的旧简历、领英档案或口述经历…' : '粘贴简历 JSON 或文本'}
-                  value={resumeText}
-                  onChange={(e) => setResumeText(e.target.value)}
-                />
+      <div className="relative z-10" ref={rootRef}>
+        <div className="mx-auto w-full max-w-[1680px] px-4 pb-16 lg:px-8">
+          {/* 车间顶栏 */}
+          <header className="pt-8 pb-5 lg:pt-10">
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+              <div className="min-w-0">
+                <h1 className="text-3xl font-bold lg:text-4xl">
+                  <GradientText>简历生成车间</GradientText>
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm text-slate-400 lg:text-base">
+                  原料 → 质检 → 加工,一条流水线产出定制简历 · JSON Resume 开放标准 · 密钥与数据仅存本机
+                </p>
               </div>
-              {tab !== 'extract' && (
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">目标岗位 JD</label>
-                  <textarea
-                    className="input min-h-[180px] text-xs"
-                    placeholder="粘贴职位描述全文…"
-                    value={jdText}
-                    onChange={(e) => setJdText(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-3 mt-4 flex-wrap">
-              <button className="btn btn-primary text-sm" disabled={busy} onClick={() => runPipeline(tab)}>
-                {busy ? '运行中…' : '运行 Agent'}
-              </button>
-              {tab !== 'extract' && (
+              <div className="flex flex-wrap items-center gap-3">
+                <ModelConfigCard compact />
                 <button
                   className="btn btn-accent text-sm"
-                  disabled={busy}
+                  disabled={busy !== null}
                   onClick={runFullPipeline}
-                  title="评估 Agent 的输出(匹配分/缺失关键词/弱项)自动作为定制 Agent 的输入"
+                  title="质检 Agent 的匹配分/缺失关键词/弱项自动作为加工 Agent 的输入"
                 >
-                  ⚡ 一键闭环流水线(评估→定制)
+                  {busy === 'pipeline' ? '闭环运行中…' : '⚡ 一键闭环(质检→加工)'}
                 </button>
-              )}
-              {tab === 'extract' && (
-                <>
-                  <button className="btn btn-secondary text-sm" onClick={() => fileInputRef.current?.click()}>
-                    导入 resume.json
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="application/json"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) importJson(f);
-                    }}
-                  />
-                  {extracted !== null && (
+              </div>
+            </div>
+            {(busy !== null || error !== '') && (
+              <div className="mt-4 flex items-center gap-3 text-xs">
+                {busy !== null && (
+                  <span className="flex items-center gap-2 rounded-full bg-primary-500/10 px-3 py-1.5 text-primary-400">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-400" />
+                    {busyLabel}
+                  </span>
+                )}
+                {error !== '' && (
+                  <span className="rounded-full bg-rose-500/10 px-3 py-1.5 text-rose-400">{error}</span>
+                )}
+              </div>
+            )}
+          </header>
+
+          {/* 三工位:原料 → 质检 → 加工 */}
+          <div className="grid items-stretch gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:gap-2">
+            {/* ① 原料台 */}
+            <StationCard
+              no="①"
+              title="原料台 · 结构化抽取"
+              sub="旧简历、领英档案或口述经历 → 压成 JSON Resume 标准数据砖,供全车间使用"
+              status={st1}
+            >
+              <label className="text-xs font-medium text-slate-300">经历描述 / 旧简历文本</label>
+              <textarea
+                className="input min-h-[150px] flex-1 font-mono text-xs"
+                placeholder="粘贴你的旧简历、领英档案或口述经历…这里是全车间共享的原料"
+                value={resumeText}
+                onChange={(e) => setResumeText(e.target.value)}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <button className="btn btn-primary text-sm" disabled={busy !== null} onClick={runExtract}>
+                  {busy === 'extract' ? '抽取中…' : '▶ 开始抽取'}
+                </button>
+                <button className="btn btn-secondary text-sm" onClick={() => fileInputRef.current?.click()}>
+                  导入 resume.json
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/json"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) importJson(f);
+                  }}
+                />
+                {extracted !== null && (
+                  <>
                     <button className="btn btn-secondary text-sm" onClick={downloadJson}>
                       导出 resume.json
                     </button>
-                  )}
-                </>
+                    <button
+                      className="btn btn-secondary text-sm"
+                      onClick={useExtractedAsMaterial}
+                      title="把抽取出的 JSON Resume 作为原料文本,供②③直接使用"
+                    >
+                      用数据砖替换原料 ↓
+                    </button>
+                  </>
+                )}
+              </div>
+              {extracted !== null && (
+                <div className="min-h-0">
+                  <p className="mb-1.5 text-xs text-slate-500">JSON Resume 数据核心</p>
+                  <pre className="max-h-52 overflow-auto rounded-lg border border-slate-700/50 bg-slate-900/60 p-3 text-[11px] leading-relaxed text-slate-300">
+                    {JSON.stringify(extracted, null, 2)}
+                  </pre>
+                </div>
               )}
-              {error !== '' && <span className="text-xs text-rose-400">{error}</span>}
-            </div>
+            </StationCard>
+
+            <FlowArrow active={extracted !== null} />
+
+            {/* ② 质检台 */}
+            <StationCard
+              no="②"
+              title="质检台 · JD 匹配评估"
+              sub="拿①的原料对照岗位 JD,量出匹配分、缺失关键词与弱项维度"
+              status={st2}
+            >
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <label className="font-medium text-slate-300">目标岗位 JD</label>
+                <span className={resumeText.trim() ? 'text-emerald-400/80' : 'text-slate-600'}>
+                  原料来自① {resumeText.trim() ? `· ${resumeText.trim().length} 字就绪` : '· 待投放'}
+                </span>
+              </div>
+              <textarea
+                className="input min-h-[120px] text-xs"
+                placeholder="粘贴职位描述全文…"
+                value={jdText}
+                onChange={(e) => setJdText(e.target.value)}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <button className="btn btn-primary text-sm" disabled={busy !== null} onClick={runEvaluateStation}>
+                  {busy === 'evaluate' ? '评估中…' : '▶ 开始评估'}
+                </button>
+                {evaluation !== null && (
+                  <button className="btn btn-secondary text-sm" onClick={recordApplication}>
+                    记录投递(匹配分 {Math.round(evaluation.matchScore)})
+                  </button>
+                )}
+              </div>
+              {evaluation === null ? (
+                <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed border-slate-700/60 px-4 py-8 text-center">
+                  <span className="text-2xl opacity-60">📋</span>
+                  <p className="mt-2 text-xs text-slate-400">质检报告 · 待生成</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
+                    将产出:匹配分 / 维度评分 / 缺失关键词 / 风险点
+                  </p>
+                </div>
+              ) : (
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl font-bold text-primary-400">{Math.round(evaluation.matchScore)}</div>
+                    <div className="text-xs leading-relaxed text-slate-300">{evaluation.verdict}</div>
+                  </div>
+                  <div className="space-y-1.5">
+                    {evaluation.dimensions.map((d) => (
+                      <div key={d.name} className="flex items-center gap-2">
+                        <span className="w-16 shrink-0 text-[11px] text-slate-400">{d.name}</span>
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-primary-500 to-accent-500"
+                            style={{ width: `${d.score}%` }}
+                          />
+                        </div>
+                        <span className="w-7 text-right text-[11px] text-slate-300">{d.score}</span>
+                        <span className="min-w-0 flex-1 truncate text-[11px] text-slate-500" title={d.comment}>
+                          {d.comment}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {evaluation.missingKeywords.length > 0 && (
+                    <div>
+                      <span className="text-[11px] text-slate-400">缺失关键词:</span>{' '}
+                      {evaluation.missingKeywords.map((k) => (
+                        <span
+                          key={k}
+                          className="mb-1 mr-1.5 inline-block rounded bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-400"
+                        >
+                          {k}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {evaluation.risks.length > 0 && (
+                    <div>
+                      <span className="text-[11px] text-slate-400">风险点:</span>
+                      <ul className="mt-1 space-y-0.5 text-[11px] text-slate-400">
+                        {evaluation.risks.map((r) => (
+                          <li key={r}>· {r}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </StationCard>
+
+            <FlowArrow active={evalCtx !== ''} />
+
+            {/* ③ 加工台 */}
+            <StationCard
+              no="③"
+              title="加工台 · 岗位定制"
+              sub="按②的质检报告精修简历:总结重写、bullet 改写、关键词嵌入,产出定制版"
+              status={st3}
+            >
+              <div className="flex flex-wrap gap-2 text-[11px]">
+                <span
+                  className={`rounded-full px-2.5 py-1 ${
+                    resumeText.trim() ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-500'
+                  }`}
+                >
+                  ① 简历原料 {resumeText.trim() ? '✓' : '待投放'}
+                </span>
+                <span
+                  className={`rounded-full px-2.5 py-1 ${
+                    jdText.trim() ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-500'
+                  }`}
+                >
+                  ② 岗位 JD {jdText.trim() ? '✓' : '待填写'}
+                </span>
+                <span
+                  className={`rounded-full px-2.5 py-1 ${
+                    evalCtx !== '' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-500'
+                  }`}
+                >
+                  ② 质检报告 {evalCtx !== '' ? '✓ 已注入' : '未生成(也可直接加工)'}
+                </span>
+              </div>
+              <button className="btn btn-primary w-fit text-sm" disabled={busy !== null} onClick={runTailorStation}>
+                {busy === 'tailor' ? '定制中…' : '▶ 开始定制'}
+              </button>
+              {tailoring === null ? (
+                <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed border-slate-700/60 px-4 py-8 text-center">
+                  <span className="text-2xl opacity-60">🛠️</span>
+                  <p className="mt-2 text-xs text-slate-400">定制产出 · 待生成</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
+                    将产出:总结重写 / 经历条目改写 / 建议嵌入关键词
+                  </p>
+                </div>
+              ) : (
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+                  <div className="rounded-lg border border-primary-500/15 bg-primary-500/5 p-3 text-xs leading-relaxed text-slate-300">
+                    <span className="font-medium text-primary-400">总结重写:</span> {tailoring.summarySuggestion}
+                  </div>
+                  <div className="space-y-2">
+                    {tailoring.bulletSuggestions.map((b, i) => (
+                      <div key={i} className="rounded-lg border border-slate-700/50 bg-slate-900/40 p-2.5">
+                        <div className="mb-1 text-[11px] text-slate-500">
+                          {b.section} · 修改理由:{b.reason}
+                        </div>
+                        <div className="text-[11px] text-slate-500 line-through">{b.original}</div>
+                        <div className="mt-1 text-xs text-slate-200">{b.improved}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {tailoring.keywordsToEmbed.length > 0 && (
+                    <div>
+                      <span className="text-[11px] text-slate-400">建议嵌入关键词:</span>{' '}
+                      {tailoring.keywordsToEmbed.map((k) => (
+                        <span
+                          key={k}
+                          className="mb-1 mr-1.5 inline-block rounded bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-400"
+                        >
+                          {k}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </StationCard>
           </div>
 
-          {/* Agent 事件时间线 */}
+          {/* Agent 运行时间线 */}
           {events.length > 0 && (
-            <div className="card-glass mb-6">
-              <h2 className="text-sm font-semibold text-white mb-3">Agent 运行时间线</h2>
-              <div className="space-y-1.5 font-mono text-xs">
+            <div className="card-glass mt-6 rounded-2xl p-5">
+              <h2 className="mb-3 text-sm font-semibold text-white">Agent 运行时间线</h2>
+              <div className="grid gap-x-6 gap-y-1.5 font-mono text-xs md:grid-cols-2">
                 {events.map((e, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${
+                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${
                         e.status === 'done'
                           ? 'bg-emerald-400'
                           : e.status === 'failed'
@@ -346,7 +585,7 @@ export default function OSLabPage() {
                       }`}
                     />
                     <span className="text-slate-300">{e.agent}</span>
-                    <span className="text-slate-500">
+                    <span className="truncate text-slate-500">
                       {e.status === 'running' ? '执行中' : e.status}
                       {e.detail ? ` · ${e.detail.slice(0, 80)}` : ''}
                     </span>
@@ -356,115 +595,11 @@ export default function OSLabPage() {
             </div>
           )}
 
-          {/* 结果区:抽取 */}
-          {tab === 'extract' && extracted !== null && (
-            <div className="card-glass mb-6">
-              <h2 className="text-lg font-semibold text-white mb-3">JSON Resume 数据核心</h2>
-              <pre className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-4 text-xs text-slate-300 overflow-x-auto max-h-96">
-                {JSON.stringify(extracted, null, 2)}
-              </pre>
-            </div>
-          )}
-
-          {/* 结果区:评估 */}
-          {tab === 'evaluate' && evaluation !== null && (
-            <div className="card-glass mb-6">
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                <h2 className="text-lg font-semibold text-white">匹配评估</h2>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {evalCtx !== '' && (
-                    <button
-                      className="btn btn-secondary text-sm"
-                      disabled={busy}
-                      onClick={() => {
-                        setTab('tailor');
-                        void runPipeline('tailor');
-                      }}
-                    >
-                      带着评估结果去定制 →
-                    </button>
-                  )}
-                  <button className="btn btn-primary text-sm" onClick={recordApplication}>
-                    记录投递(带匹配分 {Math.round(evaluation.matchScore)})
-                  </button>
-                </div>
-              </div>
-              <div className="flex items-center gap-6 mb-4 flex-wrap">
-                <div className="text-4xl font-bold text-primary-400">{Math.round(evaluation.matchScore)}</div>
-                <div className="text-sm text-slate-300 max-w-md">{evaluation.verdict}</div>
-              </div>
-              <div className="space-y-2 mb-4">
-                {evaluation.dimensions.map((d) => (
-                  <div key={d.name} className="flex items-center gap-3">
-                    <span className="text-xs text-slate-400 w-20 shrink-0">{d.name}</span>
-                    <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full"
-                        style={{ width: `${d.score}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-slate-300 w-8 text-right">{d.score}</span>
-                    <span className="text-xs text-slate-500 flex-1 min-w-[140px]">{d.comment}</span>
-                  </div>
-                ))}
-              </div>
-              {evaluation.missingKeywords.length > 0 && (
-                <div className="mb-3">
-                  <span className="text-xs text-slate-400">缺失关键词:</span>{' '}
-                  {evaluation.missingKeywords.map((k) => (
-                    <span key={k} className="inline-block text-xs px-2 py-0.5 mr-1.5 mb-1 rounded bg-amber-500/10 text-amber-400">
-                      {k}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {evaluation.risks.length > 0 && (
-                <div>
-                  <span className="text-xs text-slate-400">风险点:</span>
-                  <ul className="text-xs text-slate-400 mt-1 space-y-0.5">
-                    {evaluation.risks.map((r) => (
-                      <li key={r}>· {r}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 结果区:定制 */}
-          {tab === 'tailor' && tailoring !== null && (
-            <div className="card-glass mb-6">
-              <h2 className="text-lg font-semibold text-white mb-3">岗位定制建议</h2>
-              <div className="p-4 bg-primary-500/5 border border-primary-500/15 rounded-lg text-sm text-slate-300 mb-4">
-                <span className="text-primary-400 font-medium">总结重写:</span> {tailoring.summarySuggestion}
-              </div>
-              <div className="space-y-3 mb-4">
-                {tailoring.bulletSuggestions.map((b, i) => (
-                  <div key={i} className="p-3 bg-slate-900/40 border border-slate-700/50 rounded-lg">
-                    <div className="text-xs text-slate-500 mb-1">
-                      {b.section} · 修改理由:{b.reason}
-                    </div>
-                    <div className="text-xs text-slate-500 line-through">{b.original}</div>
-                    <div className="text-sm text-slate-200 mt-1">{b.improved}</div>
-                  </div>
-                ))}
-              </div>
-              {tailoring.keywordsToEmbed.length > 0 && (
-                <div>
-                  <span className="text-xs text-slate-400">建议嵌入关键词:</span>{' '}
-                  {tailoring.keywordsToEmbed.map((k) => (
-                    <span key={k} className="inline-block text-xs px-2 py-0.5 mr-1.5 mb-1 rounded bg-emerald-500/10 text-emerald-400">
-                      {k}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 投递回流:自进化飞轮 */}
-          <ApplicationsPanel key={appsVersion} />
-        </main>
+          {/* 校准台:投递回流自进化飞轮 */}
+          <div className="mt-6">
+            <ApplicationsPanel key={appsVersion} />
+          </div>
+        </div>
       </div>
     </PublicLayout>
   );

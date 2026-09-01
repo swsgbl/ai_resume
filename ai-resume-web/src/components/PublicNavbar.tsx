@@ -8,7 +8,6 @@ const NAV_ITEMS = [
   { path: '/os', labelKey: 'nav.os' },
   { path: '/career', labelKey: 'nav.career' },
   { path: '/resources', labelKey: 'nav.resources' },
-  { path: '/trae', labelKey: 'nav.trae' },
   { path: '/harmony-harness/', labelKey: 'nav.harmony', external: true },
   { path: '/about', labelKey: 'nav.about' },
 ] as const;

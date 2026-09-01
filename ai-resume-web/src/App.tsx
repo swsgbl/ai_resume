@@ -10,7 +10,6 @@ import MotionPage from './components/MotionPage';
 // 懒加载页面组件 - 代码分割优化
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const OSLabPage = lazy(() => import('./pages/OSLabPage'));
-const TraePage = lazy(() => import('./pages/TraePage'));
 const CareerPage = lazy(() => import('./pages/CareerPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
@@ -106,16 +105,6 @@ function App() {
           element={
             <PageLoader>
               <CareerPage />
-            </PageLoader>
-          }
-        />
-        <Route
-          path="/trae"
-          element={
-            <PageLoader>
-              <PublicLayout fullPage>
-                <TraePage />
-              </PublicLayout>
             </PageLoader>
           }
         />
