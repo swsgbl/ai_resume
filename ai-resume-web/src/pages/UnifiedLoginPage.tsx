@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { SEO } from '../components/SEO';
 import { Button, Input, GradientText } from '../components/UIComponents';
@@ -15,7 +15,11 @@ export default function UnifiedLoginPage() {
   const navigate = useNavigate();
   const { login, loginWithOAuth, isLoading, error, clearError } = useAuthStore();
 
-  const [activeTab, setActiveTab] = useState<LoginTab>('email');
+  // 支持 ?tab=phone 直达手机验证码登录(登录页手机入口带参跳转)
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<LoginTab>(
+    searchParams.get('tab') === 'phone' ? 'phone' : 'email'
+  );
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');

@@ -198,16 +198,28 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-4 text-center">
-              <p className="text-slate-400 text-xs mb-3">或使用以下方式登录</p>
+              {/* 国内用户首选:手机验证码一键登录 */}
+              <Link
+                to="/unified-login?tab=phone"
+                data-testid="sms-login-link"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary-400/30 bg-primary-500/10 px-4 py-2.5 text-sm font-medium text-primary-300 transition-colors hover:bg-primary-500/20"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                手机验证码登录 / 注册
+              </Link>
 
-              {/* Social Login Buttons - 跳转统一登录页(微信/Google/GitHub/Gitee/Discord) */}
-              <div className="flex gap-2 justify-center mb-4">
-                {(['google', 'github', 'gitee', 'discord'] as const).map((provider) => (
+              <p className="text-slate-500 text-xs mt-4 mb-2">更多方式</p>
+
+              {/* 其余渠道 - 收入统一登录页 */}
+              <div className="flex gap-2 justify-center mb-4 opacity-70 transition-opacity hover:opacity-100">
+                {(['gitee', 'github', 'google', 'discord'] as const).map((provider) => (
                   <Link
                     key={provider}
                     to="/unified-login"
                     aria-label={`使用 ${provider} 登录`}
-                    className="w-9 h-9 rounded-lg glass-effect flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+                    className="w-8 h-8 rounded-lg glass-effect flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
                   >
                     <OAuthProviderIcon provider={provider} className="w-4 h-4" />
                   </Link>
