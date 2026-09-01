@@ -79,6 +79,7 @@ class UserResponse(BaseModel):
     has_gitee: bool = False
     has_discord: bool = False
     has_wechat: bool = False
+    has_qq: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

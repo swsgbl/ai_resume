@@ -29,7 +29,7 @@ class Settings(BaseSettings):
 
     # 应用基础配置
     APP_NAME: str = "AI简历智能生成平台"
-    APP_VERSION: str = "1.0.0"
+    APP_VERSION: str = "1.1.0"
     DEBUG: bool = False  # 生产环境必须设为False
     API_V1_PREFIX: str = "/api/v1"
 
@@ -57,11 +57,15 @@ class Settings(BaseSettings):
     # ========== AI模型配置 ==========
 
     # 默认AI提供商
-    DEFAULT_AI_PROVIDER: str = "openai"  # openai/deepseek/xiaomi
+    DEFAULT_AI_PROVIDER: str = "openai"  # openai/deepseek/xiaomi（历史值 openai_v2 自动映射为 openai）
+
+    # 生成后自检：评分低于阈值时自动做一轮修正
+    AI_AUTO_REVISE: bool = True
 
     # OpenAI配置
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4"
+    OPENAI_BASE_URL: str = ""  # 留空使用官方端点；可指向任意 OpenAI 兼容网关
     OPENAI_MAX_TOKENS: int = 4000
     OPENAI_TEMPERATURE: float = 0.7
 
@@ -155,6 +159,12 @@ class Settings(BaseSettings):
     DISCORD_CLIENT_ID: Optional[str] = None
     DISCORD_CLIENT_SECRET: Optional[str] = None
     DISCORD_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/discord/callback"
+
+    # QQ 互联配置(国内个人备案可申请)
+    # 创建应用: https://connect.qq.com (网站应用, 填备案号)
+    QQ_CONNECT_APP_ID: Optional[str] = None
+    QQ_CONNECT_APP_SECRET: Optional[str] = None
+    QQ_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/qq/callback"
 
     # OAuth 状态存储（用于 CSRF 保护）
     # 开发环境使用内存存储，生产环境应使用 Redis

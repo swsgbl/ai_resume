@@ -422,6 +422,116 @@ class DiscordOAuthProvider(OAuthProvider):
         }
 
 
+class QQOAuthProvider(OAuthProvider):
+    """QQ 互联 OAuth 提供商(国内个人备案可申请)
+
+    文档: https://wiki.connect.qq.com/
+    配置: QQ_CONNECT_APP_ID / QQ_CONNECT_APP_SECRET (QQ互联后台的 AppID/AppKey)
+    """
+
+    AUTH_URL = "https://graph.qq.com/oauth2.0/authorize"
+    TOKEN_URL = "https://graph.qq.com/oauth2.0/token"
+    OPENID_URL = "https://graph.qq.com/oauth2.0/me"
+    USER_INFO_URL = "https://graph.qq.com/user/get_user_info"
+
+    def __init__(self):
+        super().__init__("qq")
+        self.client_id = getattr(settings, "QQ_CONNECT_APP_ID", "")
+        self.client_secret = getattr(settings, "QQ_CONNECT_APP_SECRET", "")
+        self.default_redirect_uri = getattr(
+            settings,
+            "QQ_REDIRECT_URI",
+            "http://localhost:8000/api/v1/auth/oauth/qq/callback",
+        )
+
+        if not self.client_id:
+            raise ValueError("QQ_CONNECT_APP_ID 未配置")
+
+    async def get_authorization_url(self, state: str, redirect_uri: Optional[str] = None) -> str:
+        from urllib.parse import urlencode
+
+        params = {
+            "client_id": self.client_id,
+            "redirect_uri": redirect_uri or self.default_redirect_uri,
+            "response_type": "code",
+            "state": state,
+        }
+        return f"{self.AUTH_URL}?{urlencode(params)}"
+
+    async def exchange_code_for_token(self, code: str, redirect_uri: str) -> Dict[str, Any]:
+        if not self.client_secret:
+            raise ValueError("QQ_CONNECT_APP_SECRET 未配置")
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                self.TOKEN_URL,
+                params={
+                    "grant_type": "authorization_code",
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "code": code,
+                    "redirect_uri": redirect_uri,
+                    "fmt": "json",
+                },
+            )
+            data = response.json()
+            if "error" in data or "error_description" in data:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"QQ OAuth 错误: {data.get('error_description', data.get('error'))}",
+                )
+            return data
+
+    async def get_user_info(self, access_token: str) -> Dict[str, Any]:
+        """QQ 特有两步:先取 openid,再取用户资料"""
+        async with httpx.AsyncClient() as client:
+            # fmt=json 免剥 callback(...) 包裹
+            openid_resp = await client.get(
+                self.OPENID_URL, params={"access_token": access_token, "fmt": "json"}
+            )
+            if openid_resp.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="获取 QQ openid 失败"
+                )
+            openid_data = openid_resp.json()
+            openid = openid_data.get("openid")
+            if not openid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="QQ 返回数据缺少 openid"
+                )
+
+            info_resp = await client.get(
+                self.USER_INFO_URL,
+                params={
+                    "access_token": access_token,
+                    "oauth_consumer_key": self.client_id,
+                    "openid": openid,
+                },
+            )
+            if info_resp.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="获取 QQ 用户信息失败"
+                )
+            info = info_resp.json()
+            if info.get("ret") not in (0, "0"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"QQ 用户信息错误: {info.get('msg', info.get('ret'))}",
+                )
+            info["openid"] = openid
+            return info
+
+    def normalize_user_info(self, raw_info: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "provider": "qq",
+            "provider_id": raw_info.get("openid"),
+            "email": None,  # QQ 互联不返回邮箱
+            "verified_email": False,
+            "name": raw_info.get("nickname") or "QQ用户",
+            "avatar_url": raw_info.get("figureurl_qq_2") or raw_info.get("figureurl_qq_1"),
+        }
+
+
 class OAuthStateManager:
     """OAuth State 管理器 - 用于 CSRF 保护
 
@@ -466,6 +576,7 @@ _google_provider: Optional[GoogleOAuthProvider] = None
 _github_provider: Optional[GitHubOAuthProvider] = None
 _gitee_provider: Optional[GiteeOAuthProvider] = None
 _discord_provider: Optional[DiscordOAuthProvider] = None
+_qq_provider: Optional[QQOAuthProvider] = None
 
 
 def get_google_provider() -> Optional[GoogleOAuthProvider]:
@@ -506,6 +617,16 @@ def get_discord_provider() -> Optional[DiscordOAuthProvider]:
         except ValueError:
             return None
     return _discord_provider
+
+
+def get_qq_provider() -> Optional[QQOAuthProvider]:
+    global _qq_provider
+    if _qq_provider is None:
+        try:
+            _qq_provider = QQOAuthProvider()
+        except ValueError:
+            return None
+    return _qq_provider
 
 
 def get_state_manager() -> OAuthStateManager:
@@ -556,6 +677,13 @@ async def oauth_login(
         if not provider_instance:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Discord OAuth 未配置"
+            )
+        provider_redirect_uri = redirect_uri or provider_instance.default_redirect_uri
+    elif provider == "qq":
+        provider_instance = get_qq_provider()
+        if not provider_instance:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="QQ 登录未配置(需在 QQ 互联创建应用并配置 AppID)"
             )
         provider_redirect_uri = redirect_uri or provider_instance.default_redirect_uri
     else:

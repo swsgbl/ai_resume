@@ -54,6 +54,11 @@ class User(Base):
     gitee_login = Column(String(100), nullable=True)
     gitee_email = Column(String(255), nullable=True)
 
+    # QQ 互联相关
+    qq_openid = Column(String(64), unique=True, nullable=True, index=True)
+    qq_nickname = Column(String(100), nullable=True)
+    qq_avatar = Column(String(500), nullable=True)
+
     # Discord OAuth 相关
     discord_id = Column(String(50), unique=True, nullable=True, index=True)
     discord_username = Column(String(100), nullable=True)
@@ -88,6 +93,31 @@ class User(Base):
     )
     ai_billings = relationship("AIBilling", back_populates="user", cascade="all, delete-orphan")
     export_tasks = relationship("ExportTask", back_populates="user", cascade="all, delete-orphan")
+
+    # OAuth 绑定状态(from_attributes 供 UserResponse 读取)
+    @property
+    def has_google(self) -> bool:
+        return self.google_id is not None
+
+    @property
+    def has_github(self) -> bool:
+        return self.github_id is not None
+
+    @property
+    def has_gitee(self) -> bool:
+        return self.gitee_id is not None
+
+    @property
+    def has_discord(self) -> bool:
+        return self.discord_id is not None
+
+    @property
+    def has_wechat(self) -> bool:
+        return self.wechat_openid is not None
+
+    @property
+    def has_qq(self) -> bool:
+        return self.qq_openid is not None
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"

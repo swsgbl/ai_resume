@@ -42,6 +42,14 @@ export const OAUTH_PROVIDERS: OAuthProviderConfig[] = [
     icon: 'gitee',
   },
   {
+    key: 'qq',
+    name: 'QQ',
+    enabled: true,
+    color: '#12B7F5',
+    bgColor: 'rgba(18, 183, 245, 0.15)',
+    icon: 'qq',
+  },
+  {
     key: 'discord',
     name: 'Discord',
     enabled: true,

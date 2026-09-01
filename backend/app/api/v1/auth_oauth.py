@@ -25,6 +25,7 @@ from app.services.oauth_service import (
     get_github_provider,
     get_gitee_provider,
     get_discord_provider,
+    get_qq_provider,
     get_state_manager,
     oauth_login,
 )
@@ -518,6 +519,103 @@ async def discord_unbind_account(
     return Response(message="Discord 账号解绑成功")
 
 
+# ==================== QQ 互联 OAuth ====================
+
+
+@router.get("/qq/authorize")
+async def qq_authorize(redirect_uri: Optional[str] = None):
+    """获取 QQ OAuth 授权 URL"""
+    provider = get_qq_provider()
+    if not provider:
+        raise HTTPException(status_code=500, detail="QQ 登录未配置(需在 QQ 互联创建应用)")
+
+    state_manager = get_state_manager()
+    state = state_manager.generate_state()
+    auth_url = await provider.get_authorization_url(state, redirect_uri)
+
+    return Response(
+        data={"auth_url": auth_url, "state": state, "provider": "qq"}, message="获取授权URL成功"
+    )
+
+
+@router.post("/qq/callback")
+async def qq_callback(request_data: OAuthLoginRequest, db: AsyncSession = Depends(get_db)):
+    """处理 QQ OAuth 回调"""
+    provider_info = await oauth_login(
+        "qq", request_data.code, request_data.state, request_data.redirect_uri
+    )
+    qq_openid = provider_info["provider_id"]
+
+    result = await db.execute(select(User).where(User.qq_openid == qq_openid))
+    user = result.scalar_one_or_none()
+
+    if user:
+        if not user.is_active:
+            raise HTTPException(status_code=403, detail="账户已被禁用")
+        user.last_login_at = datetime.now(timezone.utc)
+        await db.commit()
+    else:
+        # QQ 互联不提供邮箱,生成占位邮箱
+        user = User(
+            email=f"qq_{qq_openid}@qq.local",
+            username=provider_info.get("name", "QQ用户"),
+            avatar_url=provider_info.get("avatar_url"),
+            qq_openid=qq_openid,
+            qq_nickname=provider_info.get("name"),
+            qq_avatar=provider_info.get("avatar_url"),
+            is_verified=False,
+            is_active=True,
+            password_hash=get_password_hash(secrets.token_urlsafe(32)),
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+    return Response(data=_create_token_response(user), message="QQ 登录成功")
+
+
+@router.post("/qq/bind")
+async def qq_bind_account(
+    request_data: OAuthBindRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """绑定 QQ 账号"""
+    provider_info = await oauth_login("qq", request_data.code, request_data.state)
+    qq_openid = provider_info["provider_id"]
+
+    existing = await db.execute(
+        select(User).where(User.qq_openid == qq_openid).where(User.id != current_user.id)
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="该 QQ 账号已被其他用户绑定")
+
+    current_user.qq_openid = qq_openid
+    current_user.qq_nickname = provider_info.get("name")
+    current_user.qq_avatar = provider_info.get("avatar_url")
+    if not current_user.avatar_url and provider_info.get("avatar_url"):
+        current_user.avatar_url = provider_info["avatar_url"]
+    await db.commit()
+
+    return Response(data=UserResponse.model_validate(current_user), message="QQ 账号绑定成功")
+
+
+@router.post("/qq/unbind")
+async def qq_unbind_account(
+    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+):
+    """解绑 QQ 账号"""
+    if not current_user.qq_openid:
+        raise HTTPException(status_code=400, detail="未绑定 QQ 账号")
+
+    current_user.qq_openid = None
+    current_user.qq_nickname = None
+    current_user.qq_avatar = None
+    await db.commit()
+
+    return Response(message="QQ 账号解绑成功")
+
+
 # ==================== 统一授权入口 ====================
 
 
@@ -529,6 +627,7 @@ async def unified_authorize(provider: str, redirect_uri: Optional[str] = None):
         "github": get_github_provider,
         "gitee": get_gitee_provider,
         "discord": get_discord_provider,
+        "qq": get_qq_provider,
     }
 
     get_fn = provider_map.get(provider)
