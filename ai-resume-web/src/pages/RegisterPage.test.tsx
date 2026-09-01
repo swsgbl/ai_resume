@@ -124,7 +124,6 @@ describe('RegisterPage Component', () => {
     const code = options.code ?? '123456';
 
     await user.type(screen.getByTestId('register-email-input'), email);
-    await user.type(screen.getByTestId('confirm-email-input'), email);
     if (code) {
       await user.type(screen.getByTestId('code-input'), code);
     }
@@ -146,7 +145,6 @@ describe('RegisterPage Component', () => {
     renderWithProviders(<RegisterPage />);
 
     expect(screen.getByTestId('register-email-input')).toBeInTheDocument();
-    expect(screen.getByTestId('confirm-email-input')).toBeInTheDocument();
     expect(screen.getByTestId('code-input')).toBeInTheDocument();
     expect(screen.getByTestId('username-input')).toBeInTheDocument();
     expect(screen.getByTestId('register-password-input')).toBeInTheDocument();
@@ -275,41 +273,15 @@ describe('RegisterPage Component', () => {
     expect(sendCodeButton).toBeDisabled();
   });
 
-  it('仅输入一次邮箱后验证码按钮仍禁用', async () => {
+  it('输入邮箱后验证码按钮可点击', async () => {
     const user = userEvent.setup();
     renderWithProviders(<RegisterPage />);
 
     await user.type(screen.getByTestId('register-email-input'), 'test@example.com');
-
-    await waitFor(() => {
-      const sendCodeButton = screen.getByTestId('send-code-button');
-      expect(sendCodeButton).toBeDisabled();
-    });
-  });
-
-  it('两次邮箱一致后验证码按钮可点击', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<RegisterPage />);
-
-    await user.type(screen.getByTestId('register-email-input'), 'test@example.com');
-    await user.type(screen.getByTestId('confirm-email-input'), 'test@example.com');
 
     await waitFor(() => {
       expect(screen.getByTestId('send-code-button')).not.toBeDisabled();
     });
-  });
-
-  it('两次邮箱不一致时禁止发送验证码并显示错误', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<RegisterPage />);
-
-    await user.type(screen.getByTestId('register-email-input'), 'test@example.com');
-    await user.type(screen.getByTestId('confirm-email-input'), 'other@example.com');
-
-    const sendCodeButton = screen.getByTestId('send-code-button');
-    expect(sendCodeButton).toBeDisabled();
-    expect(api.auth.sendVerificationCode).not.toHaveBeenCalled();
-    expect(await screen.findByTestId('email-error')).toHaveTextContent('两次输入的邮箱不一致');
   });
 
   it('验证码不是6位数字时禁止提交', async () => {
@@ -328,7 +300,6 @@ describe('RegisterPage Component', () => {
     const sendCodeButton = screen.getByTestId('send-code-button');
 
     await user.type(screen.getByTestId('register-email-input'), 'test@example.com');
-    await user.type(screen.getByTestId('confirm-email-input'), 'test@example.com');
     await user.click(sendCodeButton);
 
     await waitFor(() => {

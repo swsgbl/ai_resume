@@ -14,6 +14,7 @@ export default function LoginPage() {
   const { login, isLoading, error, clearError } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);
 
   // 页面加载时检查是否有保存的凭据
@@ -114,6 +115,7 @@ export default function LoginPage() {
                   clearError();
                 }}
                 placeholder="your@email.com"
+                autoComplete="email"
                 required
                 icon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,21 +136,41 @@ export default function LoginPage() {
                 </div>
                 <Input
                   id="password-input"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="•••••••••"
+                  autoComplete="current-password"
                   required
                   icon={
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2m10 0V5a2 2 0 00-2-2H6a2 2 0 00-2 2v2" />
                     </svg>
                   }
+                  suffix={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                      className="p-1 text-slate-500 transition-colors hover:text-slate-300"
+                    >
+                      {showPassword ? (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  }
                   data-testid="password-input"
                 />
               </div>
 
-              {/* 记住密码 */}
+              {/* 记住邮箱(下次自动填充,密码由浏览器密码管理器保管) */}
               <div className="flex items-center gap-2">
                 <input
                   id="remember-password"
@@ -159,7 +181,7 @@ export default function LoginPage() {
                   data-testid="remember-password"
                 />
                 <label htmlFor="remember-password" className="text-xs text-slate-300 cursor-pointer select-none">
-                  记住密码
+                  记住邮箱
                 </label>
               </div>
 
@@ -178,19 +200,18 @@ export default function LoginPage() {
             <div className="mt-4 text-center">
               <p className="text-slate-400 text-xs mb-3">或使用以下方式登录</p>
 
-              {/* Social Login Buttons */}
+              {/* Social Login Buttons - 跳转统一登录页(微信/Google/GitHub/Gitee/Discord) */}
               <div className="flex gap-2 justify-center mb-4">
-                <button type="button" aria-label="使用 Google 登录" className="w-9 h-9 rounded-lg glass-effect flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-all">
-                  <OAuthProviderIcon provider="google" className="w-4 h-4" />
-                </button>
-                <button type="button" aria-label="使用 GitHub 登录" className="w-9 h-9 rounded-lg glass-effect flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-all">
-                  <OAuthProviderIcon provider="github" className="w-4 h-4" />
-                </button>
-                <button type="button" className="w-9 h-9 rounded-lg glass-effect flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-all">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8.69 14.25c.68-.27 1.36-.53 2.05-.78l.44-.17c.68-.27 1.35-.54 2.03-.81.68-.27 1.36-.53 2.05-.78.68-.27 1.35-.54 2.03-.81.68-.27 1.36-.53 2.05-.78.68-.27 1.35-.54 2.03-.81.68-.27 1.36-.53 2.05-.78.68-.27 1.35-.54 2.03-.81.68-.27 1.36-.53 2.05-.78.68-.27 1.35-.54 2.03-.81.68-.27 1.36-.53 2.05-.78l.44.17c.68.27 1.36.53 2.05.78.68.27 1.35.54 2.03.81l.44.17c.68.27 1.36.53 2.05.78.68.27 1.35.54 2.03.81.68-.27 1.36-.53 2.05-.78.68-.27 1.35-.54 2.03-.81.68-.27 1.36-.53 2.05-.78l-.44-.17c-.68.27-1.36-.53-2.05-.78-.68-.27-1.35-.54-2.03-.81-.68-.27-1.36-.53-2.05-.78-.68-.27-1.35-.54-2.03-.81-.68-.27-1.36-.53-2.05-.78-.68-.27-1.35-.54-2.03-.81-.68-.27-1.36-.53-2.05-.78l-.44-.17c-.68.27-1.36.53-2.05.78-.68.27-1.35.54-2.03.81-.68.27-1.36-.53-2.05.78-.68.27-1.35-.54-2.03.81-.68-.27-1.36-.53-2.05.78-.68.27-1.35-.54-2.03.81l-.44-.17c-.68.27-1.36.53-2.05.78-.68.27-1.35.54-2.03.81-.68.27-1.36-.53-2.05.78-.68.27-1.35-.54-2.03.81zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
-                  </svg>
-                </button>
+                {(['google', 'github', 'gitee', 'discord'] as const).map((provider) => (
+                  <Link
+                    key={provider}
+                    to="/unified-login"
+                    aria-label={`使用 ${provider} 登录`}
+                    className="w-9 h-9 rounded-lg glass-effect flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+                  >
+                    <OAuthProviderIcon provider={provider} className="w-4 h-4" />
+                  </Link>
+                ))}
               </div>
 
               <div className="divider-gradient" />

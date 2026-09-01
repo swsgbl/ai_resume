@@ -5,6 +5,8 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   error?: string;
   success?: string;
   icon?: ReactNode;
+  /** 输入框右侧后缀(如密码可见性切换按钮) */
+  suffix?: ReactNode;
   // id现在是必需的
   id: string;
   // 显式支持data-testid
@@ -23,11 +25,12 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
  *
  * 自动满足 WCAG AAA 触摸目标 (44px 高度)
  */
-export function Input({ label, error, success, icon, className = '', id, 'data-testid': testId, ...props }: InputProps) {
+export function Input({ label, error, success, icon, suffix, className = '', id, 'data-testid': testId, ...props }: InputProps) {
   // 构建输入框类名
   const inputClasses = [
     'input-cyber',
     icon ? 'pl-12' : '',
+    suffix ? 'pr-11' : '',
     error ? 'input-error' : '',
     success ? 'input-success' : '',
     className
@@ -59,6 +62,11 @@ export function Input({ label, error, success, icon, className = '', id, 'data-t
           aria-describedby={hasMessage ? `${id}-message` : undefined}
           {...props}
         />
+        {suffix && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+            {suffix}
+          </div>
+        )}
       </div>
       {hasMessage && (
         <p id={`${id}-message`} className={`mt-2 text-sm ${messageClass}`}>
