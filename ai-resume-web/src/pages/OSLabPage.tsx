@@ -385,7 +385,7 @@ export default function OSLabPage() {
                       onClick={useExtractedAsMaterial}
                       title="把抽取出的 JSON Resume 作为原料文本,供②③直接使用"
                     >
-                      用数据砖替换原料 ↓
+                      用抽取结果做原料 ↓
                     </button>
                   </>
                 )}

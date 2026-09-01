@@ -284,7 +284,7 @@ export default function SettingsPage() {
             简历 OS · 模型配置(本机)
           </h2>
           <p className="text-xs text-slate-500 mb-4">
-            「简历生成车间」(/os) Agent 流水线所用的模型:OpenAI 兼容端点,密钥仅保存在本机浏览器。
+            给「简历生成车间」(/os)三个工位供能的 AI 模型:选厂商 → 粘贴密钥 → 保存,密钥只存本机浏览器。
           </p>
           <ModelConfigCard />
         </div>

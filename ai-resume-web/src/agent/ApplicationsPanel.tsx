@@ -29,7 +29,7 @@ export default function ApplicationsPanel() {
       </p>
       {apps.length === 0 ? (
         <p className="text-sm text-slate-500">
-          暂无投递记录。在「JD 匹配评估」中运行后点击"记录投递",结果回流后即可校准。
+          暂无投递记录。在②质检台完成评估后点击「记录投递」,等结果出来回来更新状态,系统就能校准预测准度。
         </p>
       ) : (
         <>
