@@ -1,0 +1,125 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+*.md
+docs/
+LICENSE
+
+# Tests
+tests/
+test_*
+*_test.py
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Backups
+backups/
+*.bak
+*.backup
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Deployment scripts
+deploy/
+*.sh
+*.bat
+
+# Archive
+archive/
+
+# Screenshots
+screenshots/
+
+# Test results
+test-reports/
+test-results/
+*.test-report.md
+
+# Project management
+PROJECT_MANAGEMENT/
+plans/
+
+# Auto-generated files
+*.pid
+*.pid.lock
+web.log
+backend.log
+
+# Other
+.cache/
+*.sqlite
+*.db
+EOF

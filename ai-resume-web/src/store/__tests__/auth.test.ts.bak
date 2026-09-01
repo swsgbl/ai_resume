@@ -1,0 +1,190 @@
+/**
+ * Auth Store 单元测试
+ * 使用 Vitest 进行测试
+ */
+
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useAuthStore } from '../auth';
+
+// Mock API
+vi.mock('@ai-resume/shared/api', () => ({
+  api: {
+    auth: {
+      login: vi.fn(),
+      register: vi.fn(),
+      getCurrentUser: vi.fn(),
+      refreshToken: vi.fn(),
+    },
+  },
+  storage: {
+    getToken: vi.fn(),
+    setToken: vi.fn(),
+    setRefreshToken: vi.fn(),
+    setUser: vi.fn(),
+    getUser: vi.fn(),
+    clearAuth: vi.fn(),
+  },
+}));
+
+describe('AuthStore', () => {
+  beforeEach(() => {
+    // 重置 store 状态
+    useAuthStore.getState().logout();
+    vi.clearAllMocks();
+  });
+
+  describe('初始状态', () => {
+    it('应该有正确的初始状态', () => {
+      const { result } = renderHook(() => useAuthStore());
+
+      expect(result.current.user).toBeNull();
+      expect(result.current.token).toBeNull();
+      expect(result.current.isAuthenticated).toBe(false);
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+    });
+  });
+
+  describe('login', () => {
+    it('登录成功后应该更新状态', async () => {
+      const mockUser = { id: 1, email: 'test@example.com', role: 'user' };
+      const mockToken = 'mock-token-123';
+
+      vi.mocked(api.auth.login).mockResolvedValue({
+        access_token: mockToken,
+        user: mockUser,
+      });
+
+      const { result } = renderHook(() => useAuthStore());
+
+      await act(async () => {
+        await result.current.login('test@example.com', 'password');
+      });
+
+      expect(result.current.user).toEqual(mockUser);
+      expect(result.current.token).toBe(mockToken);
+      expect(result.current.isAuthenticated).toBe(true);
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+    });
+
+    it('登录失败后应该设置错误信息', async () => {
+      const mockError = new Error('Invalid credentials');
+
+      vi.mocked(api.auth.login).mockRejectedValue(mockError);
+
+      const { result } = renderHook(() => useAuthStore());
+
+      try {
+        await act(async () => {
+          await result.current.login('test@example.com', 'wrong-password');
+        });
+      } catch (error) {
+        // 期望抛出错误
+      }
+
+      expect(result.current.error).toBe('登录失败');
+      expect(result.current.isAuthenticated).toBe(false);
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it('登录时应该设置loading状态', async () => {
+      let resolveLogin: (value: any) => void;
+      const loginPromise = new Promise(resolve => {
+        resolveLogin = resolve;
+      });
+
+      vi.mocked(api.auth.login).mockReturnValue(loginPromise as any);
+
+      const { result } = renderHook(() => useAuthStore());
+
+      act(() => {
+        result.current.login('test@example.com', 'password');
+      });
+
+      expect(result.current.isLoading).toBe(true);
+
+      await act(async () => {
+        resolveLogin!({
+          access_token: 'token',
+          user: { id: 1, email: 'test@example.com', role: 'user' },
+        });
+      });
+
+      expect(result.current.isLoading).toBe(false);
+    });
+  });
+
+  describe('logout', () => {
+    it('登出后应该清除状态', async () => {
+      const { result } = renderHook(() => useAuthStore());
+
+      // 先登录
+      await act(async () => {
+        vi.mocked(api.auth.login).mockResolvedValue({
+          access_token: 'token',
+          user: { id: 1, email: 'test@example.com', role: 'user' },
+        });
+        await result.current.login('test@example.com', 'password');
+      });
+
+      expect(result.current.isAuthenticated).toBe(true);
+
+      // 登出
+      act(() => {
+        result.current.logout();
+      });
+
+      expect(result.current.user).toBeNull();
+      expect(result.current.token).toBeNull();
+      expect(result.current.isAuthenticated).toBe(false);
+    });
+  });
+
+  describe('clearError', () => {
+    it('应该清除错误信息', async () => {
+      vi.mocked(api.auth.login).mockRejectedValue(new Error('Test error'));
+
+      const { result } = renderHook(() => useAuthStore());
+
+      try {
+        await act(async () => {
+          await result.current.login('test@example.com', 'password');
+        });
+      } catch (error) {
+        // Ignore
+      }
+
+      expect(result.current.error).toBeTruthy();
+
+      act(() => {
+        result.current.clearError();
+      });
+
+      expect(result.current.error).toBeNull();
+    });
+  });
+
+  describe('register', () => {
+    it('注册成功后应该自动登录', async () => {
+      const mockUser = { id: 1, email: 'test@example.com', role: 'user' };
+      const mockToken = 'mock-token-123';
+
+      vi.mocked(api.auth.register).mockResolvedValue({
+        access_token: mockToken,
+        user: mockUser,
+      });
+
+      const { result } = renderHook(() => useAuthStore());
+
+      await act(async () => {
+        await result.current.register('test@example.com', 'password');
+      });
+
+      expect(result.current.user).toEqual(mockUser);
+      expect(result.current.token).toBe(mockToken);
+      expect(result.current.isAuthenticated).toBe(true);
+    });
+  });
+});

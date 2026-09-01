@@ -1,0 +1,283 @@
+/* ================================================================
+   Public Navbar — hm 统一站点导航
+   深海军蓝毛玻璃 + 冰青强调 + 极光绿点缀(与 hmharness 同源)
+   全站公开页共用: / /career /about /help /login ...
+   ================================================================ */
+
+.pub-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: rgba(8, 20, 38, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(79, 216, 235, 0.16);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.pub-nav.scrolled {
+  background: rgba(8, 20, 38, 0.94);
+  border-bottom-color: rgba(79, 216, 235, 0.28);
+  box-shadow: 0 8px 32px -16px rgba(0, 0, 0, 0.6);
+}
+
+.pub-nav-inner {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo */
+.pub-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Space Grotesk', 'DM Sans', 'Noto Sans SC', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #EAF4FA;
+  text-decoration: none;
+  transition: color 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.pub-nav-logo:hover {
+  color: #4FD8EB;
+}
+
+.pub-nav-logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #4FD8EB, #2FA8D8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #081426;
+  font-size: 0.875rem;
+  font-weight: 800;
+  font-family: 'Space Grotesk', sans-serif;
+  box-shadow: 0 0 18px rgba(79, 216, 235, 0.35);
+}
+
+/* Navigation Links */
+.pub-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pub-nav-link {
+  position: relative;
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: #8FA8C0;
+  text-decoration: none;
+  transition: color 0.2s;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pub-nav-link:hover {
+  color: #EAF4FA;
+}
+
+/* 冰青下划线:自左向右洇开 */
+.pub-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 1px;
+  height: 1px;
+  background: linear-gradient(90deg, #4FD8EB, #7DDF9A);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pub-nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+.pub-nav-link.active {
+  color: #4FD8EB;
+}
+
+.pub-nav-link.active::after {
+  transform: scaleX(1);
+}
+
+.pub-nav-lang {
+  font-size: 0.75rem;
+  border: 1px solid rgba(79, 216, 235, 0.22);
+  border-radius: 6px;
+  padding: 3px 8px;
+  margin-left: 4px;
+}
+
+.pub-nav-lang::after {
+  display: none;
+}
+
+.pub-nav-lang:hover {
+  border-color: rgba(79, 216, 235, 0.55);
+  color: #4FD8EB;
+}
+
+/* Action Buttons */
+.pub-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pub-nav-login {
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: #8FA8C0;
+  text-decoration: none;
+  border: 1px solid rgba(79, 216, 235, 0.22);
+  border-radius: 8px;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.pub-nav-login:hover {
+  color: #EAF4FA;
+  border-color: rgba(79, 216, 235, 0.55);
+  background: rgba(79, 216, 235, 0.06);
+}
+
+.pub-nav-cta {
+  padding: 7px 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #081426;
+  background: linear-gradient(135deg, #4FD8EB, #7DDF9A);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: box-shadow 0.25s, transform 0.25s;
+  white-space: nowrap;
+  box-shadow: 0 0 16px rgba(79, 216, 235, 0.25);
+}
+
+.pub-nav-cta:hover {
+  box-shadow: 0 0 26px rgba(79, 216, 235, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Hamburger */
+.pub-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.pub-hamburger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: #8FA8C0;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.pub-hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.pub-hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.pub-hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Mobile Menu */
+.pub-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: rgba(8, 20, 38, 0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 16px 24px;
+  flex-direction: column;
+  gap: 2px;
+  border-bottom: 1px solid rgba(79, 216, 235, 0.2);
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.pub-mobile-menu.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pub-mobile-menu .pub-nav-link {
+  display: block;
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+}
+
+.pub-mobile-menu .pub-nav-link::after {
+  display: none;
+}
+
+.pub-mobile-menu .pub-nav-cta {
+  display: block;
+  text-align: center;
+  margin-top: 8px;
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pub-nav-links,
+  .pub-nav-actions {
+    display: none;
+  }
+
+  .pub-hamburger {
+    display: flex;
+  }
+
+  .pub-mobile-menu {
+    display: flex;
+  }
+}
+
+/* 减少动效偏好:导航即时呈现 */
+@media (prefers-reduced-motion: reduce) {
+  .pub-nav,
+  .pub-nav-link::after,
+  .pub-nav-cta,
+  .pub-mobile-menu {
+    transition-duration: 0.01ms !important;
+  }
+}

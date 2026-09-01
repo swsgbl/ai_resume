@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>harmony-harness — 终端优先的 HarmonyOS 开发智能体框架</title>
+<meta name="description" content="一句话创建鸿蒙应用、构建 HAP、装机运行,并具备自进化能力。基于 DeepSeek Harness(MIT)的社区发行版。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230B1E3A'/><circle cx='32' cy='18' r='9' fill='%234FD8EB'/><text x='32' y='52' font-size='26' font-weight='bold' text-anchor='middle' fill='white' font-family='monospace'>hm</text></svg>">
+<style>
+:root{
+  --navy:#0B1E3A; --navy2:#123B6E; --cyan:#4FD8EB; --ice:#EAF4FA;
+  --text:#DCE8F2; --dim:#8FA8C0; --card:rgba(13,32,58,.72); --line:rgba(79,216,235,.22);
+  --radius:18px; --maxw:1120px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--text);font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;overflow-x:hidden;line-height:1.65}
+#rain{position:fixed;inset:0;z-index:0;opacity:.55}
+.vignette{position:fixed;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 0%,transparent 30%,rgba(7,17,33,.88) 100%);pointer-events:none}
+.wrap{position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;padding:0 28px}
+a{color:var(--cyan);text-decoration:none}
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(9,22,42,.72);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:#fff}
+.logo .star{color:var(--cyan);font-size:20px}
+.navlinks{display:flex;gap:26px;align-items:center;font-size:14.5px}
+.navlinks a{color:var(--dim);transition:color .2s}
+.navlinks a:hover{color:#fff}
+.lang{cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:5px 14px;color:var(--ice);font-size:13px;background:transparent;transition:border-color .2s}
+.lang:hover{border-color:var(--cyan)}
+.btn{display:inline-block;padding:10px 22px;border-radius:999px;font-weight:600;font-size:14.5px;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),#2FA8D8);color:#04121F;box-shadow:0 6px 26px rgba(79,216,235,.35)}
+.btn-primary:hover{box-shadow:0 8px 34px rgba(79,216,235,.55)}
+.btn-ghost{border-color:var(--line);color:var(--ice)}
+.btn-ghost:hover{border-color:var(--cyan)}
+.hero{text-align:center;padding:110px 0 80px}
+.hero h1{font-size:clamp(42px,7vw,76px);font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(120deg,#FFFFFF 20%,var(--cyan) 70%,#2FA8D8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .tag{margin:18px 0 10px;font-size:clamp(18px,2.6vw,24px);color:var(--cyan);letter-spacing:.35em}
+.hero p.sub{max-width:700px;margin:0 auto 34px;color:var(--dim);font-size:17px}
+.cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.term{max-width:640px;margin:56px auto 0;background:rgba(5,14,28,.9);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 24px 80px rgba(0,0,0,.5);overflow:hidden;text-align:left}
+.term-bar{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.term-bar i{width:11px;height:11px;border-radius:50%;background:#31507A}
+.term-bar i:first-child{background:#E5484D}.term-bar i:nth-child(2){background:#F5A623}
+.term-body{padding:22px 24px;font-family:"Cascadia Code",Consolas,"JetBrains Mono",monospace;font-size:13.5px;line-height:1.75;color:var(--dim);white-space:pre;overflow-x:auto}
+.term-body .w{color:#fff;font-weight:700}.term-body .c{color:var(--cyan)}.term-body .g{color:#7DDF9A}
+section{padding:86px 0}
+h2.sec{font-size:clamp(28px,4vw,40px);font-weight:800;text-align:center;letter-spacing:-.01em;margin-bottom:14px}
+p.secdesc{text-align:center;color:var(--dim);max-width:660px;margin:0 auto 46px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px;transition:transform .2s,border-color .2s,box-shadow .25s;backdrop-filter:blur(8px)}
+.card:hover{transform:translateY(-4px);border-color:rgba(79,216,235,.55);box-shadow:0 16px 46px rgba(0,0,0,.35)}
+.card .ic{font-size:26px;margin-bottom:12px}
+.card h3{font-size:17.5px;margin-bottom:8px;color:#fff}
+.card p{font-size:14.5px;color:var(--dim)}
+.card code{font-family:Consolas,monospace;font-size:12.5px;color:var(--cyan);background:rgba(79,216,235,.09);padding:1px 6px;border-radius:5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px;text-align:center}
+.stat{padding:26px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.stat b{display:block;font-size:40px;font-weight:800;background:linear-gradient(135deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat span{color:var(--dim);font-size:14px}
+.steps{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.step{display:flex;gap:18px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+.step .n{flex:none;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#2FA8D8);color:#04121F;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.step pre{flex:1;font-family:Consolas,monospace;font-size:13px;color:#9FE8F5;background:rgba(5,14,28,.75);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto}
+.step .cap{color:var(--dim);font-size:13px;margin-bottom:8px}
+.loop{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;margin-top:8px}
+.node{padding:12px 22px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-size:14.5px}
+.node b{color:var(--cyan)}
+.arrow{color:var(--dim);font-size:18px}
+footer{border-top:1px solid var(--line);padding:44px 0 54px;color:var(--dim);font-size:13px}
+footer .cols{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:26px}
+footer h4{color:#fff;font-size:14px;margin-bottom:10px}
+footer li{list-style:none;margin:6px 0}
+.legal{max-width:880px;border-top:1px dashed var(--line);padding-top:20px;line-height:1.8}
+@media(max-width:640px){.navlinks a:not(.btn){display:none}.term-body{font-size:11.5px}}
+</style>
+</head>
+<body>
+<canvas id="rain"></canvas><div class="vignette"></div>
+
+<nav><div class="wrap">
+  <div class="logo"><span class="star">✦</span> hm <span style="color:var(--dim);font-weight:400;font-size:13px;margin-left:6px">harmony-harness</span></div>
+  <div class="navlinks">
+    <a href="#features" data-i18n="nav_features">特性</a>
+    <a href="#install" data-i18n="nav_install">安装</a>
+    <a href="#evo" data-i18n="nav_evo">自进化</a>
+    <a href="#models" data-i18n="nav_models">模型路由</a>
+    <button class="lang" id="langBtn" onclick="toggleLang()">EN</button>
+    <a class="btn btn-primary" href="https://github.com/swsgbl/harmony-harness" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <h1>harmony-harness</h1>
+  <div class="tag" data-i18n="hero_tag">和 声 演 进</div>
+  <p class="sub" data-i18n="hero_sub">终端优先的 HarmonyOS 开发智能体框架 —— 一句话创建鸿蒙应用、构建 HAP、装机运行;带自进化循环的 AI 编程伙伴。基于 DeepSeek Harness(MIT)构建的独立社区项目。</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="https://github.com/swsgbl/harmony-harness" target="_blank" rel="noopener" data-i18n="cta_github">⭐ GitHub 开源</a>
+    <a class="btn btn-ghost" href="#install" data-i18n="cta_start">三步上手</a>
+  </div>
+  <div class="term"><div class="term-bar"><i></i><i></i><i></i></div>
+<div class="term-body"><span class="c">$ hm tui</span>
+<span class="w">✦ hm-tui</span>
+<span class="c">█   █  ▄▀▄  █▀▀▀▄ ▄▄▄▄▄ ▄▄▄▄▄ █   █ ▄▄▄▄▄</span>   <span class="g">HARMONY HARNESS</span>
+      <span class="c">glm-5.3 · Max effort</span>
+      C:\workspace\my-app
+      <span class="w" data-i18n="term_tagline">和声演进!</span>
+
+❯ <span class="w" data-i18n="term_prompt">创建鸿蒙项目 my-app,构建并装到模拟器跑起来</span>
+∴ <span class="g">harmony_project_create</span> → 63 files · Stage
+∴ <span class="g">harmony_build_hap</span>  → hvigorw · BUILD SUCCESSFUL
+∴ <span class="g">harmony_run</span>       → install ✓ · start ability ✓</div></div>
+</div></header>
+
+<section id="features"><div class="wrap">
+  <h2 class="sec" data-i18n="feat_title">为鸿蒙开发而生的完整工具面</h2>
+  <p class="secdesc" data-i18n="feat_desc">34 个智能体工具覆盖「创建 → 构建 → 签名 → 装机 → 日志 → 质量门禁 → 生态雷达」全链路,DevEco Studio 的命令行等价物,由 AI 自主编排。</p>
+  <div class="grid">
+    <div class="card"><div class="ic">🏗️</div><h3 data-i18n="c1_h">工程脚手架</h3><p data-i18n="c1_p"><code>harmony_project_create</code> 一句话生成完整 Stage 模型工程(AppScope / entry / hvigor / oh-package / 测试),自动装配 DevEco 调试签名。</p></div>
+    <div class="card"><div class="ic">🔨</div><h3 data-i18n="c2_h">HAP 命令行构建</h3><p data-i18n="c2_p"><code>harmony_build_hap</code> 走 DevEco 同款链路(ohpm + hvigorw),秒级出包,失败自动解析典型构建错误。</p></div>
+    <div class="card"><div class="ic">📲</div><h3 data-i18n="c3_h">装机运行</h3><p data-i18n="c3_p"><code>harmony_run</code>:签名检查 → <code>hdc install</code> → <code>aa start</code> → hilog 跟随。模拟器实测全通,真机链即插即用。</p></div>
+    <div class="card"><div class="ic">👁️</div><h3 data-i18n="c7_h">视觉看图</h3><p data-i18n="c7_p"><code>harmony_see_image</code> 让纯文本主模型按需调视觉端点看图 —— 截图、报错弹窗、设计稿,零路由切换。</p></div>
+    <div class="card"><div class="ic">📐</div><h3 data-i18n="c8_h">工程质量门禁</h3><p data-i18n="c8_p"><code>harmony_lint</code> 包装华为官方 codelinter(baseline 增量治理,存量债务不阻断)+ 项目画像 + UI 视觉回归(<code>harmony_visual_check</code>),质量评分自动计入基准循环。</p></div>
+    <div class="card"><div class="ic">🧠</div><h3 data-i18n="c4_h">自进化</h3><p data-i18n="c4_p">跨会话记忆自动注入系统提示词;技能草稿 → 静态审查 → 人工批准晋升;基准评测 + git 快照,严格提升才保留。</p></div>
+    <div class="card"><div class="ic">📡</div><h3 data-i18n="c5_h">控制论事件域</h3><p data-i18n="c5_p">感知(<code>harmony_sense</code>)→ 世界模型(<code>harmony_world_model</code>)→ 决策 → 执行 → 反馈,五环闭环的可观测开发回路。</p></div>
+    <div class="card"><div class="ic">🛡️</div><h3 data-i18n="c6_h">安全门禁</h3><p data-i18n="c6_p">deny-first 设备命令门禁:安装 / 卸载 / 清数据 / 重启类命令默认拒绝;技能晋升必过 Misevolution 静态审查 + 人工批准。</p></div>
+    <div class="card"><div class="ic">🛰️</div><h3 data-i18n="c9_h">生态雷达(hm 管家)</h3><p data-i18n="c9_p">8 源全景开源鸿蒙雷达(不止华为:PMC/SIG 周会·RFC·71 个 SIG·核心仓脉搏·开放原子基金会)每日 diff 脚手架与门禁假设,变更简报由本地 FreeRide 免费模型网关生成;P2 issue 管家每日拉取社区 issue 分类起草回复,人批准后才发布(双重门禁+AI 标识);修复流出方案卡→主模型修复→人批开草稿 PR;雷达与社区洞察自动沉淀进进化记忆——零成本自运维。</p></div>
+  </div>
+</div></section>
+
+<section style="padding-top:20px"><div class="wrap">
+  <div class="stats">
+    <div class="stat"><b>34</b><span data-i18n="s1">智能体工具</span></div>
+    <div class="stat"><b>34</b><span data-i18n="s2">预置厂商路由</span></div>
+    <div class="stat"><b>2</b><span data-i18n="s3">智能体模式(hm / 通用)</span></div>
+    <div class="stat"><b>0</b><span data-i18n="s4">上游 fork(纯插件组合)</span></div>
+  </div>
+</div></section>
+
+<section id="install" style="padding-top:30px"><div class="wrap">
+  <h2 class="sec" data-i18n="ins_title">三步上手</h2>
+  <p class="secdesc" data-i18n="ins_desc">Windows 一键安装;前置(Node ≥ 22 / pnpm / Git / dsh / DevEco Studio)详见 INSTALL 文档,各环节官方直达链接齐备。</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div style="flex:1"><div class="cap" data-i18n="ins1">克隆仓库</div><pre>git clone https://github.com/swsgbl/harmony-harness.git
+cd harmony-harness</pre></div></div>
+    <div class="step"><div class="n">2</div><div style="flex:1"><div class="cap" data-i18n="ins2">一键总装(幂等:前置检查 → 构建 → hvigorw 铺路 → profile → preset → hm 命令 → 品牌)</div><pre>pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1</pre></div></div>
+    <div class="step"><div class="n">3</div><div style="flex:1"><div class="cap" data-i18n="ins3">选模型路由,启动</div><pre>hm model set glm-coding     # 或 kimi / qwen / deepseek / ollama …
+hm tui</pre></div></div>
+  </div>
+</div></section>
+
+<section id="evo" style="padding-top:20px"><div class="wrap">
+  <h2 class="sec" data-i18n="evo_title">和声演进:会自我改进的开发伙伴</h2>
+  <p class="secdesc" data-i18n="evo_desc">借鉴 Darwin Gödel Machine 与 Penguin Harness 的机制思想:每轮优化有度量、有快照、可归因、可回滚 —— 严格提升,否则回退。</p>
+  <div class="loop">
+    <div class="node"><b data-i18n="n1">感知</b> sense</div><span class="arrow">→</span>
+    <div class="node"><b data-i18n="n2">世界模型</b> world_model</div><span class="arrow">→</span>
+    <div class="node"><b data-i18n="n3">决策</b> agent</div><span class="arrow">→</span>
+    <div class="node"><b data-i18n="n4">执行</b> 34 tools</div><span class="arrow">→</span>
+    <div class="node"><b data-i18n="n5">反馈</b> bench · evo_report</div><span class="arrow">↺</span>
+  </div>
+  <p class="secdesc" style="margin-top:34px" data-i18n="evo_outro">上一次会话踩过的坑,下一次会话开局就知道(insights 自动注入);每一轮改进都记录在积分榜,增益可归因到具体变更面。</p>
+</div></section>
+
+<section id="models" style="padding-top:10px"><div class="wrap">
+  <h2 class="sec" data-i18n="mod_title">模型无关 · 34 家厂商预置路由</h2>
+  <p class="secdesc" data-i18n="mod_desc">GLM Coding Plan(推荐)/ DeepSeek / 通义 / Kimi / 硅基流动 / OpenRouter / Anthropic / OpenAI / Ollama / LM Studio……一键切换,路由并存,密钥全走环境变量。</p>
+  <div class="steps">
+    <div class="step"><div class="n">✦</div><div style="flex:1"><pre>hm model list               # templates + current default
+hm model set glm-coding     # Zhipu Coding Plan (glm-5.3 · 1M ctx)
+hm model set ollama         # local inference, no key</pre></div></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="cols">
+    <div><h4>✦ harmony-harness</h4><ul>
+      <li><a href="https://github.com/swsgbl/harmony-harness" target="_blank" rel="noopener" data-i18n="f_repo">GitHub 仓库</a></li>
+      <li><a href="https://github.com/swsgbl/harmony-harness/blob/main/docs/INSTALL.md" target="_blank" rel="noopener" data-i18n="f_install">安装使用指导</a></li>
+      <li><a href="https://github.com/swsgbl/harmony-harness/blob/main/docs/ARCHITECTURE.md" target="_blank" rel="noopener" data-i18n="f_arch">架构设计</a></li>
+    </ul></div>
+    <div><h4 data-i18n="f_eco">生态</h4><ul>
+      <li><a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener">DeepSeek Harness(MIT)</a></li>
+      <li><a href="https://cordis.dev" target="_blank" rel="noopener">Cordis</a></li>
+      <li><a href="https://developer.huawei.com/consumer/cn/deveco-studio/" target="_blank" rel="noopener">DevEco Studio</a></li>
+    </ul></div>
+    <div><h4 data-i18n="f_docs">文档</h4><ul>
+      <li><a href="https://github.com/swsgbl/harmony-harness/blob/main/docs/DESIGN-evolution.md" target="_blank" rel="noopener" data-i18n="f_devo">自进化系统设计</a></li>
+      <li><a href="https://github.com/swsgbl/harmony-harness/blob/main/docs/ROADMAP.md" target="_blank" rel="noopener" data-i18n="f_road">路线图</a></li>
+      <li><a href="https://github.com/swsgbl/harmony-harness/blob/main/docs/DEVELOPMENT_LOG.md" target="_blank" rel="noopener" data-i18n="f_devlog">开发日志</a></li>
+    </ul></div>
+  </div>
+  <div class="legal" data-i18n="legal">
+    <b>非官方声明:</b>harmony-harness 是独立社区开源项目(MIT),与华为(Huawei)、开放原子开源基金会、DeepSeek、智谱 AI 均无隶属、合作或背书关系。
+    "HarmonyOS"、"鸿蒙"、"OpenHarmony"、"DevEco Studio" 等名称与标志归各自权利人所有,此处仅为描述性合理使用;"harmony" 取英文常用义(和声)。
+    本项目基于 MIT 许可的 deepseek-harness 与 Cordis 构建;自进化设计参考 Penguin Harness、Darwin Gödel Machine 等公开机制思想(无代码复制)。
+    <br>© 2026 harmony-harness contributors · MIT License
+  </div>
+</div></footer>
+
+<script>
+/* ---- i18n ---- */
+const I18N = {
+  zh: {
+    _title: 'harmony-harness — 终端优先的 HarmonyOS 开发智能体框架',
+    _desc: '一句话创建鸿蒙应用、构建 HAP、装机运行,并具备自进化能力。基于 DeepSeek Harness(MIT)的社区发行版。',
+    nav_features: '特性', nav_install: '安装', nav_evo: '自进化', nav_models: '模型路由',
+    hero_tag: '和 声 演 进',
+    hero_sub: '终端优先的 HarmonyOS 开发智能体框架 —— 一句话创建鸿蒙应用、构建 HAP、装机运行;带自进化循环的 AI 编程伙伴。基于 DeepSeek Harness(MIT)构建的独立社区项目。',
+    cta_github: '⭐ GitHub 开源', cta_start: '三步上手',
+    term_tagline: '和声演进!', term_prompt: '创建鸿蒙项目 my-app,构建并装到模拟器跑起来',
+    feat_title: '为鸿蒙开发而生的完整工具面',
+    feat_desc: '34 个智能体工具覆盖「创建 → 构建 → 签名 → 装机 → 日志 → 质量门禁 → 生态雷达」全链路,DevEco Studio 的命令行等价物,由 AI 自主编排。',
+    c1_h: '工程脚手架', c1_p: '<code>harmony_project_create</code> 一句话生成完整 Stage 模型工程(AppScope / entry / hvigor / oh-package / 测试),自动装配 DevEco 调试签名。',
+    c2_h: 'HAP 命令行构建', c2_p: '<code>harmony_build_hap</code> 走 DevEco 同款链路(ohpm + hvigorw),秒级出包,失败自动解析典型构建错误。',
+    c3_h: '装机运行', c3_p: '<code>harmony_run</code>:签名检查 → <code>hdc install</code> → <code>aa start</code> → hilog 跟随。模拟器实测全通,真机链即插即用。',
+    c7_h: '视觉看图', c7_p: '<code>harmony_see_image</code> 让纯文本主模型按需调视觉端点看图 —— 截图、报错弹窗、设计稿,零路由切换。',
+    c8_h: '工程质量门禁', c9_h: '生态雷达(hm 管家)', c9_p: '8 源全景开源鸿蒙雷达(不止华为:PMC/SIG 周会·RFC·71 个 SIG·核心仓脉搏·开放原子基金会)每日 diff 脚手架与门禁假设,变更简报由本地 FreeRide 免费模型网关生成——零成本自运维。', c8_p: '<code>harmony_lint</code> 包装华为官方 codelinter(baseline 增量治理,存量债务不阻断)+ 项目画像 + UI 视觉回归(<code>harmony_visual_check</code>),质量评分自动计入基准循环。',
+    c4_h: '自进化', c4_p: '跨会话记忆自动注入系统提示词;技能草稿 → 静态审查 → 人工批准晋升;基准评测 + git 快照,严格提升才保留。',
+    c5_h: '控制论事件域', c5_p: '感知(<code>harmony_sense</code>)→ 世界模型(<code>harmony_world_model</code>)→ 决策 → 执行 → 反馈,五环闭环的可观测开发回路。',
+    c6_h: '安全门禁', c6_p: 'deny-first 设备命令门禁:安装 / 卸载 / 清数据 / 重启类命令默认拒绝;技能晋升必过 Misevolution 静态审查 + 人工批准。',
+    s1: '智能体工具', s2: '预置厂商路由', s3: '智能体模式(hm / 通用)', s4: '上游 fork(纯插件组合)',
+    ins_title: '三步上手',
+    ins_desc: 'Windows 一键安装;前置(Node ≥ 22 / pnpm / Git / dsh / DevEco Studio)详见 INSTALL 文档,各环节官方直达链接齐备。',
+    ins1: '克隆仓库',
+    ins2: '一键总装(幂等:前置检查 → 构建 → hvigorw 铺路 → profile → preset → hm 命令 → 品牌)',
+    ins3: '选模型路由,启动',
+    evo_title: '和声演进:会自我改进的开发伙伴',
+    evo_desc: '借鉴 Darwin Gödel Machine 与 Penguin Harness 的机制思想:每轮优化有度量、有快照、可归因、可回滚 —— 严格提升,否则回退。',
+    n1: '感知', n2: '世界模型', n3: '决策', n4: '执行', n5: '反馈',
+    evo_outro: '上一次会话踩过的坑,下一次会话开局就知道(insights 自动注入);每一轮改进都记录在积分榜,增益可归因到具体变更面。',
+    mod_title: '模型无关 · 34 家厂商预置路由',
+    mod_desc: 'GLM Coding Plan(推荐)/ DeepSeek / 通义 / Kimi / 硅基流动 / OpenRouter / Anthropic / OpenAI / Ollama / LM Studio……一键切换,路由并存,密钥全走环境变量。',
+    f_repo: 'GitHub 仓库', f_install: '安装使用指导', f_arch: '架构设计',
+    f_eco: '生态', f_docs: '文档', f_devo: '自进化系统设计', f_road: '路线图', f_devlog: '开发日志',
+    legal: '<b>非官方声明:</b>harmony-harness 是独立社区开源项目(MIT),与华为(Huawei)、开放原子开源基金会、DeepSeek、智谱 AI 均无隶属、合作或背书关系。"HarmonyOS"、"鸿蒙"、"OpenHarmony"、"DevEco Studio" 等名称与标志归各自权利人所有,此处仅为描述性合理使用;"harmony" 取英文常用义(和声)。本项目基于 MIT 许可的 deepseek-harness 与 Cordis 构建;自进化设计参考 Penguin Harness、Darwin Gödel Machine 等公开机制思想(无代码复制)。<br>© 2026 harmony-harness contributors · MIT License',
+    _langBtn: 'EN'
+  },
+  en: {
+    _title: 'harmony-harness — Terminal-first AI agent framework for HarmonyOS development',
+    _desc: 'Create HarmonyOS apps, build HAPs and run them in one sentence — with a self-evolving loop. Community distro built on DeepSeek Harness (MIT).',
+    nav_features: 'Features', nav_install: 'Install', nav_evo: 'Self-Evolving', nav_models: 'Model Routing',
+    hero_tag: 'E V O L V E   I N   H A R M O N Y',
+    hero_sub: 'A terminal-first AI agent framework for HarmonyOS development — create apps, build HAPs, install and launch them in one sentence; a coding partner that evolves with you. An independent community distro built on DeepSeek Harness (MIT).',
+    cta_github: '⭐ Star on GitHub', cta_start: 'Quick Start',
+    term_tagline: 'Evolve in harmony!', term_prompt: 'Create a HarmonyOS project my-app, build it and run it on the emulator',
+    feat_title: 'A Complete Toolset Built for HarmonyOS',
+    feat_desc: '26 agent tools cover the full chain — scaffold → build → sign → install → logs → quality gates. The command-line equivalent of DevEco Studio, orchestrated autonomously by AI.',
+    c1_h: 'Project Scaffolding', c1_p: '<code>harmony_project_create</code> generates a complete Stage-model project (AppScope / entry / hvigor / oh-package / tests) from one sentence, auto-wiring DevEco debug signing.',
+    c2_h: 'HAP Command-Line Build', c2_p: '<code>harmony_build_hap</code> runs the same chain as DevEco (ohpm + hvigorw); builds in seconds and decodes typical failures.',
+    c3_h: 'Install & Run', c3_p: '<code>harmony_run</code>: signing check → <code>hdc install</code> → <code>aa start</code> → hilog tail. Verified end-to-end on the emulator; ready for real devices.',
+    c7_h: 'Vision-as-a-tool', c7_p: '<code>harmony_see_image</code> lets a text-only main model consult a vision endpoint on demand — screenshots, error dialogs, design mockups. No route switch.',
+    c8_h: 'Quality Gate', c9_h: 'Ecosystem Radar (hm keeper)', c9_p: 'An 8-source whole-OpenHarmony radar (beyond Huawei: PMC/SIG meeting notes, RFCs, 71 SIGs, core-repo pulse, OpenAtom foundation) diffs our scaffold & gate assumptions daily; briefs via a local FreeRide free-tier gateway; the P2 issue butler drafts community replies daily and publishes only after human approval; fixes flow plan-card -> main-model fix -> human-approved DRAFT PR; radar & community insights auto-persist into evolution memory — self-ops at zero cost.', c8_p: '<code>harmony_lint</code> wraps the official Huawei codelinter (baseline-based incremental gating — legacy debt never blocks), plus project profiling and UI visual regression (<code>harmony_visual_check</code>); the quality score feeds the benchmark loop.',
+    c4_h: 'Self-Evolving', c4_p: 'Cross-session memory injected into every prompt; skill drafts → static review → human-approved promotion; benchmarks + git snapshots — keep only strict improvements.',
+    c5_h: 'Cybernetics Event Domain', c5_p: 'Perceive (<code>harmony_sense</code>) → world model (<code>harmony_world_model</code>) → decide → act → feedback: an observable, closed development loop.',
+    c6_h: 'Safety Gates', c6_p: 'Deny-first device gate: install / uninstall / wipe / reboot commands are refused by default; skill promotion requires Misevolution static review + human approval.',
+    s1: 'agent tools', s2: '34 vendor routes preset', s3: 'agent modes (hm / general)', s4: 'upstream forks (pure plugin composition)',
+    ins_title: 'Quick Start in Three Steps',
+    ins_desc: 'One-shot install on Windows; prerequisites (Node ≥ 22 / pnpm / Git / dsh / DevEco Studio) with official links in the INSTALL doc.',
+    ins1: 'Clone the repository',
+    ins2: 'One-shot installer (idempotent: prereq check → build → hvigorw paving → profile → presets → hm command → branding)',
+    ins3: 'Pick a model route and launch',
+    evo_title: 'Evolve in Harmony: A Partner That Improves Itself',
+    evo_desc: 'Mechanism ideas borrowed from Darwin Gödel Machine and Penguin Harness: every optimization round is measured, snapshotted, attributable and reversible — strictly improve, or roll back.',
+    n1: 'Perceive', n2: 'World Model', n3: 'Decide', n4: 'Act', n5: 'Feedback',
+    evo_outro: 'Lessons from your last session are already known at the start of the next one (insights auto-injected); every improvement lands on the scoreboard with per-surface attribution.',
+    mod_title: 'Model-Agnostic · 34 Vendor Routes Preset',
+    mod_desc: 'GLM Coding Plan (recommended) / DeepSeek / Qwen / Kimi / SiliconFlow / OpenRouter / Anthropic / OpenAI / Ollama / LM Studio… one command to switch; routes coexist; keys live in env vars only.',
+    f_repo: 'GitHub Repository', f_install: 'Installation Guide', f_arch: 'Architecture',
+    f_eco: 'Ecosystem', f_docs: 'Docs', f_devo: 'Self-Evolution Design', f_road: 'Roadmap', f_devlog: 'Development Log',
+    legal: '<b>Non-affiliation notice:</b> harmony-harness is an independent community open-source project (MIT). It is not affiliated with, endorsed by, or cooperating with Huawei, the OpenAtom Foundation, DeepSeek, or Zhipu AI. "HarmonyOS", "OpenHarmony", "DevEco Studio" and related names and marks belong to their respective owners; used here descriptively under fair use. Built on the MIT-licensed deepseek-harness and Cordis; self-evolution design references public mechanism ideas from Penguin Harness and Darwin Gödel Machine (no code copied).<br>© 2026 harmony-harness contributors · MIT License',
+    _langBtn: '中文'
+  }
+};
+
+function applyLang(lang) {
+  const dict = I18N[lang] || I18N.zh;
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.title = dict._title;
+  document.querySelector('meta[name="description"]').content = dict._desc;
+  for (const el of document.querySelectorAll('[data-i18n]')) {
+    const v = dict[el.dataset.i18n];
+    if (v !== undefined) el.innerHTML = v;
+  }
+  document.getElementById('langBtn').textContent = dict._langBtn;
+  try { localStorage.setItem('hm-lang', lang); } catch (e) {}
+}
+function toggleLang() {
+  const cur = document.documentElement.lang.startsWith('zh') ? 'zh' : 'en';
+  applyLang(cur === 'zh' ? 'en' : 'zh');
+}
+(function () {
+  let lang = null;
+  try { lang = localStorage.getItem('hm-lang'); } catch (e) {}
+  if (!lang) {
+    const q = new URLSearchParams(location.search).get('lang');
+    if (q === 'en' || q === 'zh') lang = q;
+  }
+  if (!lang) lang = (navigator.language || 'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+  applyLang(lang);
+})();
+
+/* ---- Matrix-style rain, brand-tuned ---- */
+(function(){
+  const cv = document.getElementById('rain'), cx = cv.getContext('2d');
+  const GLYPHS = '01✦HM和声演进-{}<>/;$#'.split('');
+  let W, H, cols, drops, speeds;
+  function fit(){
+    W = cv.width = innerWidth; H = cv.height = innerHeight;
+    cols = Math.floor(W / 16);
+    drops = Array.from({length: cols}, () => Math.random() * -H / 16);
+    speeds = Array.from({length: cols}, () => 0.45 + Math.random() * 0.75);
+  }
+  fit(); addEventListener('resize', fit);
+  function frame(){
+    cx.fillStyle = 'rgba(11,30,58,0.14)';
+    cx.fillRect(0, 0, W, H);
+    cx.font = '14px Consolas, monospace';
+    for (let i = 0; i < cols; i++){
+      const y = drops[i] * 16;
+      const ch = GLYPHS[(Math.random() * GLYPHS.length) | 0];
+      cx.fillStyle = Math.random() < 0.06 ? 'rgba(234,244,250,0.92)' : 'rgba(79,216,235,0.72)';
+      cx.fillText(ch, i * 16, y);
+      if (y > H && Math.random() > 0.985) drops[i] = 0;
+      drops[i] += speeds[i];
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+</script>
+</body>
+</html>

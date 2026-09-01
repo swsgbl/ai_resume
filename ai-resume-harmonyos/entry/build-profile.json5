@@ -1,0 +1,15 @@
+{
+  "apiType": "stageMode",
+  "buildOption": {
+    "externalNativeOptions": {
+      "path": "./src/main/cpp",
+      "arguments": "",
+      "cppFlags": ""
+    }
+  },
+  "targets": [
+    {
+      "name": "default"
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "nav": {
+    "os": "简历 OS",
+    "home": "首页",
+    "career": "职业智能",
+    "resources": "资源工具",
+    "trae": "Trae AI",
+    "about": "关于",
+    "help": "帮助",
+    "terms": "条款",
+    "privacy": "隐私",
+    "login": "登录",
+    "register": "注册",
+    "language": "EN",
+    "harmony": "鸿蒙智能体"
+  },
+  "landing": {
+    "hero": {
+      "badge": "AI 驱动 · 智能简历",
+      "title": "让简历成为你的",
+      "titleAccent": "职业名片",
+      "subtitle": "融合 20 年猎头直觉与 AI 智能分析，不只是填写模板，而是挖掘你的默会经验，呈现最真实的职业价值",
+      "cta": "开始创建",
+      "ctaSecondary": "了解更多",
+      "onlineEntry": "在线使用"
+    },
+    "stats": {
+      "resumes": "份简历已创建",
+      "users": "位用户信赖",
+      "templates": "套专业模板",
+      "satisfaction": "满意度"
+    },
+    "features": {
+      "badge": "核心功能",
+      "title": "不只是简历编辑器",
+      "subtitle": "融合职业智能、默会知识挖掘和猎头级评估，让每一份简历都精准匹配目标岗位",
+      "items": {
+        "ai": {
+          "title": "AI 智能写作",
+          "desc": "基于上下文理解，自动优化措辞，让经历描述更专业"
+        },
+        "templates": {
+          "title": "专业模板库",
+          "desc": "涵盖互联网、金融、咨询等行业，精准匹配求职场景"
+        },
+        "career": {
+          "title": "职业智能评估",
+          "desc": "融合猎头直觉判断，6 维全景分析目标岗位匹配度"
+        },
+        "export": {
+          "title": "多格式导出",
+          "desc": "支持 PDF、Word、在线链接，一键分享你的简历"
+        },
+        "polanyi": {
+          "title": "默会知识挖掘",
+          "desc": "挖掘那些你知道但说不出的经验智慧，转化为面试资产"
+        },
+        "tailor": {
+          "title": "智能简历定制",
+          "desc": "根据目标 JD 自动调整叙事角度，让你看起来就是最佳人选"
+        }
+      }
+    },
+    "howItWorks": {
+      "badge": "使用流程",
+      "title": "三步打造完美简历",
+      "steps": {
+        "select": {
+          "title": "选择模板",
+          "desc": "从专业模板库中选择最适合你行业的模板"
+        },
+        "fill": {
+          "title": "填写内容",
+          "desc": "AI 辅助优化，让你的经历描述更专业"
+        },
+        "export": {
+          "title": "导出分享",
+          "desc": "PDF、Word 或在线链接，一键搞定"
+        }
+      }
+    },
+    "download": {
+      "badge": "多端支持",
+      "title": "随时随地，编辑简历",
+      "web": {
+        "title": "Web 在线版",
+        "desc": "无需安装，浏览器直接使用",
+        "cta": "立即使用"
+      },
+      "android": {
+        "title": "Android",
+        "desc": "手机端随时编辑",
+        "cta": "下载 APK"
+      },
+      "linux": {
+        "title": "Linux",
+        "desc": "支持 Ubuntu/Debian",
+        "cta": "下载 .deb"
+      },
+      "coming": "即将推出"
+    }
+  },
+  "career": {
+    "title": "职业智能中心",
+    "subtitle": "融合猎头评估引擎 + Polanyi 默会知识理论",
+    "desc": "AI 模拟资深猎头阅人无数后形成的直觉判断",
+    "evaluate": {
+      "title": "JD 全景评估",
+      "desc": "粘贴目标 JD，AI 以资深猎头直觉进行 6 维全景分析",
+      "placeholder": "粘贴职位描述 (JD) 到这里...",
+      "cta": "开始评估",
+      "analyzing": "AI 猎头分析中...",
+      "minChars": "请输入至少 50 个字符的职位描述"
+    },
+    "stories": {
+      "title": "STAR+R 故事银行",
+      "desc": "基于 Polanyi 默会知识理论，挖掘那些你知道但说不出的经验智慧",
+      "loginPrompt": "登录后上传简历，AI 将自动挖掘你的默会经验",
+      "loginCta": "登录开始挖掘",
+      "polanyiTitle": "什么是默会知识？",
+      "polanyiDesc": "Michael Polanyi 说：我们知道的多于我们能说的。你在职业生涯中积累了大量无法写在简历上的经验 — 处理危机的直觉反应、与人沟通的隐性技巧、技术选型的第六感。故事银行帮你把这些默会智慧转化为可复用的面试资产。",
+      "s": "情境",
+      "sDesc": "当时的背景和画面",
+      "t": "任务",
+      "tDesc": "面对的挑战和目标",
+      "a": "行动",
+      "aDesc": "你的直觉判断和决策"
+    },
+    "tailor": {
+      "title": "智能简历定制",
+      "desc": "AI 以猎头直觉调整你的简历叙事角度",
+      "loginPrompt": "登录后选择简历 + 粘贴目标 JD",
+      "loginCta": "登录开始定制"
+    },
+    "footer": "AI 判断仅供参考，最终决策权始终在你手中"
+  },
+  "resources": {
+    "title": "资源激活工具站",
+    "subtitle": "常用工具与优质资源一站搞定",
+    "search": {
+      "placeholder": "搜索资源或工具...",
+      "button": "搜索"
+    },
+    "categories": {
+      "common": {
+        "title": "常用工具"
+      },
+      "popular": {
+        "title": "热门资源"
+      }
+    },
+    "toolbox": {
+      "title": "工具箱",
+      "system": {
+        "title": "系统工具"
+      },
+      "network": {
+        "title": "网络工具"
+      },
+      "software": {
+        "title": "软件工具"
+      }
+    },
+    "list": {
+      "title": "资源中心",
+      "system": {
+        "title": "系统资源",
+        "iso": "系统镜像",
+        "drivers": "驱动程序",
+        "patches": "系统补丁"
+      },
+      "dev": {
+        "title": "开发资源",
+        "sdk": "SDK下载",
+        "api": "API文档",
+        "examples": "代码示例"
+      },
+      "security": {
+        "title": "安全资源",
+        "patches": "安全补丁",
+        "guides": "安全指南",
+        "vulndb": "漏洞数据库"
+      }
+    },
+    "feedback": {
+      "title": "问题反馈",
+      "name": "您的称呼",
+      "namePlaceholder": "请输入您的称呼",
+      "contact": "联系方式（选填）",
+      "contactPlaceholder": "邮箱/电话/微信",
+      "question": "问题描述",
+      "questionPlaceholder": "请详细描述您遇到的问题...",
+      "submit": "提交问题",
+      "success": "反馈提交成功",
+      "error": "提交失败，请重试",
+      "history": "历史反馈",
+      "noData": "暂无历史反馈",
+      "status": {
+        "pending": "等待处理",
+        "processing": "处理中",
+        "resolved": "已解决",
+        "closed": "已关闭"
+      }
+    },
+    "status": {
+      "title": "系统状态",
+      "server": "服务器状态",
+      "online": "在线",
+      "offline": "离线",
+      "services": "服务状态",
+      "api": "API 服务",
+      "database": "数据库服务",
+      "systemInfo": "系统信息",
+      "version": "版本号",
+      "lastUpdate": "最后更新"
+    },
+    "security": {
+      "title": "安全中心",
+      "detection": {
+        "title": "安全检测",
+        "desc": "所有工具均经过严格安全检测，确保无毒无害"
+      },
+      "instructions": {
+        "title": "使用说明",
+        "desc": "请按照说明文档正确使用工具"
+      },
+      "disclaimer": {
+        "title": "免责声明",
+        "desc": "本平台工具仅供学习交流，请勿用于商业用途"
+      }
+    },
+    "useNow": "立即使用",
+    "download": "下载",
+    "extractCode": "提取码"
+  },
+  "auth": {
+    "login": {
+      "title": "登录",
+      "email": "邮箱",
+      "password": "密码",
+      "submit": "登录",
+      "forgot": "忘记密码？",
+      "noAccount": "没有账号？",
+      "registerLink": "立即注册"
+    },
+    "register": {
+      "title": "注册",
+      "username": "用户名",
+      "email": "邮箱",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "submit": "注册",
+      "hasAccount": "已有账号？",
+      "loginLink": "立即登录"
+    }
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "出错了",
+    "retry": "重试",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "back": "返回",
+    "next": "下一步",
+    "submit": "提交"
+  }
+}

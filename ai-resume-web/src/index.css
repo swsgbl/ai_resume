@@ -1,0 +1,531 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   ndtool.cn — hm Unified Design System v3.0
+   统一 harmony-harness 品牌:深海军蓝 + 冰青 + 数字雨
+   (v2.0 印泥朱砂主题存于 git 历史,可随时回退)
+   变量名保持不变 — Tailwind 类零改动,全局换肤
+   ============================================ */
+
+@layer base {
+  :root {
+    /* ============================================
+       COLORS - Primary & Accent
+       ============================================ */
+    /* Primary — Ice Cyan (hm 主色) */
+    --color-primary-400: #4FD8EB;
+    --color-primary-500: #2FA8D8;
+    --color-primary-600: #1F7FA8;
+    --color-primary-700: #175F80;
+
+    /* Accent — Aurora Green (hm 终端绿) */
+    --color-accent-400: #9FE8F5;
+    --color-accent-500: #7DDF9A;
+    --color-accent-600: #4FBF7E;
+
+    /* ============================================
+       COLORS - Surface Ladder (4级系统 → navy)
+       ============================================ */
+    --color-surface-0: #081426;  /* Canvas — 基础背景 */
+    --color-surface-1: #0B1E3A;  /* 一级提升 — 默认卡片 */
+    --color-surface-2: #102A4C;  /* 二级提升 — 重要卡片 */
+    --color-surface-3: #123B6E;  /* 三级提升 — 悬浮层 */
+    --color-surface-4: #164270;  /* 四级提升 — 模态框 */
+
+    /* 向后兼容 */
+    --color-bg: #081426;
+    --color-surface: #0B1E3A;
+    --color-border: rgba(79, 216, 235, 0.22);
+    --color-border-hover: rgba(79, 216, 235, 0.55);
+
+    /* ============================================
+       COLORS - Text
+       ============================================ */
+    --color-text: #EAF4FA;
+    --color-text-secondary: #8FA8C0;
+    --color-text-muted: #5A7490;
+
+    /* ============================================
+       COLORS - Semantic (完整色阶)
+       ============================================ */
+    /* Success — aurora green */
+    --color-success-50:  #e8f5e9;
+    --color-success-100: #c8e6c9;
+    --color-success-500: #7DDF9A;
+    --color-success-700: #4caf50;
+
+    /* Warning — 暖橙系列 */
+    --color-warning-50:  #fff8e1;
+    --color-warning-500: #F5A623;
+    --color-warning-700: #f57c00;
+
+    /* Error — signal red */
+    --color-error-50: #ffebee;
+    --color-error-500: #E5484D;
+    --color-error-700: #d32f2f;
+
+    /* Info — ice cyan */
+    --color-info-50:   #e3f2fd;
+    --color-info-500:  #2FA8D8;
+    --color-info-700:  #1976d2;
+
+    /* 向后兼容 */
+    --color-error-500: #E5484D;
+    --color-warning-500: #F5A623;
+    --color-success-500: #7DDF9A;
+
+    /* ============================================
+       SHADOWS - 暗色主题层级系统
+       ============================================ */
+    --shadow-0: none;  /* Level 0 — Flat */
+
+    /* Level 1 — Hairline */
+    --shadow-1: 0 0 0 1px var(--color-border);
+
+    /* Level 2 — Subtle */
+    --shadow-2:
+      0 0 0 1px var(--color-border),
+      0 4px 8px -4px rgba(0, 0, 0, 0.3);
+
+    /* Level 3 — Medium */
+    --shadow-3:
+      0 0 0 1px var(--color-border),
+      0 8px 16px -8px rgba(0, 0, 0, 0.4);
+
+    /* Level 4 — Elevated */
+    --shadow-4:
+      0 0 0 1px var(--color-border),
+      0 16px 32px -16px rgba(0, 0, 0, 0.5);
+
+    /* Level 5 — Modal */
+    --shadow-5:
+      0 0 0 1px var(--color-border),
+      0 24px 48px -24px rgba(0, 0, 0, 0.6);
+
+    /* ============================================
+       TOUCH TARGETS - WCAG AAA
+       ============================================ */
+    --touch-target-min: 44px;
+    --touch-target-comfort: 48px;
+
+    /* ============================================
+       LETTER SPACING - 负字距规范
+       ============================================ */
+    --tracking-tighter: -0.05em;  /* -2.4px @ 48px */
+    --tracking-tight:   -0.03em;  /* -1.4px @ 48px */
+    --tracking-normal:  0;
+    --tracking-wide:    0.025em;
+
+    /* ============================================
+       ANIMATION
+       ============================================ */
+    --transition-fast: 150ms ease-out;
+    --transition-normal: 300ms ease-out;
+    --transition-slow: 500ms ease-out;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'DM Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.7;
+  }
+
+  /* ============================================
+     TOUCH TARGET BASELINE (P0)
+     ============================================ */
+  /* 确保所有可点击元素符合 WCAG AAA 标准 */
+  button, a, [role="button"], [role="link"] {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+
+  /* Scrollbar — minimal */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--color-border-hover); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+  /* Selection */
+  ::selection {
+    background-color: rgba(79, 216, 235, 0.25);
+    color: inherit;
+  }
+
+  /* Focus visible - 键盘导航可见性 (P0) */
+  :focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+
+  /* 移除默认 outline，使用 focus-visible */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer components {
+  /* ============================================
+     BUTTONS - 完整状态系统 (P0)
+     ============================================ */
+
+  /* Primary Button */
+  .btn-primary {
+    @apply relative inline-flex items-center justify-center;
+    @apply px-6 py-3 font-semibold text-white;
+    @apply transition-all duration-300;
+    background: var(--color-primary-500);
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    padding: 10px 18px;
+  }
+  .btn-primary.w-full, button.w-full.btn-primary { width: 100% !important; }
+
+  /* Primary Hover */
+  .btn-primary:hover {
+    background: var(--color-primary-600);
+    box-shadow: var(--shadow-2);
+  }
+
+  /* Primary Active/Pressed */
+  .btn-primary:active {
+    background: var(--color-primary-700);
+    transform: scale(0.98);
+  }
+
+  /* Primary Disabled (P0 新增) */
+  .btn-primary:disabled {
+    background: var(--color-border);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none;
+  }
+
+  /* Primary Focus Ring (P0 新增) */
+  .btn-primary:focus-visible {
+    @apply outline-none;
+    box-shadow:
+      0 0 0 2px var(--color-surface-0),
+      0 0 0 4px var(--color-primary-500);
+  }
+
+  .btn-primary:disabled:focus-visible {
+    box-shadow: none;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center;
+    @apply px-6 py-3 font-semibold;
+    @apply transition-all duration-300;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    padding: 10px 18px;
+  }
+  .btn-secondary.w-full, button.w-full.btn-secondary { width: 100% !important; }
+
+  .btn-secondary:hover {
+    border-color: var(--color-border-hover);
+    background: rgba(255,255,255,0.03);
+    box-shadow: var(--shadow-1);
+  }
+
+  /* Secondary Disabled (P0 新增) */
+  .btn-secondary:disabled {
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    background: transparent;
+  }
+
+  /* Secondary Focus Ring */
+  .btn-secondary:focus-visible {
+    @apply outline-none;
+    box-shadow:
+      0 0 0 2px var(--color-surface-0),
+      0 0 0 4px var(--color-primary-500);
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center;
+    @apply px-6 py-3 font-semibold;
+    @apply transition-all duration-300;
+    color: var(--color-text-secondary);
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    padding: 10px 18px;
+  }
+  .btn-ghost.w-full, button.w-full.btn-ghost { width: 100% !important; }
+
+  .btn-ghost:hover {
+    color: var(--color-text);
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* Ghost Disabled */
+  .btn-ghost:disabled {
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+  }
+
+  /* Ghost Focus Ring */
+  .btn-ghost:focus-visible {
+    @apply outline-none;
+    background: rgba(255,255,255,0.08);
+    box-shadow:
+      0 0 0 2px var(--color-surface-0),
+      0 0 0 4px var(--color-primary-500);
+  }
+
+  /* Accent Button */
+  .btn-accent {
+    @apply relative inline-flex items-center justify-center;
+    @apply px-6 py-3 font-semibold text-white;
+    @apply transition-all duration-300;
+    background: var(--color-accent-600);
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    padding: 10px 18px;
+  }
+  .btn-accent.w-full, button.w-full.btn-accent { width: 100% !important; }
+
+  .btn-accent:hover {
+    background: var(--color-accent-500);
+    box-shadow: var(--shadow-2);
+  }
+
+  .btn-accent:active {
+    transform: scale(0.98);
+  }
+
+  .btn-accent:disabled {
+    background: var(--color-border);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+  }
+
+  .btn-accent:focus-visible {
+    @apply outline-none;
+    box-shadow:
+      0 0 0 2px var(--color-surface-0),
+      0 0 0 4px var(--color-accent-500);
+  }
+
+  /* ============================================
+     FORM INPUTS - 完整状态系统 (P0)
+     ============================================ */
+  .input-cyber {
+    @apply w-full px-4 py-3 text-white;
+    @apply transition-all duration-300;
+    background: var(--color-surface-1);
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    min-width: 200px;
+    min-height: var(--touch-target-min);
+  }
+
+  @media (max-width: 640px) {
+    .input-cyber { width: 100%; min-width: 180px; }
+  }
+
+  .input-cyber:hover:not(:focus) {
+    border-bottom-color: var(--color-border-hover);
+  }
+
+  .input-cyber:focus {
+    @apply outline-none;
+    border-bottom-color: var(--color-primary-500);
+    box-shadow:
+      0 1px 0 0 var(--color-primary-500),
+      0 0 0 3px rgba(79, 216, 235, 0.12);
+  }
+
+  /* Error State (P0 新增) */
+  .input-cyber.input-error {
+    border-bottom-color: var(--color-error-500);
+  }
+
+  .input-cyber.input-error:focus {
+    border-bottom-color: var(--color-error-500);
+    box-shadow:
+      0 1px 0 0 var(--color-error-500),
+      0 0 0 3px rgba(79, 216, 235, 0.12);
+  }
+
+  /* Success State (P0 新增) */
+  .input-cyber.input-success {
+    border-bottom-color: var(--color-success-500);
+  }
+
+  .input-cyber.input-success:focus {
+    border-bottom-color: var(--color-success-500);
+    box-shadow:
+      0 1px 0 0 var(--color-success-500),
+      0 0 0 3px rgba(125, 223, 154, 0.12);
+  }
+
+  /* Disabled State (P0 新增) */
+  .input-cyber:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--color-surface-0);
+  }
+
+  /* ============================================
+     CARDS - 表面层级系统 (P1)
+     ============================================ */
+  .card-glass {
+    @apply p-6;
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-1);
+  }
+
+  .card-neon {
+    @apply p-6;
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    position: relative;
+    box-shadow: var(--shadow-1);
+  }
+  .card-neon:hover {
+    border-color: var(--color-primary-500);
+    box-shadow: var(--shadow-2);
+  }
+
+  .card-hover {
+    @apply p-6 transition-all duration-300;
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-1);
+  }
+  .card-hover:hover {
+    border-color: var(--color-border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-2);
+  }
+
+  /* 新增: 卡片层级变体 */
+  .card-elevation-1 {
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-1);
+  }
+
+  .card-elevation-2 {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border-hover);
+    box-shadow: var(--shadow-2);
+  }
+
+  .card-elevation-3 {
+    background: var(--color-surface-3);
+    border: 1px solid var(--color-border-hover);
+    box-shadow: var(--shadow-3);
+  }
+
+  /* ============================================
+     TEXT - 文本语义颜色 (P0 新增)
+     ============================================ */
+  .text-success { color: var(--color-success-500); }
+  .text-warning { color: var(--color-warning-500); }
+  .text-error   { color: var(--color-error-500); }
+  .text-info    { color: var(--color-info-500); }
+
+  /* 背景 Soft 变体 */
+  .bg-success-soft { background: var(--color-success-50); color: var(--color-success-700); }
+  .bg-error-soft   { background: var(--color-error-50); color: var(--color-error-700); }
+  .bg-warning-soft { background: var(--color-warning-50); color: var(--color-warning-700); }
+  .bg-info-soft    { background: var(--color-info-50); color: var(--color-info-700); }
+
+  /* ============================================
+     SHADOW UTILITIES (P1 新增)
+     ============================================ */
+  .shadow-0 { box-shadow: var(--shadow-0); }
+  .shadow-1 { box-shadow: var(--shadow-1); }
+  .shadow-2 { box-shadow: var(--shadow-2); }
+  .shadow-3 { box-shadow: var(--shadow-3); }
+  .shadow-4 { box-shadow: var(--shadow-4); }
+  .shadow-5 { box-shadow: var(--shadow-5); }
+
+  /* ============================================
+     Text
+     ============================================ */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--color-primary-500), var(--color-accent-500));
+  }
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+  }
+  .text-gradient-accent {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--color-accent-400), var(--color-accent-600));
+  }
+
+  /* ============================================
+     Animation
+     ============================================ */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* ============================================
+     Backgrounds
+     ============================================ */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(79, 216, 235, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79, 216, 235, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .bg-dots {
+    background-image: radial-gradient(rgba(79, 216, 235, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ============================================
+     Loading
+     ============================================ */
+  .spinner {
+    @apply w-8 h-8 border-4 rounded-full;
+    border-color: var(--color-border);
+    border-top-color: var(--color-primary-500);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ============================================
+     Utilities
+     ============================================ */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@layer utilities {
+}

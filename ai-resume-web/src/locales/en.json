@@ -1,0 +1,268 @@
+{
+  "nav": {
+    "os": "Resume OS",
+    "home": "Home",
+    "career": "Career AI",
+    "resources": "Resources",
+    "trae": "Trae AI",
+    "about": "About",
+    "help": "Help",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "login": "Login",
+    "register": "Register",
+    "language": "涓枃",
+    "harmony": "HarmonyOS Agent"
+  },
+  "landing": {
+    "hero": {
+      "badge": "AI-Powered 路 Smart Resume",
+      "title": "Make Your Resume a",
+      "titleAccent": "Career Card",
+      "subtitle": "Combining 20 years of headhunter intuition with AI analysis 鈥?not just filling templates, but uncovering your tacit knowledge to present your true professional value",
+      "cta": "Start Creating",
+      "ctaSecondary": "Learn More",
+      "onlineEntry": "Use Online"
+    },
+    "stats": {
+      "resumes": "resumes created",
+      "users": "trusted users",
+      "templates": "professional templates",
+      "satisfaction": "satisfaction rate"
+    },
+    "features": {
+      "badge": "Core Features",
+      "title": "More Than a Resume Editor",
+      "subtitle": "Integrating career intelligence, tacit knowledge mining, and headhunter-level assessment",
+      "items": {
+        "ai": {
+          "title": "AI Smart Writing",
+          "desc": "Context-aware optimization for more professional descriptions"
+        },
+        "templates": {
+          "title": "Template Library",
+          "desc": "Industry-specific templates for tech, finance, consulting and more"
+        },
+        "career": {
+          "title": "Career Intelligence",
+          "desc": "6-dimension JD analysis with headhunter intuition"
+        },
+        "export": {
+          "title": "Multi-format Export",
+          "desc": "PDF, Word, or online link 鈥?share with one click"
+        },
+        "polanyi": {
+          "title": "Tacit Knowledge Mining",
+          "desc": "Uncover the expertise you know but can't articulate"
+        },
+        "tailor": {
+          "title": "Smart Customization",
+          "desc": "Auto-adjust resume narrative to match target positions"
+        }
+      }
+    },
+    "howItWorks": {
+      "badge": "How It Works",
+      "title": "Three Steps to a Perfect Resume",
+      "steps": {
+        "select": {
+          "title": "Choose Template",
+          "desc": "Pick the best template for your industry"
+        },
+        "fill": {
+          "title": "Fill Content",
+          "desc": "AI assists in optimizing your descriptions"
+        },
+        "export": {
+          "title": "Export & Share",
+          "desc": "PDF, Word, or online link in one click"
+        }
+      }
+    },
+    "download": {
+      "badge": "Multi-platform",
+      "title": "Edit Your Resume Anywhere",
+      "web": {
+        "title": "Web",
+        "desc": "No installation needed",
+        "cta": "Use Online"
+      },
+      "android": {
+        "title": "Android",
+        "desc": "Edit on the go",
+        "cta": "Download APK"
+      },
+      "linux": {
+        "title": "Linux",
+        "desc": "Ubuntu/Debian supported",
+        "cta": "Download .deb"
+      },
+      "coming": "Coming Soon"
+    }
+  },
+  "career": {
+    "title": "Career Intelligence Center",
+    "subtitle": "Headhunter Assessment Engine + Polanyi Tacit Knowledge Theory",
+    "desc": "AI simulates the intuitive judgment of a senior headhunter",
+    "evaluate": {
+      "title": "JD Full Assessment",
+      "desc": "Paste a JD for AI headhunter 6-dimension analysis",
+      "placeholder": "Paste job description here...",
+      "cta": "Start Assessment",
+      "analyzing": "AI headhunter analyzing...",
+      "minChars": "Please enter at least 50 characters"
+    },
+    "stories": {
+      "title": "STAR+R Story Bank",
+      "desc": "Mine your tacit knowledge based on Polanyi's theory",
+      "loginPrompt": "Login to upload resume and mine tacit knowledge",
+      "loginCta": "Login to Start",
+      "polanyiTitle": "What is Tacit Knowledge?",
+      "polanyiDesc": "Michael Polanyi said: We know more than we can tell. You've accumulated experience that can't be written on a resume 鈥?crisis handling instincts, implicit communication skills, tech selection sixth sense. Story Bank helps convert this tacit wisdom into reusable interview assets.",
+      "s": "Situation",
+      "sDesc": "The background and context",
+      "t": "Task",
+      "tDesc": "The challenge and goal",
+      "a": "Action",
+      "aDesc": "Your intuitive judgment"
+    },
+    "tailor": {
+      "title": "Smart Resume Tailoring",
+      "desc": "AI adjusts your resume narrative with headhunter intuition",
+      "loginPrompt": "Login to select resume + paste target JD",
+      "loginCta": "Login to Start"
+    },
+    "footer": "AI judgment is for reference only 鈥?the final decision is always yours"
+  },
+  "resources": {
+    "title": "Resource & Tools Station",
+    "subtitle": "Essential tools and quality resources in one place",
+    "search": {
+      "placeholder": "Search resources or tools...",
+      "button": "Search"
+    },
+    "categories": {
+      "common": {
+        "title": "Common Tools"
+      },
+      "popular": {
+        "title": "Popular Resources"
+      }
+    },
+    "toolbox": {
+      "title": "Toolbox",
+      "system": {
+        "title": "System Tools"
+      },
+      "network": {
+        "title": "Network Tools"
+      },
+      "software": {
+        "title": "Software Tools"
+      }
+    },
+    "list": {
+      "title": "Resource Center",
+      "system": {
+        "title": "System Resources",
+        "iso": "System Images",
+        "drivers": "Drivers",
+        "patches": "System Patches"
+      },
+      "dev": {
+        "title": "Dev Resources",
+        "sdk": "SDK Downloads",
+        "api": "API Docs",
+        "examples": "Code Examples"
+      },
+      "security": {
+        "title": "Security Resources",
+        "patches": "Security Patches",
+        "guides": "Security Guides",
+        "vulndb": "Vulnerability DB"
+      }
+    },
+    "feedback": {
+      "title": "Feedback",
+      "name": "Your Name",
+      "namePlaceholder": "Enter your name",
+      "contact": "Contact (optional)",
+      "contactPlaceholder": "Email/Phone/WeChat",
+      "question": "Issue Description",
+      "questionPlaceholder": "Describe your issue in detail...",
+      "submit": "Submit",
+      "success": "Feedback submitted successfully",
+      "error": "Submission failed, please try again",
+      "history": "Feedback History",
+      "noData": "No feedback yet",
+      "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "resolved": "Resolved",
+        "closed": "Closed"
+      }
+    },
+    "status": {
+      "title": "System Status",
+      "server": "Server Status",
+      "online": "Online",
+      "offline": "Offline",
+      "services": "Service Status",
+      "api": "API Service",
+      "database": "Database Service",
+      "systemInfo": "System Info",
+      "version": "Version",
+      "lastUpdate": "Last Updated"
+    },
+    "security": {
+      "title": "Security Center",
+      "detection": {
+        "title": "Security Check",
+        "desc": "All tools are strictly tested to ensure safety"
+      },
+      "instructions": {
+        "title": "Usage Instructions",
+        "desc": "Please follow documentation to use tools correctly"
+      },
+      "disclaimer": {
+        "title": "Disclaimer",
+        "desc": "Tools are for learning purposes only, not for commercial use"
+      }
+    },
+    "useNow": "Use Now",
+    "download": "Download",
+    "extractCode": "Extract code"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Login",
+      "forgot": "Forgot password?",
+      "noAccount": "No account?",
+      "registerLink": "Register now"
+    },
+    "register": {
+      "title": "Register",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Register",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Login now"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit"
+  }
+}

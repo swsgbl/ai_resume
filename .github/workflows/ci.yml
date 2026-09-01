@@ -1,0 +1,346 @@
+name: AI Resume Platform - CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  # ==================== 前端代码质量检查 ====================
+  frontend-lint:
+    name: Frontend - Lint & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ai-resume-web/package-lock.json
+
+      - name: 安装依赖
+        working-directory: ./ai-resume-web
+        run: npm ci
+
+      - name: ESLint 检查
+        working-directory: ./ai-resume-web
+        run: npm run lint
+
+      - name: TypeScript 类型检查
+        working-directory: ./ai-resume-web
+        run: npx tsc --noEmit
+
+  # ==================== 前端单元测试 ====================
+  frontend-unit-test:
+    name: Frontend - Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ai-resume-web/package-lock.json
+
+      - name: 安装依赖
+        working-directory: ./ai-resume-web
+        run: npm ci
+
+      - name: 运行单元测试
+        working-directory: ./ai-resume-web
+        run: npm run test
+
+      - name: 生成覆盖率报告
+        if: success()
+        working-directory: ./ai-resume-web
+        run: npm run test:coverage
+
+      - name: 上传覆盖率报告
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: ./ai-resume-web/coverage/coverage-final.json
+          flags: frontend-unit
+          name: frontend-unit-coverage
+
+  # ==================== 前端 E2E 测试 ====================
+  frontend-e2e-test:
+    name: Frontend - E2E Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ai-resume-web/package-lock.json
+
+      - name: 安装依赖
+        working-directory: ./ai-resume-web
+        run: npm ci
+
+      - name: 安装 Playwright 浏览器
+        working-directory: ./ai-resume-web
+        run: npx playwright install --with-deps chromium
+
+      - name: 运行 E2E 测试
+        working-directory: ./ai-resume-web
+        run: npm run test:e2e -- --project=chromium-desktop
+        env:
+          CI: true
+
+      - name: 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: ai-resume-web/playwright-report/
+          retention-days: 7
+
+      - name: 上传测试视频
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-videos
+          path: ai-resume-web/test-results/
+          retention-days: 3
+
+  # ==================== 后端代码质量检查 ====================
+  backend-lint:
+    name: Backend - Lint & Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: 安装依赖
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install black flake8 mypy pytest pytest-cov
+
+      - name: Black 格式检查
+        working-directory: ./backend
+        run: black --check app/
+
+      - name: Flake8 代码检查
+        working-directory: ./backend
+        run: flake8 app/ --max-line-length=120 --extend-ignore=E203,W503
+
+      - name: MyPy 类型检查
+        working-directory: ./backend
+        run: mypy app/ --ignore-missing-imports
+        continue-on-error: true
+
+  # ==================== 后端单元测试 ====================
+  backend-unit-test:
+    name: Backend - Unit Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+          MYSQL_DATABASE: ai_resume_test
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_pass
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 3306:3306
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: 安装依赖
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio pymysql
+
+      - name: 运行测试
+        working-directory: ./backend
+        run: |
+          python -m pytest tests/ --cov=app --cov-report=xml --cov-report=html --asyncio-mode=auto
+        env:
+          DATABASE_URL: mysql+aiomysql://test_user:test_pass@localhost:3306/ai_resume_test
+          TEST_DATABASE_URL: mysql+aiomysql://test_user:test_pass@localhost:3306/ai_resume_test
+
+      - name: 上传覆盖率报告
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+
+  # ==================== 安全扫描 ====================
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 初始化 CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript, python
+
+      - name: CodeQL 分析
+        uses: github/codeql-action/analyze@v3
+
+      - name: 依赖安全扫描 (前端)
+        run: |
+          npm install -g audit-ci@latest
+          cd ai-resume-web
+          audit-ci --moderate
+        continue-on-error: true
+
+      - name: 依赖安全扫描 (后端)
+        working-directory: ./backend
+        run: |
+          pip install safety bandit
+          safety check --json > safety-results.json || true
+          bandit -r app/ -f json > bandit-results.json || true
+        continue-on-error: true
+
+  # ==================== Docker 构建验证 ====================
+  docker-build:
+    name: Docker - Build Verification
+    runs-on: ubuntu-latest
+    needs: [frontend-lint, backend-lint]
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 构建后端镜像
+        run: |
+          docker build -t ai-resume-backend:test -f backend/Dockerfile backend/
+
+      - name: 构建前端镜像
+        run: |
+          docker build -t ai-resume-web:test -f ai-resume-web/Dockerfile .
+
+      - name: 镜像安全扫描
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ai-resume-backend:test
+          format: 'sarif'
+          output: 'trivy-backend-results.sarif'
+        continue-on-error: true
+
+      - name: 上传安全扫描结果
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-backend-results.sarif'
+        continue-on-error: true
+
+  # ==================== 构建验证 ====================
+  build-verification:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [frontend-lint, backend-lint]
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 构建前端
+        working-directory: ./ai-resume-web
+        run: |
+          npm ci
+          npm run build
+          ls -la dist/
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: ai-resume-web/dist/
+          retention-days: 3
+
+  # ==================== 汇总状态 ====================
+  ci-summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [frontend-lint, frontend-unit-test, frontend-e2e-test, backend-lint, backend-unit-test, security-scan, docker-build, build-verification]
+    if: always()
+
+    steps:
+      - name: 检查所有任务状态
+        run: |
+          echo "## CI 任务状态汇总" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 任务 | 状态 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 前端代码检查 | ${{ needs.frontend-lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 前端单元测试 | ${{ needs.frontend-unit-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 前端E2E测试 | ${{ needs.frontend-e2e-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 后端代码检查 | ${{ needs.backend-lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 后端单元测试 | ${{ needs.backend-unit-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 安全扫描 | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker构建 | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 构建验证 | ${{ needs.build-verification.result }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: 设置 CI 状态
+        if: |
+          needs.frontend-lint.result == 'failure' ||
+          needs.backend-lint.result == 'failure' ||
+          needs.frontend-unit-test.result == 'failure' ||
+          needs.backend-unit-test.result == 'failure' ||
+          needs.frontend-e2e-test.result == 'failure'
+        run: exit 1

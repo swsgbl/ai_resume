@@ -1,0 +1,84 @@
+# Prometheus 告警规则
+groups:
+  - name: ai-resume-alerts
+    interval: 30s
+    rules:
+      # 服务可用性
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务 {{ $labels.job }} 宕机"
+          description: "{{ $labels.instance }} 已宕机超过 1 分钟"
+
+      # 高错误率
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高错误率检测到"
+          description: "{{ $labels.job }} 错误率超过 5%"
+
+      # 高响应时间
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, http_request_duration_seconds_bucket) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高响应时间"
+          description: "P95 响应时间超过 1 秒"
+
+      # 高 CPU 使用率
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高 CPU 使用率"
+          description: "{{ $labels.job }} CPU 使用率超过 80%"
+
+      # 高内存使用率
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 1024
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高内存使用"
+          description: "{{ $labels.job }} 内存使用超过 1GB"
+
+      # 磁盘空间不足
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.15
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "磁盘空间不足"
+          description: "根分区可用空间低于 15%"
+
+      # Redis 连接失败
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis 服务宕机"
+          description: "Redis 已宕机超过 1 分钟"
+
+      # 数据库连接池耗尽
+      - alert: DatabasePoolExhausted
+        expr: db_pool_available_connections < 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "数据库连接池不足"
+          description: "可用数据库连接少于 5 个"

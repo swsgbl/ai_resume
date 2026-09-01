@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-resume-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    volumes:
+      - backend_data:/app/data
+      - ./logs/backend:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ai-resume-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ai-resume-web/Dockerfile
+    container_name: ai-resume-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ai-resume-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-resume-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - ai-resume-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: ai-resume-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ai_resume
+      MYSQL_USER: airesume
+      MYSQL_PASSWORD: airesume_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ai-resume-network
+    profiles:
+      - production
+
+  nginx:
+    image: nginx:alpine
+    container_name: ai-resume-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./ai-resume-web/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    networks:
+      - ai-resume-network
+    profiles:
+      - production
+
+volumes:
+  backend_data:
+  mysql_data:
+  redis_data:
+
+networks:
+  ai-resume-network:
+    driver: bridge

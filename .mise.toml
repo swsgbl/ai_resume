@@ -1,0 +1,71 @@
+# mise 配置文件 - AI Resume 项目
+# 此配置文件定义项目所需的工具版本
+# 文档: https://mise.jdx.dev/configuration.html
+
+# 工具版本配置
+[tools]
+# Node.js - 前端构建工具
+node = "lts"  # 当前: v24.14.0
+
+# Python - 后端服务
+python = "3.14"  # 当前: 3.14.3
+
+# Go - 部分工具需要
+go = "latest"  # 当前: 1.26.1
+
+# Java - DevEco Studio 需要 (安装后启用)
+# java = "corretto-17"
+
+# Gradle - 构建工具 (安装后启用)
+# gradle = "8.5"
+
+# pnpm - 包管理器 (可选)
+# pnpm = "latest"
+
+# 环境变量配置
+[env]
+# HarmonyOS SDK 路径 (安装 DevEco Studio 后配置)
+# HOS_SDK_HOME = "$HOME/Huawei/Sdk"
+
+# DevEco Studio 路径 (安装后配置)
+# DEVECO_HOME = "$HOME/Huawei/DevEcoStudio"
+
+# 仓颉编译器路径 (安装后配置)
+# CJ_HOME = "$HOME/Huawei/Cangjie"
+# PATH_add = "$CJ_HOME/bin"
+
+# 后端服务地址
+BACKEND_URL = "http://localhost:8000"
+
+# 开发环境标识
+NODE_ENV = "development"
+
+# 任务配置
+[tasks]
+# 项目级任务
+"install:web" = "cd ai-resume-web && npm install"
+"install:desktop" = "cd ai-resume-desktop && npm install"
+"install:backend" = "cd backend && pip install -r requirements.txt"
+
+"dev:web" = "cd ai-resume-web && npm run dev"
+"dev:backend" = "cd backend && uvicorn app.main:app --reload"
+
+"build:web" = "cd ai-resume-web && npm run build"
+"build:desktop" = "cd ai-resume-desktop && npm run build"
+
+"test:web" = "cd ai-resume-web && npm test"
+"test:backend" = "cd backend && pytest"
+
+# 设置
+[settings]
+# 自动安装缺失的工具
+auto_install = true
+
+# 实验性功能
+experimental = true
+
+# 别名
+[alias]
+# 创建工具版本别名
+# node_lts = "24"
+# python_stable = "3.14"

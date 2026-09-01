@@ -1,0 +1,128 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "AI Resume Generator Module"
+    },
+    {
+      "name": "EntryStage_desc",
+      "value": "AI Resume Application Entry"
+    },
+    {
+      "name": "EntryStage_label",
+      "value": "AI简历"
+    },
+    {
+      "name": "app_name",
+      "value": "AI简历"
+    },
+    {
+      "name": "login_title",
+      "value": "登录"
+    },
+    {
+      "name": "register_title",
+      "value": "注册"
+    },
+    {
+      "name": "email_placeholder",
+      "value": "请输入邮箱"
+    },
+    {
+      "name": "password_placeholder",
+      "value": "请输入密码"
+    },
+    {
+      "name": "login_button",
+      "value": "登录"
+    },
+    {
+      "name": "register_button",
+      "value": "注册"
+    },
+    {
+      "name": "no_account",
+      "value": "还没有账号？"
+    },
+    {
+      "name": "register_now",
+      "value": "立即注册"
+    },
+    {
+      "name": "home_title",
+      "value": "AI 简历"
+    },
+    {
+      "name": "my_resumes",
+      "value": "我的简历"
+    },
+    {
+      "name": "templates",
+      "value": "模板"
+    },
+    {
+      "name": "ai_assistant",
+      "value": "AI助手"
+    },
+    {
+      "name": "create_resume",
+      "value": "创建新简历"
+    },
+    {
+      "name": "no_resumes",
+      "value": "还没有简历"
+    },
+    {
+      "name": "create_first",
+      "value": "点击下方按钮创建第一份简历"
+    },
+    {
+      "name": "save",
+      "value": "保存"
+    },
+    {
+      "name": "export",
+      "value": "导出"
+    },
+    {
+      "name": "export_pdf",
+      "value": "导出PDF"
+    },
+    {
+      "name": "export_docx",
+      "value": "导出Word"
+    },
+    {
+      "name": "personal_info",
+      "value": "个人信息"
+    },
+    {
+      "name": "education",
+      "value": "教育经历"
+    },
+    {
+      "name": "experience",
+      "value": "工作经历"
+    },
+    {
+      "name": "skills",
+      "value": "技能特长"
+    },
+    {
+      "name": "projects",
+      "value": "项目经验"
+    },
+    {
+      "name": "loading",
+      "value": "加载中..."
+    },
+    {
+      "name": "draft",
+      "value": "草稿"
+    },
+    {
+      "name": "completed",
+      "value": "已完成"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# Alertmanager 服务配置
+# 使用方式: docker-compose -f docker-compose.monitoring.yml -f docker-compose.alertmanager.yml up -d
+
+version: '3.8'
+
+services:
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: ai-resume-alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./templates:/etc/alertmanager/templates:ro
+      - alertmanager_data:/alertmanager
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+    restart: unless-stopped
+    networks:
+      - ai-resume-network
+    profiles:
+      - monitoring
+
+volumes:
+  alertmanager_data:
+
+networks:
+  ai-resume-network:
+    external: true

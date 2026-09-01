@@ -1,0 +1,132 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import PublicLayout from '../../components/PublicLayout';
+import ResourceLayout from '../../components/resources/ResourceLayout';
+
+interface FeedbackItem {
+  id: string;
+  name: string;
+  question: string;
+  date: string;
+  status: 'pending' | 'processing' | 'resolved' | 'closed';
+}
+
+export default function FeedbackPage() {
+  const { t } = useTranslation();
+  const [name, setName] = useState('');
+  const [contact, setContact] = useState('');
+  const [question, setQuestion] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [history, setHistory] = useState<FeedbackItem[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('feedback_history') || '[]');
+    } catch { return []; }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !question.trim()) return;
+
+    const item: FeedbackItem = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      question: question.trim(),
+      date: new Date().toLocaleString('zh-CN'),
+      status: 'pending',
+    };
+
+    const updated = [item, ...history];
+    setHistory(updated);
+    localStorage.setItem('feedback_history', JSON.stringify(updated));
+    setName('');
+    setContact('');
+    setQuestion('');
+    setSubmitted(true);
+    setTimeout(() => setSubmitted(false), 3000);
+  };
+
+  const STATUS_COLORS: Record<string, string> = {
+    pending: 'text-amber-400',
+    processing: 'text-blue-400',
+    resolved: 'text-[#8FAE8B]',
+    closed: 'text-[#5A7490]',
+  };
+
+  return (
+    <PublicLayout>
+      <ResourceLayout>
+        <h1 className="text-3xl font-bold text-[#EAF4FA] mb-8">{t('resources.feedback.title')}</h1>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="mb-10 space-y-4">
+          <div>
+            <label className="block text-sm text-[#8FA8C0] mb-1">{t('resources.feedback.name')}</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('resources.feedback.namePlaceholder')}
+              required
+              className="w-full bg-[#0B1E3A] border-b border-[#1E3A5C] px-3 py-2 text-sm text-[#EAF4FA] placeholder-[#5A7490] focus:outline-none focus:border-[#4FD8EB] transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-[#8FA8C0] mb-1">{t('resources.feedback.contact')}</label>
+            <input
+              type="text"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              placeholder={t('resources.feedback.contactPlaceholder')}
+              className="w-full bg-[#0B1E3A] border-b border-[#1E3A5C] px-3 py-2 text-sm text-[#EAF4FA] placeholder-[#5A7490] focus:outline-none focus:border-[#4FD8EB] transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-[#8FA8C0] mb-1">{t('resources.feedback.question')}</label>
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder={t('resources.feedback.questionPlaceholder')}
+              required
+              rows={4}
+              className="w-full bg-[#0B1E3A] border-b border-[#1E3A5C] px-3 py-2 text-sm text-[#EAF4FA] placeholder-[#5A7490] focus:outline-none focus:border-[#4FD8EB] transition-colors resize-y"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-[#4FD8EB] text-[#081426] text-sm font-medium rounded hover:bg-[#2FA8D8] transition-colors"
+          >
+            {t('resources.feedback.submit')}
+          </button>
+          {submitted && (
+            <p className="text-[#8FAE8B] text-sm">{t('resources.feedback.success')}</p>
+          )}
+        </form>
+
+        {/* History */}
+        <section>
+          <h2 className="text-lg font-semibold text-[#EAF4FA] mb-4 pb-2 border-b border-[#1E3A5C]">
+            {t('resources.feedback.history')}
+          </h2>
+          {history.length === 0 ? (
+            <p className="text-[#5A7490] text-sm">{t('resources.feedback.noData')}</p>
+          ) : (
+            <div className="space-y-3">
+              {history.map((item) => (
+                <div key={item.id} className="p-4 bg-[#0B1E3A] border border-[#1E3A5C] rounded">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[#EAF4FA] text-sm font-medium">{item.name}</span>
+                    <span className={`text-xs ${STATUS_COLORS[item.status]}`}>
+                      {t(`resources.feedback.status.${item.status}`)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-[#8FA8C0]">{item.question}</p>
+                  <p className="text-xs text-[#5A7490] mt-2">{item.date}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </ResourceLayout>
+    </PublicLayout>
+  );
+}

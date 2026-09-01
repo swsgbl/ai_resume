@@ -1,0 +1,11 @@
+{
+  "name": "ai-resume-harmonyos",
+  "version": "1.0.0",
+  "description": "AI Resume Generator for HarmonyOS",
+  "main": "",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@ohos/hypium": "1.0.6"
+  }
+}

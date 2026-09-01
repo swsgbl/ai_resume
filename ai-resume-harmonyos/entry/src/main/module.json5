@@ -1,0 +1,27 @@
+{
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "description": "$string:module_desc",
+    "mainElement": "EntryStage",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "pages": "$profile:main_pages",
+    "abilities": [
+      {
+        "name": "EntryStage",
+        "srcEntry": "./cj/entry/EntryStage.cj",
+        "description": "$string:EntryStage_desc",
+        "icon": "$media:icon",
+        "label": "$string:EntryStage_label",
+        "displayOrientation": "portrait",
+        "launchType": "standard",
+        "visible": true
+      }
+    ]
+  }
+}

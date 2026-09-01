@@ -1,0 +1,14 @@
+# Grafana 仪表板提供者配置
+apiVersion: 1
+
+providers:
+  - name: 'AI Resume Platform'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true

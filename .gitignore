@@ -1,0 +1,220 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.apk/
+.ipa/
+*.apk
+*.ipa
+
+# Temporary files
+*.tmp
+*.temp
+nul
+dev_error.txt
+dev_output.txt
+*.png
+
+# Test results
+test-results/
+
+# Claude AI
+.claude/
+
+# OMC (oh-my-claudecode) state
+.omc/
+
+# Agent configurations (runtime)
+agents/
+
+# Scripts that were for one-time fixes
+fix_*.js
+fix_*.py
+apply_fix.js
+check_client.js
+run_*.bat
+run_*.ps1
+run_*.sh
+install-and-start.bat
+start.bat
+start.sh
+build_*.bat
+build_*.ps1
+build_*.py
+setup_*.bat
+
+# Other
+TemplatesPage_part1.txt
+screen.png
+test_01_current.png
+screenshots/
+AI-/
+
+# Security - Environment files
+.env
+.env.local
+.env.production
+*.env
+.env.*
+# 但保留示例模板文件
+!.env.example
+!.env.*.example
+!.env.production.template
+
+# Log files
+logcat.txt
+*.txt
+logs/
+
+# Test scripts with sensitive data
+test_*.js
+test_*.ps1
+reset_password.js
+
+# Test reports
+*_TEST_*.md
+*_REPORT*.md
+*_GUIDE*.md
+playwright-report/
+test-reports/
+archive/reports/
+
+# Archive directory
+archive/
+
+# Temporary build scripts
+*.bat
+*.ps1
+*.sh
+*.vbs
+!*.sh.bak
+
+# Compliance documents (temporary)
+COMPLIANCE_*.md
+SECURITY_*.md
+
+# Legal and business documents
+AI_USAGE_*.md
+COMPANY_*.md
+CONTRIBUTING.md
+COOKIE_POLICY.md
+LEGAL_*.md
+REFUND_POLICY.md
+THIRD_PARTY_*.md
+
+# Temporary files in root directory
+AUTO_TEST.vbs
+RUN_TESTS.vbs
+EXECUTE_TEST.js
+
+# Chinese named files and directories
+测试状态报告.md
+请启动*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Export data directory
+data/exports/
+
+# Test reports
+test-report-*.md
+*_TEST_*.md
+*_REPORT*.md
+
+# Pid files
+*.pid
+backend.pid
+backend_prod.pid
+web.pid
+
+# Temporary files
+.gstack/
+.coverage
+
+# Backend data and coverage
+backend/data/
+backend/.coverage
+backend/htmlcov/
+backend/.pytest_cache/
+
+target/
+
+# Tauri (Desktop)
+**/src-tauri/gen/
+
+# HarmonyOS
+**/oh_modules/
+**/.hvigor/
+**/oh-package-lock.json5
+**/hvigor/
+**/entry/hvigor/
+
+# Download files (build artifacts)
+**/public/downloads/*.apk
+**/public/downloads/*.deb
+**/public/downloads/*.rpm
+**/public/downloads/*.hap
+**/public/downloads/*.exe
+**/public/downloads/*.dmg
+DEVOPS_*.md
+.codelin/
+# 部署文档归档
+#.devops-archive/
+.jcode
+
+# Local-only generated artifacts
+EOF
+playwright/.cache/
+
+# Process ID files
+*.pid
+backend.pid
+web.pid
+
+# Test report snapshots
+test-report-*.md
+
+# Empty file marker
+EOF
+
+# Playwright cache
+playwright-report/
+playwright/.cache/
+
+# Python cache (more specific)
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database files (local development)
+*.db
+*.db-journal

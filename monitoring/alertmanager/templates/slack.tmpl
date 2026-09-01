@@ -1,0 +1,35 @@
+{{ define "slack.default.title" }}
+[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.alertname }}
+{{ end }}
+
+{{ define "slack.default.text" }}
+{{ range .Alerts }}
+*告警名称:* {{ .Labels.alertname }}
+*严重级别:* {{ .Labels.severity }}
+*服务:* {{ .Labels.service | default "N/A" }}
+*实例:* {{ .Labels.instance | default "N/A" }}
+
+*摘要:* {{ .Annotations.summary }}
+*描述:* {{ .Annotations.description }}
+
+*开始时间:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+{{ if .EndAt }}
+*结束时间:* {{ .EndAt.Format "2006-01-02 15:04:05" }}
+{{ end }}
+
+*运行视图:* {{ .GeneratorURL }}
+---
+{{ end }}
+{{ end }}
+
+{{ define "slack.default.color" }}
+{{ if eq .Status "firing" }}
+{{ if eq .CommonLabels.severity "critical" }}danger{{ else if eq .CommonLabels.severity "warning" }}warning{{ else }}good{{ end }}
+{{ else }}
+good
+{{ end }}
+{{ end }}
+
+{{ define "slack.default.footer" }}
+AI Resume Platform Monitoring | {{ .ExternalURL }}
+{{ end }}
