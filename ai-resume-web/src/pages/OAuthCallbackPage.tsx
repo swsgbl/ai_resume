@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth';
 import { SEO } from '../components/SEO';
 import { Spinner } from '../components/UIComponents';
 import EmailCompletionModal from '../components/EmailCompletionModal';
+import { getStateFingerprint } from '../config/oauth.config';
 
 function getApiBaseUrl(): string {
   return import.meta.env.VITE_API_URL || '';
@@ -54,18 +55,21 @@ export default function OAuthCallbackPage() {
 
     // 授权码流程
     if (code && state) {
-      const savedState = sessionStorage.getItem('oauth_state');
+      const savedStateHash = sessionStorage.getItem('oauth_state_hash');
       const provider = sessionStorage.getItem('oauth_provider') || 'github';
 
       // 验证 state 防止 CSRF
-      if (savedState && savedState !== state) {
-        setErrorMsg('安全验证失败，请重新登录');
-        setStatus('error');
-        return;
+      if (savedStateHash) {
+        const currentStateHash = await getStateFingerprint(state);
+        if (!currentStateHash || currentStateHash !== savedStateHash) {
+          setErrorMsg('安全验证失败，请重新登录');
+          setStatus('error');
+          return;
+        }
       }
 
       // 清理 sessionStorage
-      sessionStorage.removeItem('oauth_state');
+      sessionStorage.removeItem('oauth_state_hash');
       sessionStorage.removeItem('oauth_provider');
 
       try {

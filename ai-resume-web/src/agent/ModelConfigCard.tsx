@@ -34,7 +34,7 @@ interface Props {
   compact?: boolean;
 }
 
-/** 模型配置(本机):三步引导式配置,密钥仅存本机浏览器 */
+/** 模型配置(本机):三步引导式配置,密钥仅保留在当前页面内存 */
 export default function ModelConfigCard({ compact = false }: Props) {
   const [config, setConfig] = useState<AgentModelConfig>(
     () => loadModelConfig() ?? { baseUrl: PROVIDERS[0].baseUrl, apiKey: '', model: PROVIDERS[0].model }
@@ -63,7 +63,7 @@ export default function ModelConfigCard({ compact = false }: Props) {
       {/* 引导语 */}
       <div className="rounded-lg bg-slate-800/50 px-3 py-2 text-[11px] leading-relaxed text-slate-400">
         三步搞定:<span className="text-slate-200">① 选模型 → ② 粘贴密钥 → ③ 保存</span>
-        。密钥只保存在你自己设备的浏览器里,绝不上传服务器。
+        。密钥不会写入浏览器存储,仅在本页会话内使用。
       </div>
 
       {/* 第①步:选厂商卡片 */}

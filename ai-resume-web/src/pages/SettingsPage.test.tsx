@@ -14,16 +14,10 @@ vi.mock('@ai-resume/shared', () => ({
     setBaseURL: vi.fn(),
     getAIProvider: vi.fn(() => 'openai'),
     setAIProvider: vi.fn(),
-    getOpenAIApiKey: vi.fn(() => ''),
-    setOpenAIApiKey: vi.fn(),
     getOpenAIModel: vi.fn(() => 'gpt-4'),
     setOpenAIModel: vi.fn(),
-    getDeepSeekApiKey: vi.fn(() => ''),
-    setDeepSeekApiKey: vi.fn(),
     getDeepSeekModel: vi.fn(() => 'deepseek-chat'),
     setDeepSeekModel: vi.fn(),
-    getXiaomiApiKey: vi.fn(() => ''),
-    setXiaomiApiKey: vi.fn(),
     getXiaomiModel: vi.fn(() => 'MiMo-V2-Flash'),
     setXiaomiModel: vi.fn(),
     clearAll: vi.fn(),
@@ -95,7 +89,7 @@ describe('SettingsPage', () => {
     );
 
     expect(screen.getByText('OpenAI 配置')).toBeInTheDocument();
-    expect(screen.getByText('API 密钥')).toBeInTheDocument();
+    expect(screen.queryByText('API 密钥')).not.toBeInTheDocument();
     expect(screen.getByText('模型')).toBeInTheDocument();
   });
 

@@ -10,16 +10,10 @@ export default function SettingsPage() {
   const [provider, setProvider] = useState<AIProvider>('openai' as AIProvider);
   const [baseUrl, setBaseUrl] = useState('http://127.0.0.1:8000/api/v1');
 
-  // OpenAI 配置
-  const [openaiKey, setOpenaiKey] = useState('');
   const [openaiModel, setOpenaiModel] = useState('gpt-4');
 
-  // DeepSeek 配置
-  const [deepseekKey, setDeepseekKey] = useState('');
   const [deepseekModel, setDeepseekModel] = useState('deepseek-chat');
 
-  // 小米配置
-  const [xiaomiKey, setXiaomiKey] = useState('');
   const [xiaomiModel, setXiaomiModel] = useState('MiMo-V2-Flash');
 
   const [isSaving, setIsSaving] = useState(false);
@@ -30,11 +24,8 @@ export default function SettingsPage() {
     // 加载配置
     setBaseUrl(storage.getBaseURL());
     setProvider(storage.getAIProvider() as AIProvider);
-    setOpenaiKey(storage.getOpenAIApiKey() ?? '');
     setOpenaiModel(storage.getOpenAIModel() ?? 'gpt-4');
-    setDeepseekKey(storage.getDeepSeekApiKey() ?? '');
     setDeepseekModel(storage.getDeepSeekModel() ?? 'deepseek-chat');
-    setXiaomiKey(storage.getXiaomiApiKey() ?? '');
     setXiaomiModel(storage.getXiaomiModel() ?? 'MiMo-V2-Flash');
   }, []);
 
@@ -55,11 +46,8 @@ export default function SettingsPage() {
       // 保存配置
       storage.setBaseURL(baseUrl);
       storage.setAIProvider(provider);
-      storage.setOpenAIApiKey(openaiKey);
       storage.setOpenAIModel(openaiModel);
-      storage.setDeepSeekApiKey(deepseekKey);
       storage.setDeepSeekModel(deepseekModel);
-      storage.setXiaomiApiKey(xiaomiKey);
       storage.setXiaomiModel(xiaomiModel);
 
       // 更新 API 客户端
@@ -108,7 +96,7 @@ export default function SettingsPage() {
         {/* 配置说明 */}
         <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-lg mb-6">
           <p className="text-sm text-slate-300">
-            配置后端服务器地址和 AI 提供商。所有配置仅保存在本地设备，不会上传到任何服务器。
+            配置后端服务器地址和 AI 提供商。API 密钥不会写入浏览器持久化存储。
           </p>
         </div>
 
@@ -170,7 +158,7 @@ export default function SettingsPage() {
               ))}
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              切换提供商后需要重新配置 API 密钥
+              密钥只在本次页面会话中生效，刷新后需重新输入
             </p>
           </div>
 
@@ -178,18 +166,6 @@ export default function SettingsPage() {
           {provider === 'openai' && (
             <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg">
               <h3 className="font-medium text-amber-400">OpenAI 配置</h3>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  API 密钥
-                </label>
-                <input
-                  type="password"
-                  value={openaiKey}
-                  onChange={(e) => setOpenaiKey(e.target.value)}
-                  className="input"
-                  placeholder="sk-..."
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
                   模型
@@ -202,9 +178,6 @@ export default function SettingsPage() {
                   placeholder="gpt-4"
                 />
               </div>
-              <p className="text-xs text-slate-500">
-                获取 API 密钥: platform.openai.com
-              </p>
             </div>
           )}
 
@@ -212,18 +185,6 @@ export default function SettingsPage() {
           {provider === 'deepseek' && (
             <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg">
               <h3 className="font-medium text-amber-400">DeepSeek 配置</h3>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  API 密钥
-                </label>
-                <input
-                  type="password"
-                  value={deepseekKey}
-                  onChange={(e) => setDeepseekKey(e.target.value)}
-                  className="input"
-                  placeholder="sk-..."
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
                   模型
@@ -236,9 +197,6 @@ export default function SettingsPage() {
                   placeholder="deepseek-chat"
                 />
               </div>
-              <p className="text-xs text-slate-500">
-                获取 API 密钥: platform.deepseek.com
-              </p>
             </div>
           )}
 
@@ -246,18 +204,6 @@ export default function SettingsPage() {
           {provider === 'xiaomi' && (
             <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg">
               <h3 className="font-medium text-amber-400">小米 AI 配置</h3>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  API 密钥
-                </label>
-                <input
-                  type="password"
-                  value={xiaomiKey}
-                  onChange={(e) => setXiaomiKey(e.target.value)}
-                  className="input"
-                  placeholder="您的 API 密钥"
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
                   模型
@@ -270,9 +216,6 @@ export default function SettingsPage() {
                   placeholder="MiMo-V2-Flash"
                 />
               </div>
-              <p className="text-xs text-slate-500">
-                获取 API 密钥: platform.xiaomimimo.com
-              </p>
             </div>
           )}
         </div>
@@ -284,7 +227,7 @@ export default function SettingsPage() {
             简历 OS · 模型配置(本机)
           </h2>
           <p className="text-xs text-slate-500 mb-4">
-            给「简历生成车间」(/os)三个工位供能的 AI 模型:选厂商 → 粘贴密钥 → 保存,密钥只存本机浏览器。
+            给「简历生成车间」(/os)三个工位供能的 AI 模型:选厂商 → 粘贴密钥 → 保存,密钥仅在本页会话内使用。
           </p>
           <ModelConfigCard />
         </div>

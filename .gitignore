@@ -35,6 +35,7 @@ dev_output.txt
 
 # Test results
 test-results/
+ai-resume-web/coverage/
 
 # Claude AI
 .claude/

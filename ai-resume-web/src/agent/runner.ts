@@ -4,7 +4,7 @@ import type { z } from 'zod';
  * 结构化输出 Agent 引擎 — AI 简历 OS 的执行层
  *
  * 原则:
- * - 模型端点与密钥只存浏览器 localStorage,数据不出本机
+ * - 模型端点可持久化,密钥只保留在当前页面内存中
  * - 每个 Agent 返回严格符合 Zod schema 的 JSON,下游代码直接消费
  * - 校验失败自动带错误信息重试一次(自愈),仍失败则抛出可读错误
  */
@@ -19,20 +19,32 @@ export interface AgentModelConfig {
 
 export const MODEL_CONFIG_STORAGE_KEY = 'os_model_config';
 
+let runtimeApiKey: string | null = null;
+
+interface StoredModelConfig {
+  baseUrl: string;
+  model: string;
+}
+
 export function loadModelConfig(): AgentModelConfig | null {
   try {
     const raw = localStorage.getItem(MODEL_CONFIG_STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as AgentModelConfig;
-    if (!parsed.baseUrl || !parsed.apiKey || !parsed.model) return null;
-    return parsed;
+    const parsed = JSON.parse(raw) as StoredModelConfig;
+    if (!parsed.baseUrl || !parsed.model) return null;
+    return { ...parsed, apiKey: runtimeApiKey ?? '' };
   } catch {
     return null;
   }
 }
 
 export function saveModelConfig(config: AgentModelConfig): void {
-  localStorage.setItem(MODEL_CONFIG_STORAGE_KEY, JSON.stringify(config));
+  const storedConfig: StoredModelConfig = {
+    baseUrl: config.baseUrl,
+    model: config.model,
+  };
+  runtimeApiKey = config.apiKey;
+  localStorage.setItem(MODEL_CONFIG_STORAGE_KEY, JSON.stringify(storedConfig));
 }
 
 interface ChatMessage {
@@ -45,6 +57,9 @@ async function chatCompletion(
   messages: ChatMessage[],
   signal?: AbortSignal
 ): Promise<string> {
+  if (!config.apiKey.trim()) {
+    throw new Error('API Key 未配置,请重新输入本次会话密钥');
+  }
   const url = `${config.baseUrl.replace(/\/+$/, '')}/chat/completions`;
   const response = await fetch(url, {
     method: 'POST',

@@ -123,20 +123,6 @@ export const storage = {
   },
 
   /**
-   * 获取 OpenAI API Key
-   */
-  getOpenAIApiKey(): string | null {
-    return localStorage.getItem('openai_api_key');
-  },
-
-  /**
-   * 设置 OpenAI API Key
-   */
-  setOpenAIApiKey(key: string): void {
-    localStorage.setItem('openai_api_key', key);
-  },
-
-  /**
    * 获取 OpenAI 模型
    */
   getOpenAIModel(): string | null {
@@ -151,20 +137,6 @@ export const storage = {
   },
 
   /**
-   * 获取 DeepSeek API Key
-   */
-  getDeepSeekApiKey(): string | null {
-    return localStorage.getItem('deepseek_api_key');
-  },
-
-  /**
-   * 设置 DeepSeek API Key
-   */
-  setDeepSeekApiKey(key: string): void {
-    localStorage.setItem('deepseek_api_key', key);
-  },
-
-  /**
    * 获取 DeepSeek 模型
    */
   getDeepSeekModel(): string | null {
@@ -176,20 +148,6 @@ export const storage = {
    */
   setDeepSeekModel(model: string): void {
     localStorage.setItem('deepseek_model', model);
-  },
-
-  /**
-   * 获取小米 API Key
-   */
-  getXiaomiApiKey(): string | null {
-    return localStorage.getItem('xiaomi_api_key');
-  },
-
-  /**
-   * 设置小米 API Key
-   */
-  setXiaomiApiKey(key: string): void {
-    localStorage.setItem('xiaomi_api_key', key);
   },
 
   /**
@@ -210,6 +168,9 @@ export const storage = {
    * 清除所有配置
    */
   clearAll(): void {
+    localStorage.removeItem('openai_api_key');
+    localStorage.removeItem('deepseek_api_key');
+    localStorage.removeItem('xiaomi_api_key');
     localStorage.clear();
   },
 };

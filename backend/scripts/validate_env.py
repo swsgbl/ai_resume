@@ -170,7 +170,7 @@ def validate_env_file(env_path: Path) -> List[Tuple[bool, str, str]]:
     # Redis 配置
     redis_url = env_vars.get("REDIS_URL", "")
     if redis_url and not redis_url.startswith("redis://localhost"):
-        optional_checks.append((True, "Redis", f"已配置: {redis_url[:20]}..."))
+        optional_checks.append((True, "Redis", "已配置"))
     else:
         optional_checks.append((False, "Redis", "未配置（使用内存存储）"))
 

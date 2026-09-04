@@ -5,6 +5,7 @@ import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from datetime import datetime
 import time
+from urllib.parse import parse_qs, urlparse
 
 from app.services.oauth_service import (
     GoogleOAuthProvider,
@@ -63,7 +64,9 @@ class TestGoogleOAuthProvider:
         url = asyncio.run(provider.get_authorization_url("test_state", custom_uri))
 
         # URL 编码后的回调地址
-        assert "custom.example.com" in url
+        parsed_url = urlparse(url)
+        redirect_uri = parse_qs(parsed_url.query)["redirect_uri"][0]
+        assert urlparse(redirect_uri).hostname == "custom.example.com"
 
     @pytest.mark.asyncio
     async def test_exchange_code_for_token_success(self, mock_settings):

@@ -74,6 +74,12 @@ export function getApiBaseUrl(): string {
   return import.meta.env.VITE_API_URL || '';
 }
 
+export async function getStateFingerprint(state: string): Promise<string | null> {
+  if (!globalThis.crypto?.subtle) return null;
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(state));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 // 发起 OAuth 授权流程
 export async function initiateOAuth(providerKey: string): Promise<void> {
   const baseUrl = getApiBaseUrl();
@@ -85,7 +91,10 @@ export async function initiateOAuth(providerKey: string): Promise<void> {
   }
 
   // 保存 state 到 sessionStorage 用于回调验证
-  sessionStorage.setItem('oauth_state', json.data.state);
+  const stateFingerprint = await getStateFingerprint(json.data.state);
+  if (stateFingerprint) {
+    sessionStorage.setItem('oauth_state_hash', stateFingerprint);
+  }
   sessionStorage.setItem('oauth_provider', providerKey);
 
   // 跳转到第三方授权页

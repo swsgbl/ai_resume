@@ -189,10 +189,13 @@ async def mask_privacy(request: PrivacyMaskRequest, current_user: User = Depends
             masked_content = masked_content.replace(phone, masked_phone)
             masked_items.append({"type": "phone", "original": phone, "masked": masked_phone})
 
-    # 邮箱脱敏
+    # 邮箱脱敏。逐个检查分隔出的 token，避免嵌套量词正则造成回溯放大。
     if "email" in request.mask_types:
-        email_pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-        emails = re.findall(email_pattern, masked_content)
+        emails = []
+        for token in masked_content.split():
+            local_part, separator, domain = token.partition("@")
+            if separator and local_part and "." in domain and not domain.startswith("."):
+                emails.append(token)
         for email in emails:
             parts = email.split("@")
             if len(parts[0]) > 2:
@@ -227,7 +230,7 @@ async def mask_privacy(request: PrivacyMaskRequest, current_user: User = Depends
     # 地址脱敏（简单处理）
     if "address" in request.mask_types:
         # 匹配门牌号
-        addr_pattern = r"(\d+号楼?\d*单元?\d*[室户]?|\d+栋\d*[室户]?)"
+        addr_pattern = r"(\d{1,6}(?:号楼|栋)(?:\d{1,5}单元?)?(?:\d{1,5}[室户])?)"
         addresses = re.findall(addr_pattern, masked_content)
         for addr in addresses:
             masked_addr = "***"
