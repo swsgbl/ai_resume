@@ -57,7 +57,9 @@ class Settings(BaseSettings):
     # ========== AI模型配置 ==========
 
     # 默认AI提供商
-    DEFAULT_AI_PROVIDER: str = "openai"  # openai/deepseek/xiaomi（历史值 openai_v2 自动映射为 openai）
+    DEFAULT_AI_PROVIDER: str = (
+        "openai"  # openai/deepseek/xiaomi（历史值 openai_v2 自动映射为 openai）
+    )
 
     # 生成后自检：评分低于阈值时自动做一轮修正
     AI_AUTO_REVISE: bool = True

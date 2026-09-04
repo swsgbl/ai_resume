@@ -683,7 +683,8 @@ async def oauth_login(
         provider_instance = get_qq_provider()
         if not provider_instance:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="QQ 登录未配置(需在 QQ 互联创建应用并配置 AppID)"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="QQ 登录未配置(需在 QQ 互联创建应用并配置 AppID)",
             )
         provider_redirect_uri = redirect_uri or provider_instance.default_redirect_uri
     else:

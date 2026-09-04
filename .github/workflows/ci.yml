@@ -19,14 +19,20 @@ jobs:
 
     steps:
       - name: Checkout 代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 设置 Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ai-resume-web/package-lock.json
+          cache-dependency-path: |
+            ai-resume-shared/package-lock.json
+            ai-resume-web/package-lock.json
+
+      - name: 安装共享包依赖
+        working-directory: ./ai-resume-shared
+        run: npm ci
 
       - name: 安装依赖
         working-directory: ./ai-resume-web
@@ -47,14 +53,20 @@ jobs:
 
     steps:
       - name: Checkout 代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 设置 Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ai-resume-web/package-lock.json
+          cache-dependency-path: |
+            ai-resume-shared/package-lock.json
+            ai-resume-web/package-lock.json
+
+      - name: 安装共享包依赖
+        working-directory: ./ai-resume-shared
+        run: npm ci
 
       - name: 安装依赖
         working-directory: ./ai-resume-web
@@ -70,7 +82,7 @@ jobs:
         run: npm run test:coverage
 
       - name: 上传覆盖率报告
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         if: success()
         with:
           files: ./ai-resume-web/coverage/coverage-final.json
@@ -84,14 +96,20 @@ jobs:
 
     steps:
       - name: Checkout 代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 设置 Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ai-resume-web/package-lock.json
+          cache-dependency-path: |
+            ai-resume-shared/package-lock.json
+            ai-resume-web/package-lock.json
+
+      - name: 安装共享包依赖
+        working-directory: ./ai-resume-shared
+        run: npm ci
 
       - name: 安装依赖
         working-directory: ./ai-resume-web
@@ -108,7 +126,7 @@ jobs:
           CI: true
 
       - name: 上传测试报告
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
@@ -116,7 +134,7 @@ jobs:
           retention-days: 7
 
       - name: 上传测试视频
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-videos
@@ -130,10 +148,10 @@ jobs:
 
     steps:
       - name: Checkout 代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 设置 Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
@@ -181,10 +199,10 @@ jobs:
 
     steps:
       - name: Checkout 代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 设置 Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
@@ -206,7 +224,7 @@ jobs:
           TEST_DATABASE_URL: mysql+aiomysql://test_user:test_pass@localhost:3306/ai_resume_test
 
       - name: 上传覆盖率报告
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         if: success()
         with:
           files: ./backend/coverage.xml
@@ -223,7 +241,7 @@ jobs:
 
     steps:
       - name: Checkout 代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 初始化 CodeQL
         uses: github/codeql-action/init@v3
@@ -256,10 +274,10 @@ jobs:
 
     steps:
       - name: Checkout 代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 设置 Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: 构建后端镜像
         run: |
@@ -270,7 +288,7 @@ jobs:
           docker build -t ai-resume-web:test -f ai-resume-web/Dockerfile .
 
       - name: 镜像安全扫描
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ai-resume-backend:test
           format: 'sarif'
@@ -292,12 +310,16 @@ jobs:
 
     steps:
       - name: Checkout 代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 设置 Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: 安装共享包依赖
+        working-directory: ./ai-resume-shared
+        run: npm ci
 
       - name: 构建前端
         working-directory: ./ai-resume-web
@@ -307,7 +329,7 @@ jobs:
           ls -la dist/
 
       - name: 上传构建产物
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-dist
           path: ai-resume-web/dist/
