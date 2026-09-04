@@ -59,6 +59,14 @@ export const OAUTH_PROVIDERS: OAuthProviderConfig[] = [
   },
 ];
 
+const PROVIDER_STORAGE_IDS = {
+  google: 1,
+  github: 2,
+  gitee: 3,
+  qq: 4,
+  discord: 5,
+} as const;
+
 // 获取所有已启用的 OAuth 提供商
 export function getEnabledProviders(): OAuthProviderConfig[] {
   return OAUTH_PROVIDERS.filter((p) => p.enabled);
@@ -83,6 +91,10 @@ export async function getStateFingerprint(state: string): Promise<string | null>
 // 发起 OAuth 授权流程
 export async function initiateOAuth(providerKey: string): Promise<void> {
   const baseUrl = getApiBaseUrl();
+  const providerStorageId = PROVIDER_STORAGE_IDS[providerKey as keyof typeof PROVIDER_STORAGE_IDS];
+  if (!providerStorageId) {
+    throw new Error(`不支持的 OAuth 提供商: ${providerKey}`);
+  }
   const res = await fetch(`${baseUrl}/api/v1/auth/oauth/${providerKey}/authorize`);
   const json = await res.json();
 
@@ -95,7 +107,7 @@ export async function initiateOAuth(providerKey: string): Promise<void> {
   if (stateFingerprint) {
     sessionStorage.setItem('oauth_state_hash', stateFingerprint);
   }
-  sessionStorage.setItem('oauth_provider', providerKey);
+  sessionStorage.setItem('oauth_provider', String(providerStorageId));
 
   // 跳转到第三方授权页
   window.location.href = json.data.auth_url;

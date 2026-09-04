@@ -6,6 +6,8 @@ import { Spinner } from '../components/UIComponents';
 import EmailCompletionModal from '../components/EmailCompletionModal';
 import { getStateFingerprint } from '../config/oauth.config';
 
+const PROVIDER_STORAGE_KEYS = ['', 'google', 'github', 'gitee', 'qq', 'discord'] as const;
+
 function getApiBaseUrl(): string {
   return import.meta.env.VITE_API_URL || '';
 }
@@ -56,7 +58,8 @@ export default function OAuthCallbackPage() {
     // 授权码流程
     if (code && state) {
       const savedStateHash = sessionStorage.getItem('oauth_state_hash');
-      const provider = sessionStorage.getItem('oauth_provider') || 'github';
+      const providerStorageId = Number(sessionStorage.getItem('oauth_provider') || '0');
+      const provider = PROVIDER_STORAGE_KEYS[providerStorageId] || 'github';
 
       // 验证 state 防止 CSRF
       if (savedStateHash) {

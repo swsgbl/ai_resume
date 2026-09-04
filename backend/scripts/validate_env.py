@@ -19,16 +19,16 @@ RED = "\033[91m"
 RESET = "\033[0m"
 
 
-def check_passed(msg: str):
-    print(f"{GREEN}✓{RESET} {msg}")
+def check_passed():
+    print(f"{GREEN}✓{RESET} 检查通过")
 
 
-def check_warning(msg: str):
-    print(f"{YELLOW}⚠{RESET} {msg}")
+def check_warning():
+    print(f"{YELLOW}⚠{RESET} 检查未通过")
 
 
-def check_failed(msg: str):
-    print(f"{RED}✗{RESET} {msg}")
+def check_failed():
+    print(f"{RED}✗{RESET} 检查未通过")
 
 
 def validate_secret_key(key: str) -> Tuple[bool, str]:
@@ -202,7 +202,7 @@ def main():
         target_file = env_file
         print(f"检查文件: .env (开发环境)")
     else:
-        check_failed("未找到环境配置文件（.env 或 .env.production）")
+        check_failed()
         print("\n请先创建配置文件:")
         print("  cp .env.example .env")
         sys.exit(1)
@@ -216,24 +216,24 @@ def main():
     critical_failed = 0
     important_failed = 0
 
-    for passed, level, msg in results:
+    for passed, level, _msg in results:
         if level == "critical":
             if passed:
-                check_passed(msg)
+                check_passed()
             else:
-                check_failed(msg)
+                check_failed()
                 critical_failed += 1
         elif level == "important":
             if passed:
-                check_passed(msg)
+                check_passed()
             else:
-                check_warning(msg)
+                check_warning()
                 important_failed += 1
         else:  # optional
             if passed:
-                check_passed(msg)
+                check_passed()
             else:
-                check_warning(msg)
+                check_warning()
 
     print()
     print("=" * 60)
