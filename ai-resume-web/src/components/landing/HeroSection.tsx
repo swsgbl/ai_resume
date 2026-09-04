@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap, SplitText, useGSAP, MOTION_OK, FINE_POINTER } from '../../animation/motion';
 import { AnimatedCounter } from '../../animation/AnimatedCounter';
+import QQLoginButton from '../QQLoginButton';
 
 const Arrow = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="18" height="18">
@@ -200,6 +201,7 @@ export default function HeroSection() {
           <Link to="/templates" className="lp-btn-secondary">
             浏览模板
           </Link>
+          <QQLoginButton size="lg" className="lp-qq-login" />
         </div>
 
         <div className="lp-hero-stats">

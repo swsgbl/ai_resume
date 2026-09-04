@@ -70,7 +70,8 @@ export default function OAuthCallbackPage() {
 
       try {
         const baseUrl = getApiBaseUrl();
-        // 构造前端回调地址作为 redirect_uri（与 authorize 时一致）
+        // QQ 后台登记的是后端回调地址；后端 GET 回跳会转到本页。
+        // 换 token 时不传 redirect_uri，让服务端使用登记地址。
         const frontendCallbackUrl = `${window.location.origin}/oauth/callback`;
 
         const res = await fetch(`${baseUrl}/api/v1/auth/oauth/${provider}/callback`, {
@@ -79,7 +80,7 @@ export default function OAuthCallbackPage() {
           body: JSON.stringify({
             code,
             state,
-            redirect_uri: frontendCallbackUrl,
+            redirect_uri: provider === 'qq' ? undefined : frontendCallbackUrl,
           }),
         });
 

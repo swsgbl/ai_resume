@@ -5,7 +5,8 @@ OAuth 认证路由 (Google, GitHub)
 from datetime import datetime, timezone
 from typing import Optional
 import secrets
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -520,6 +521,17 @@ async def discord_unbind_account(
 
 
 # ==================== QQ 互联 OAuth ====================
+
+
+@router.get("/qq/callback")
+async def qq_callback_redirect(request: Request):
+    """QQ 服务端回调：转发给前端统一处理授权码。"""
+    if not request.query_params:
+        raise HTTPException(status_code=400, detail="QQ 回调缺少参数")
+    return RedirectResponse(
+        url=f"/oauth/callback?{request.query_params}",
+        status_code=302,
+    )
 
 
 @router.get("/qq/authorize")

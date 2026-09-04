@@ -24,6 +24,14 @@ describe('OAuthProviderIcon Component', () => {
     expect(svg?.getAttribute('fill')).toBe('currentColor');
   });
 
+  it('QQ图标必须使用腾讯官方素材', () => {
+    const { container } = render(<OAuthProviderIcon provider="qq" />);
+    const img = container.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', '/images/qq/qq-icon-16x16.png');
+    expect(img).toHaveAttribute('alt', 'QQ登录');
+  });
+
   it('应该渲染Discord图标', () => {
     const { container } = render(<OAuthProviderIcon provider="discord" />);
     const svg = container.querySelector('svg');

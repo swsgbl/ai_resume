@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth';
 import { SEO } from '../components/SEO';
 import { Button, Input, GradientText } from '../components/UIComponents';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
+import QQLoginButton from '../components/QQLoginButton';
 import VerificationCodeInput from '../components/VerificationCodeInput';
 import { getEnabledProviders, initiateOAuth } from '../config/oauth.config';
 
@@ -17,8 +18,9 @@ export default function UnifiedLoginPage() {
 
   // 支持 ?tab=phone 直达手机验证码登录(登录页手机入口带参跳转)
   const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState<LoginTab>(
-    searchParams.get('tab') === 'phone' ? 'phone' : 'email'
+    initialTab === 'phone' || initialTab === 'oauth' ? initialTab : 'email'
   );
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -214,6 +216,9 @@ export default function UnifiedLoginPage() {
                     </span>
                   </Button>
                 ))}
+                <div className="flex justify-center pt-1">
+                  <QQLoginButton />
+                </div>
               </div>
             )}
 

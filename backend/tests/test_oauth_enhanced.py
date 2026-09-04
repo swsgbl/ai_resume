@@ -9,6 +9,22 @@ from sqlalchemy import select
 from app.models.user import User
 
 
+class TestQQCallbackRedirect:
+    """QQ 后台登记回调转发测试"""
+
+    async def test_qq_callback_redirects_to_frontend(self, client: AsyncClient):
+        response = await client.get(
+            "/api/v1/auth/oauth/qq/callback",
+            params={"code": "test_code", "state": "test_state"},
+            follow_redirects=False,
+        )
+
+        assert response.status_code == 302
+        assert response.headers["location"] == (
+            "/oauth/callback?code=test_code&state=test_state"
+        )
+
+
 class TestGoogleOAuthAuthorize:
     """Google OAuth 授权测试"""
 

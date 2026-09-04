@@ -1,0 +1,47 @@
+.qq-login-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.qq-login-button:focus-visible {
+  outline: 2px solid #12b7f5;
+  outline-offset: 4px;
+}
+
+.qq-login-button:disabled {
+  cursor: progress;
+  opacity: 0.78;
+}
+
+.qq-login-button img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.qq-login-button--lg img {
+  width: 230px;
+  height: 48px;
+}
+
+.qq-login-button--md img {
+  width: 170px;
+  height: 32px;
+}
+
+@media (max-width: 520px) {
+  .qq-login-button--lg img {
+    width: 100%;
+    max-width: 230px;
+  }
+
+  .qq-login-button--md img {
+    width: 100%;
+    max-width: 170px;
+  }
+}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { SEO } from '../components/SEO';
 import { Button, Input, GradientText, Orb } from '../components/UIComponents';
+import QQLoginButton from '../components/QQLoginButton';
 import { api } from '@ai-resume/shared';
 
 // 常量配置 - 组织为配置对象便于维护
@@ -385,6 +386,8 @@ export default function RegisterPage() {
             </form>
 
             <div className="mt-5 text-center">
+              <QQLoginButton />
+
               <div className="divider-gradient" />
 
               <div className="text-center text-xs text-slate-400 mt-4">

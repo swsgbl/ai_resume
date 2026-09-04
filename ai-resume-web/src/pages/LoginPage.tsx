@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { SEO } from '../components/SEO';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
+import QQLoginButton from '../components/QQLoginButton';
 import { Button, Input, GradientText, Orb } from '../components/UIComponents';
 
 // 存储键名常量
@@ -198,6 +199,8 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-4 text-center">
+              <QQLoginButton />
+
               {/* 国内用户首选:手机验证码一键登录 */}
               <Link
                 to="/unified-login?tab=phone"

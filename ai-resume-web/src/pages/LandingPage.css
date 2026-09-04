@@ -185,6 +185,10 @@
   will-change: transform;
 }
 
+.lp-qq-login {
+  flex: 0 0 auto;
+}
+
 /* 墨滴滚动提示 */
 .lp-hero-cue {
   position: absolute;
@@ -853,6 +857,8 @@
   .lp-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
   .lp-hero-actions { flex-direction: column; }
   .lp-btn-primary, .lp-btn-secondary { width: 100%; justify-content: center; }
+  .lp-qq-login { width: 100%; }
+  .lp-qq-login img { width: 100%; max-width: 230px; }
   .lp-cta-box { padding: 48px 24px; }
   .lp-testimonials-marquee .lp-testimonial-card { width: 290px; }
 }
