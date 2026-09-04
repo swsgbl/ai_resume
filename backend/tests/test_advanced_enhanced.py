@@ -383,7 +383,7 @@ class TestResumeParsing:
         self, client: AsyncClient, auth_headers
     ):
         """测试: 解析PDF简历"""
-        # 创建一个简单的PDF内容（实际解析会失败因为没有PyPDF2）
+        # 创建一个简单的PDF内容（实际解析会失败因为没有pypdf）
         content = b"%PDF-1.4 fake pdf content"
 
         files = {"file": ("resume.pdf", content, "application/pdf")}

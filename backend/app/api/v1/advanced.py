@@ -468,7 +468,7 @@ async def _parse_pdf(content: bytes) -> str:
     """解析PDF文件"""
     try:
         import io
-        from PyPDF2 import PdfReader
+        from pypdf import PdfReader
 
         reader = PdfReader(io.BytesIO(content))
         text = ""
