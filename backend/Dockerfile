@@ -8,7 +8,9 @@ RUN python -m venv /opt/venv
 COPY requirements.txt .
 
 RUN /opt/venv/bin/pip install --no-cache-dir --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple && \
-    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --timeout 120
+    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --timeout 120 && \
+    /opt/venv/bin/pip install --no-cache-dir --force-reinstall msgpack==1.2.2 && \
+    /opt/venv/bin/pip check
 
 FROM python:3.12.14-slim-trixie
 
@@ -18,9 +20,12 @@ ENV PATH="/opt/venv/bin:$PATH"
 # 运行时不需要安装器或 ensurepip，移除后可减少 Python 包攻击面
 RUN rm -rf \
     /usr/local/bin/pip* \
+    /opt/venv/bin/pip* \
     /usr/local/lib/python3.12/ensurepip \
     /usr/local/lib/python3.12/site-packages/pip* \
-    /usr/local/lib/python3.12/site-packages/setuptools*
+    /usr/local/lib/python3.12/site-packages/setuptools* \
+    /opt/venv/lib/python3.12/site-packages/pip* \
+    /opt/venv/lib/python3.12/site-packages/setuptools*
 
 COPY . .
 

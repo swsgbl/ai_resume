@@ -286,6 +286,11 @@ jobs:
         run: |
           docker build -t ai-resume-backend:test -f backend/Dockerfile backend/
 
+      - name: 后端运行时依赖探针
+        run: |
+          docker run --rm --entrypoint python ai-resume-backend:test -c "import msgpack; print('msgpack', msgpack.version)"
+          docker run --rm --entrypoint find ai-resume-backend:test /usr/local/lib/python3.12 /opt/venv/lib/python3.12 -maxdepth 3 \( -iname '*setuptools*' -o -iname '*msgpack*' \) -print
+
       - name: 构建前端镜像
         run: |
           docker build -t ai-resume-web:test -f ai-resume-web/Dockerfile .
