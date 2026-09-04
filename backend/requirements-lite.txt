@@ -33,6 +33,7 @@ Jinja2==3.1.6
 httpx==0.26.0
 python-dotenv==1.2.3
 loguru==0.7.2
+msgpack==1.2.2
 
 # 阿里云服务
 alibabacloud-dypnsapi20170525==2.0.0

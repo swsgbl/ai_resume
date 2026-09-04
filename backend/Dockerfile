@@ -1,5 +1,5 @@
 # 后端 Dockerfile
-FROM python:3.12.14-slim-bookworm AS builder
+FROM python:3.12.14-slim-trixie AS builder
 
 WORKDIR /app
 
@@ -10,10 +10,17 @@ COPY requirements.txt .
 RUN /opt/venv/bin/pip install --no-cache-dir --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple && \
     /opt/venv/bin/pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --timeout 120
 
-FROM python:3.12.14-slim-bookworm
+FROM python:3.12.14-slim-trixie
 
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+
+# 运行时不需要安装器或 ensurepip，移除后可减少 Python 包攻击面
+RUN rm -rf \
+    /usr/local/bin/pip* \
+    /usr/local/lib/python3.12/ensurepip \
+    /usr/local/lib/python3.12/site-packages/pip* \
+    /usr/local/lib/python3.12/site-packages/setuptools*
 
 COPY . .
 
