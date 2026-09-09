@@ -34,6 +34,20 @@ from app.services.oauth_service import (
 router = APIRouter(prefix="/auth/oauth", tags=["OAuth认证"])
 
 
+@router.get("/providers")
+async def list_available_providers():
+    """返回后端实际可用的 OAuth 渠道列表(前端据此渲染图标,避免未配置渠道显示404)"""
+    checks = [
+        ("google", get_google_provider),
+        ("github", get_github_provider),
+        ("gitee", get_gitee_provider),
+        ("discord", get_discord_provider),
+        ("qq", get_qq_provider),
+    ]
+    available = [key for key, getter in checks if getter() is not None]
+    return {"providers": available}
+
+
 def _create_token_response(user: User) -> TokenResponse:
     """创建令牌响应"""
     access_token = create_access_token(data={"sub": str(user.id)})

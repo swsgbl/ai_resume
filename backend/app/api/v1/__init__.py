@@ -27,12 +27,7 @@ router.include_router(auth_router)  # 基础认证 (/auth/*)
 # 可选登录通道：未配置对应密钥时不挂载（认证栈可插拔，核心链路只依赖 JWT+邮箱）
 if settings.WECHAT_APP_ID and settings.WECHAT_APP_SECRET:
     router.include_router(wechat_router)  # 微信登录 (/auth/wechat/*)
-if (
-    (settings.GITHUB_CLIENT_ID and settings.GITHUB_CLIENT_SECRET)
-    or (settings.GITEE_CLIENT_ID and settings.GITEE_CLIENT_SECRET)
-    or (settings.QQ_CONNECT_APP_ID and settings.QQ_CONNECT_APP_SECRET)
-):
-    router.include_router(oauth_router)  # OAuth登录 (/auth/oauth/*)
+router.include_router(oauth_router)  # OAuth登录 (/auth/oauth/*) — 无条件挂载(/providers 需始终可用)
 router.include_router(account_router)  # 账号管理 (/account/*)
 router.include_router(resume_router)
 router.include_router(template_router)

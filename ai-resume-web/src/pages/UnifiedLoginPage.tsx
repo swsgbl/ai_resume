@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { SEO } from '../components/SEO';
@@ -6,7 +6,8 @@ import { Button, Input, GradientText } from '../components/UIComponents';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
 import QQLoginButton from '../components/QQLoginButton';
 import VerificationCodeInput from '../components/VerificationCodeInput';
-import { getEnabledProviders, initiateOAuth } from '../config/oauth.config';
+import { fetchAvailableProviders, initiateOAuth } from '../config/oauth.config';
+import type { OAuthProviderConfig } from '../config/oauth.config';
 
 type LoginTab = 'email' | 'phone' | 'oauth';
 
@@ -28,8 +29,11 @@ export default function UnifiedLoginPage() {
   const [smsCode, setSmsCode] = useState('');
   const [smsToken, setSmsToken] = useState('');
   const [oauthLoading, setOAuthLoading] = useState<string | null>(null);
+  const [enabledProviders, setEnabledProviders] = useState<OAuthProviderConfig[]>([]);
 
-  const enabledProviders = getEnabledProviders();
+  useEffect(() => {
+    fetchAvailableProviders().then(setEnabledProviders);
+  }, []);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();

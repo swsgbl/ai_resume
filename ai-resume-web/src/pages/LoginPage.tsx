@@ -4,6 +4,8 @@ import { useAuthStore } from '../store/auth';
 import { SEO } from '../components/SEO';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
 import QQLoginButton from '../components/QQLoginButton';
+import { fetchAvailableProviders } from '../config/oauth.config';
+import type { OAuthProviderConfig } from '../config/oauth.config';
 import { Button, Input, GradientText, Orb } from '../components/UIComponents';
 
 // 存储键名常量
@@ -17,6 +19,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);
+  const [oauthProviders, setOauthProviders] = useState<OAuthProviderConfig[]>([]);
+
+  // 拉取后端实际可用的 OAuth 渠道(未配密钥的不显示)
+  useEffect(() => {
+    fetchAvailableProviders().then(setOauthProviders);
+  }, []);
 
   // 页面加载时检查是否有保存的凭据
   useEffect(() => {
@@ -215,19 +223,21 @@ export default function LoginPage() {
 
               <p className="text-slate-500 text-xs mt-4 mb-2">更多方式</p>
 
-              {/* 其余渠道 - 收入统一登录页 */}
-              <div className="flex gap-2 justify-center mb-4 opacity-70 transition-opacity hover:opacity-100">
-                {(['gitee', 'github', 'google', 'discord'] as const).map((provider) => (
-                  <Link
-                    key={provider}
-                    to="/unified-login"
-                    aria-label={`使用 ${provider} 登录`}
-                    className="w-8 h-8 rounded-lg glass-effect flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
-                  >
-                    <OAuthProviderIcon provider={provider} className="w-4 h-4" />
-                  </Link>
-                ))}
-              </div>
+              {/* 其余渠道 - 只显示后端实际可用的(避免未配置的渠道点击404) */}
+              {oauthProviders.length > 0 && (
+                <div className="flex gap-2 justify-center mb-4 opacity-70 transition-opacity hover:opacity-100">
+                  {oauthProviders.map((p) => (
+                    <Link
+                      key={p.key}
+                      to="/unified-login"
+                      aria-label={`使用 ${p.name} 登录`}
+                      className="w-8 h-8 rounded-lg glass-effect flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      <OAuthProviderIcon provider={p.key} className="w-4 h-4" />
+                    </Link>
+                  ))}
+                </div>
+              )}
 
               <div className="divider-gradient" />
 
