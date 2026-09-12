@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { GradientText, Orb } from '../components/UIComponents';
 import PublicLayout from '../components/PublicLayout';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 interface CareerIntuition {
   first_impression: string;
@@ -37,7 +37,7 @@ export default function CareerPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/v1/career/evaluate`, {
+      const response = await fetch(`${API_URL}/career/evaluate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

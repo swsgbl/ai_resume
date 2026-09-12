@@ -8,7 +8,7 @@ interface VerificationCodeInputProps {
   code: string;
 }
 
-const API_BASE = () => import.meta.env.VITE_API_URL || '';
+const API_BASE = () => import.meta.env.VITE_API_URL || '/api/v1';
 
 /**
  * 短信验证码输入 + 发送按钮 + 60秒冷却
@@ -39,7 +39,7 @@ export default function VerificationCodeInput({ phone, onCodeChange, onSmsTokenC
     setSendSuccess(false);
 
     try {
-      const res = await fetch(`${API_BASE()}/api/v1/auth/sms/send`, {
+      const res = await fetch(`${API_BASE()}/auth/sms/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),

@@ -20,7 +20,7 @@ export default function PhoneBindingForm({ currentPhone, token, onSuccess }: Pho
   const [success, setSuccess] = useState<string | null>(null);
 
   const isBound = !!currentPhone;
-  const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+  const apiBaseUrl = import.meta.env.VITE_API_URL || '/api/v1';
 
   const handleBind = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +35,7 @@ export default function PhoneBindingForm({ currentPhone, token, onSuccess }: Pho
 
     setLoading(true);
     try {
-      const res = await fetch(`${apiBaseUrl}/api/v1/account/bind/phone`, {
+      const res = await fetch(`${apiBaseUrl}/account/bind/phone`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export default function PhoneBindingForm({ currentPhone, token, onSuccess }: Pho
 
     setLoading(true);
     try {
-      const res = await fetch(`${apiBaseUrl}/api/v1/account/unbind`, {
+      const res = await fetch(`${apiBaseUrl}/account/unbind`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

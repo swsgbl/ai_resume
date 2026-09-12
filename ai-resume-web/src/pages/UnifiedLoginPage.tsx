@@ -11,7 +11,7 @@ import type { OAuthProviderConfig } from '../config/oauth.config';
 
 type LoginTab = 'email' | 'phone' | 'oauth';
 
-const API_BASE = () => import.meta.env.VITE_API_URL || '';
+const API_BASE = () => import.meta.env.VITE_API_URL || '/api/v1';
 
 export default function UnifiedLoginPage() {
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export default function UnifiedLoginPage() {
     }
 
     try {
-      const res = await fetch(`${API_BASE()}/api/v1/auth/sms/login`, {
+      const res = await fetch(`${API_BASE()}/auth/sms/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, code: smsCode, sms_token: smsToken }),

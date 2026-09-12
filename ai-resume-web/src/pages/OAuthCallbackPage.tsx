@@ -9,7 +9,7 @@ import { getStateFingerprint } from '../config/oauth.config';
 const PROVIDER_STORAGE_KEYS = ['', 'google', 'github', 'gitee', 'qq', 'discord'] as const;
 
 function getApiBaseUrl(): string {
-  return import.meta.env.VITE_API_URL || '';
+  return import.meta.env.VITE_API_URL || '/api/v1';
 }
 
 /**
@@ -81,7 +81,7 @@ export default function OAuthCallbackPage() {
         // 换 token 时不传 redirect_uri，让服务端使用登记地址。
         const frontendCallbackUrl = `${window.location.origin}/oauth/callback`;
 
-        const res = await fetch(`${baseUrl}/api/v1/auth/oauth/${provider}/callback`, {
+        const res = await fetch(`${baseUrl}/auth/oauth/${provider}/callback`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -107,7 +107,7 @@ export default function OAuthCallbackPage() {
         loginWithOAuth(tokenData.access_token, tokenData.refresh_token);
 
         // 检查是否需要补全邮箱
-        const userResponse = await fetch(`${baseUrl}/api/v1/auth/me`, {
+        const userResponse = await fetch(`${baseUrl}/auth/me`, {
           headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
         });
         if (userResponse.ok) {
@@ -136,7 +136,7 @@ export default function OAuthCallbackPage() {
   const handleEmailSubmit = async (email: string) => {
     if (!pendingTokens) return;
     const baseUrl = getApiBaseUrl();
-    const res = await fetch(`${baseUrl}/api/v1/account/bind/email`, {
+    const res = await fetch(`${baseUrl}/account/bind/email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

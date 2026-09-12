@@ -51,7 +51,7 @@ export default function AccountSettingsPage() {
   // 解绑
   const [unbindPassword, setUnbindPassword] = useState('');
 
-  const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+  const apiBaseUrl = import.meta.env.VITE_API_URL || '/api/v1';
 
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
@@ -61,7 +61,7 @@ export default function AccountSettingsPage() {
 
   const fetchBindings = async () => {
     try {
-      const res = await fetch(`${apiBaseUrl}/api/v1/account/bindings`, {
+      const res = await fetch(`${apiBaseUrl}/account/bindings`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('获取账号信息失败');
@@ -77,7 +77,7 @@ export default function AccountSettingsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiBaseUrl}/api/v1/account/bind/email`, {
+      const res = await fetch(`${apiBaseUrl}/account/bind/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ email: bindEmail, password: bindPassword, verification_code: bindCode }),
@@ -102,7 +102,7 @@ export default function AccountSettingsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiBaseUrl}/api/v1/account/unbind`, {
+      const res = await fetch(`${apiBaseUrl}/account/unbind`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ account_type: accountType, password: unbindPassword }),

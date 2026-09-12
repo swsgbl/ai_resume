@@ -78,7 +78,7 @@ export function getProvider(key: string): OAuthProviderConfig | undefined {
 
 /** API 基础地址 */
 export function getApiBaseUrl(): string {
-  return import.meta.env.VITE_API_URL || '';
+  return import.meta.env.VITE_API_URL || '/api/v1';
 }
 
 /** state 的 SHA-256 指纹(原始 state 不落存储,回调时比对哈希) */
@@ -97,7 +97,7 @@ export async function fetchAvailableProviders(): Promise<OAuthProviderConfig[]> 
   const baseUrl = getApiBaseUrl();
   if (_cachedAvailable === null) {
     try {
-      const res = await fetch(`${baseUrl}/api/v1/auth/oauth/providers`);
+      const res = await fetch(`${baseUrl}/auth/oauth/providers`);
       if (res.ok) {
         const data = await res.json();
         _cachedAvailable = data.providers ?? [];
@@ -129,7 +129,7 @@ export async function initiateOAuth(providerKey: string): Promise<void> {
   if (!providerStorageId) {
     throw new Error(`不支持的 OAuth 提供商: ${providerKey}`);
   }
-  const res = await fetch(`${baseUrl}/api/v1/auth/oauth/${providerKey}/authorize`);
+  const res = await fetch(`${baseUrl}/auth/oauth/${providerKey}/authorize`);
   const json = await res.json();
 
   if (!res.ok || !json?.data?.auth_url) {

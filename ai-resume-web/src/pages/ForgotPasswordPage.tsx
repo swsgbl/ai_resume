@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
 
     try {
       // 调用后端API发送验证码
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/password-reset/request`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/password-reset/request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/password-reset/verify`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/password-reset/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code, new_password: newPassword })
