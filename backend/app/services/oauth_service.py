@@ -535,39 +535,64 @@ class QQOAuthProvider(OAuthProvider):
 class OAuthStateManager:
     """OAuth State 管理器 - 用于 CSRF 保护
 
-    开发环境使用内存存储，生产环境建议使用 Redis
+    优先 Redis(重启安全/多实例一致),不可用时内存兜底。
+    state 一次性消费:validate_and_consume 原子删除,重复提交只成功一次。
     """
 
     def __init__(self):
-        self._states: Dict[str, float] = {}  # state -> timestamp
+        self._redis = None
+        self._redis_failed = False
+        self._memory: Dict[str, float] = {}  # state -> timestamp(兜底)
         self.ttl = getattr(settings, "OAUTH_STATE_TTL_SECONDS", 600)
 
-    def generate_state(self) -> str:
+    async def _get_redis(self):
+        if self._redis is None and not self._redis_failed:
+            try:
+                import redis.asyncio as aioredis
+
+                client = aioredis.from_url(
+                    settings.REDIS_URL, encoding="utf-8", decode_responses=True
+                )
+                await client.ping()
+                self._redis = client
+            except Exception:
+                self._redis_failed = True
+                self._redis = None
+        return self._redis
+
+    async def generate_state(self) -> str:
         """生成随机 state 参数"""
         state = secrets.token_urlsafe(32)
-        self._states[state] = time.time()
+        client = await self._get_redis()
+        if client:
+            try:
+                await client.setex(f"oauth_state:{state}", self.ttl, "1")
+                return state
+            except Exception:
+                pass
+        self._memory[state] = time.time()
         return state
 
-    def validate_and_consume(self, state: str) -> bool:
-        """验证并消费 state 参数（一次性使用）"""
-        if state not in self._states:
+    async def validate_and_consume(self, state: str) -> bool:
+        """验证并消费 state 参数(一次性使用,原子删除)"""
+        client = await self._get_redis()
+        if client:
+            try:
+                deleted = await client.delete(f"oauth_state:{state}")
+                return deleted > 0
+            except Exception:
+                pass
+        if state not in self._memory:
             return False
-
-        timestamp = self._states.pop(state)
-        current_time = time.time()
-
-        # 检查是否过期
-        if current_time - timestamp > self.ttl:
-            return False
-
-        return True
+        timestamp = self._memory.pop(state)
+        return time.time() - timestamp <= self.ttl
 
     def cleanup_expired(self):
-        """清理过期的 state"""
+        """清理内存兜底中过期的 state(Redis 自带 TTL 无需清理)"""
         current_time = time.time()
-        expired = [s for s, t in self._states.items() if current_time - t > self.ttl]
+        expired = [s for s, t in self._memory.items() if current_time - t > self.ttl]
         for state in expired:
-            del self._states[state]
+            del self._memory[state]
 
 
 # 全局实例
@@ -645,7 +670,7 @@ async def oauth_login(
     """
     # 验证 state
     state_manager = get_state_manager()
-    if not state_manager.validate_and_consume(state):
+    if not await state_manager.validate_and_consume(state):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="无效或过期的 state 参数"
         )

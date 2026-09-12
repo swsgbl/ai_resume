@@ -80,7 +80,7 @@ async def google_authorize(
 
     # 生成 state 参数
     state_manager = get_state_manager()
-    state = state_manager.generate_state()
+    state = await state_manager.generate_state()
 
     # 获取授权 URL
     auth_url = await provider.get_authorization_url(state, redirect_uri)
@@ -212,7 +212,7 @@ async def github_authorize(
 
     # 生成 state 参数
     state_manager = get_state_manager()
-    state = state_manager.generate_state()
+    state = await state_manager.generate_state()
 
     # 获取授权 URL
     auth_url = await provider.get_authorization_url(state, redirect_uri)
@@ -337,7 +337,7 @@ async def gitee_authorize(redirect_uri: Optional[str] = None):
         raise HTTPException(status_code=500, detail="Gitee OAuth 未配置")
 
     state_manager = get_state_manager()
-    state = state_manager.generate_state()
+    state = await state_manager.generate_state()
     auth_url = await provider.get_authorization_url(state, redirect_uri)
 
     return Response(
@@ -439,7 +439,7 @@ async def discord_authorize(redirect_uri: Optional[str] = None):
         raise HTTPException(status_code=500, detail="Discord OAuth 未配置")
 
     state_manager = get_state_manager()
-    state = state_manager.generate_state()
+    state = await state_manager.generate_state()
     auth_url = await provider.get_authorization_url(state, redirect_uri)
 
     return Response(
@@ -556,7 +556,7 @@ async def qq_authorize(redirect_uri: Optional[str] = None):
         raise HTTPException(status_code=500, detail="QQ 登录未配置(需在 QQ 互联创建应用)")
 
     state_manager = get_state_manager()
-    state = state_manager.generate_state()
+    state = await state_manager.generate_state()
     auth_url = await provider.get_authorization_url(state, redirect_uri)
 
     return Response(
@@ -665,7 +665,7 @@ async def unified_authorize(provider: str, redirect_uri: Optional[str] = None):
         raise HTTPException(status_code=500, detail=f"{provider} OAuth 未配置")
 
     state_manager = get_state_manager()
-    state = state_manager.generate_state()
+    state = await state_manager.generate_state()
     auth_url = await p.get_authorization_url(state, redirect_uri)
 
     return Response(

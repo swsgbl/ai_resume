@@ -8,6 +8,9 @@ import { getStateFingerprint } from '../config/oauth.config';
 
 const PROVIDER_STORAGE_KEYS = ['', 'google', 'github', 'gitee', 'qq', 'discord'] as const;
 
+// 防重入:state 一次性消费,重复提交(双挂载/StrictMode/刷新)会导致第二次校验失败
+let lastHandledState = '';
+
 function getApiBaseUrl(): string {
   return import.meta.env.VITE_API_URL || '/api/v1';
 }
@@ -57,6 +60,13 @@ export default function OAuthCallbackPage() {
 
     // 授权码流程
     if (code && state) {
+      // 防重入:同一 state 只处理一次(模块级拦双挂载,sessionStorage 拦页面级重放)
+      if (lastHandledState === state || sessionStorage.getItem(`oauth_done_${state}`)) {
+        return;
+      }
+      lastHandledState = state;
+      sessionStorage.setItem(`oauth_done_${state}`, '1');
+
       const savedStateHash = sessionStorage.getItem('oauth_state_hash');
       const providerStorageId = Number(sessionStorage.getItem('oauth_provider') || '0');
       const provider = PROVIDER_STORAGE_KEYS[providerStorageId] || 'github';
