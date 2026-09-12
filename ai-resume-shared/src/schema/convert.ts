@@ -75,12 +75,19 @@ export function fromJsonResume(resume: unknown): ResumeContent {
   const profile = (network: string) =>
     basics?.profiles?.find((p) => p.network === network)?.url;
 
+  const extractLocation = (): string | undefined => {
+    const loc = basics?.location;
+    if (!loc) return undefined;
+    if (typeof loc === 'string') return loc;
+    return loc.address || ('city' in loc ? loc.city : undefined);
+  };
+
   return {
     basic_info: {
       name: basics?.name,
       email: basics?.email,
       phone: basics?.phone,
-      location: basics?.location?.address || basics?.location?.city,
+      location: extractLocation(),
       title: basics?.label,
       summary: basics?.summary,
       avatar: basics?.image,

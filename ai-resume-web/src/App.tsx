@@ -23,6 +23,7 @@ const HelpPage = lazy(() => import('./pages/HelpPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ResumeListPage = lazy(() => import('./pages/ResumeListPage'));
+const SmartResumeCreate = lazy(() => import('./pages/SmartResumeCreate'));
 const ResumeEditorPage = lazy(() => import('./pages/ResumeEditorPage'));
 const TemplatesPage = lazy(() => import('./pages/TemplatesPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -230,7 +231,7 @@ function App() {
           path="/resumes/new"
           element={
             <PageLoader>
-              {isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
+              {isAuthenticated ? <SmartResumeCreate /> : <Navigate to="/login" replace />}
             </PageLoader>
           }
         />

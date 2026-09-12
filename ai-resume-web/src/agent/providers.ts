@@ -1,10 +1,10 @@
 /**
- * 多厂商模型路由存储 — 参考 OpenCode 的 provider 路由方案
+ * 多厂商模型路由存储 — 参考 OpenCode 的 provider 路由方案(models.dev 全量目录思路)
  *
  * 设计:
  * - 每个厂商一份完整配置(baseUrl + apiKey + 当前选用模型),可并存多家
  * - defaultId 即「路由」:车间所有 Agent 默认走该厂商,可随时切换
- * - 预设目录内置主流 OpenAI 兼容厂商(含模型候选),也支持自定义接入
+ * - 内置 26 家主流厂商目录(国内/海外/本地三分组),支持自定义接入
  * - 向后兼容:首次加载自动迁移旧的单配置 os_model_config
  * - 密钥仅存本机浏览器(产品隐私承诺),绝不上传
  */
@@ -27,7 +27,7 @@ export interface ProviderStore {
   defaultId: string;
 }
 
-/** 预设厂商目录(models.dev 思路的本地精简版) */
+/** 预设厂商目录(OpenCode/models.dev 思路:全量厂商 + 分组 + 模型候选) */
 export interface ProviderPreset {
   id: string;
   name: string;
@@ -37,24 +37,116 @@ export interface ProviderPreset {
   desc: string;
   /** 密钥申请地址(空表示无需密钥) */
   keyUrl?: string;
+  /** 分组:cn 国内 / global 海外 / local 本地 */
+  category: 'cn' | 'global' | 'local';
 }
 
+export const PROVIDER_CATEGORY_LABELS: Record<ProviderPreset['category'], string> = {
+  cn: '国内厂商',
+  global: '海外厂商',
+  local: '本地运行',
+};
+
 export const PROVIDER_PRESETS: ProviderPreset[] = [
+  // ===== 国内 =====
   {
     id: 'deepseek',
     name: 'DeepSeek',
     baseUrl: 'https://api.deepseek.com/v1',
     models: ['deepseek-chat', 'deepseek-reasoner'],
-    desc: '国内直连 · 性价比高 · 推荐',
+    desc: '性价比高 · 推荐',
     keyUrl: 'https://platform.deepseek.com/api_keys',
+    category: 'cn',
   },
   {
-    id: 'openai',
-    name: 'OpenAI',
-    baseUrl: 'https://api.openai.com/v1',
-    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'],
-    desc: '效果强 · 需海外网络与支付',
-    keyUrl: 'https://platform.openai.com/api-keys',
+    id: 'qwen',
+    name: '阿里通义千问',
+    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    models: ['qwen-plus', 'qwen-max', 'qwen-turbo', 'qwen2.5-72b-instruct'],
+    desc: '百炼平台 · Qwen 全系',
+    keyUrl: 'https://bailian.console.aliyun.com/?apiKey=1',
+    category: 'cn',
+  },
+  {
+    id: 'glm',
+    name: '智谱 GLM',
+    baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+    models: ['glm-4-flash', 'glm-4-plus', 'glm-4-air'],
+    desc: 'glm-4-flash 免费',
+    keyUrl: 'https://open.bigmodel.cn/usercenter/apikeys',
+    category: 'cn',
+  },
+  {
+    id: 'kimi',
+    name: '月之暗面 Kimi',
+    baseUrl: 'https://api.moonshot.cn/v1',
+    models: ['moonshot-v1-8k', 'moonshot-v1-32k', 'kimi-k2-0711-preview'],
+    desc: '长文本擅长',
+    keyUrl: 'https://platform.moonshot.cn/console/api-keys',
+    category: 'cn',
+  },
+  {
+    id: 'doubao',
+    name: '火山方舟(豆包)',
+    baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
+    models: ['doubao-pro-32k', 'doubao-pro-128k', 'doubao-lite-32k'],
+    desc: '字节豆包 · 需创建推理接入点',
+    keyUrl: 'https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey',
+    category: 'cn',
+  },
+  {
+    id: 'hunyuan',
+    name: '腾讯混元',
+    baseUrl: 'https://api.hunyuan.cloud.tencent.com/v1',
+    models: ['hunyuan-turbo', 'hunyuan-pro', 'hunyuan-lite'],
+    desc: 'hunyuan-lite 免费',
+    keyUrl: 'https://console.cloud.tencent.com/hunyuan/api-key',
+    category: 'cn',
+  },
+  {
+    id: 'minimax',
+    name: 'MiniMax',
+    baseUrl: 'https://api.minimax.chat/v1',
+    models: ['MiniMax-Text-01', 'abab6.5s-chat'],
+    desc: '长上下文 · 多模态',
+    keyUrl: 'https://platform.minimaxi.com/user-center/basic-information/interface-key',
+    category: 'cn',
+  },
+  {
+    id: 'stepfun',
+    name: '阶跃星辰',
+    baseUrl: 'https://api.stepfun.com/v1',
+    models: ['step-2-16k', 'step-1v-8k'],
+    desc: 'Step 系列',
+    keyUrl: 'https://platform.stepfun.com/interface-key',
+    category: 'cn',
+  },
+  {
+    id: 'yi',
+    name: '零一万物',
+    baseUrl: 'https://api.lingyiwanwu.com/v1',
+    models: ['yi-large', 'yi-medium'],
+    desc: 'Yi 系列',
+    keyUrl: 'https://platform.lingyiwanwu.com/apikeys',
+    category: 'cn',
+  },
+  {
+    id: 'baidu',
+    name: '百度千帆',
+    baseUrl: 'https://qianfan.baidubce.com/v2',
+    models: ['ernie-4.0-turbo-8k', 'ernie-3.5-8k'],
+    desc: '文心一言全系',
+    keyUrl: 'https://console.bce.baidu.com/iam/#/iam/apikey/list',
+    category: 'cn',
+  },
+  {
+    id: 'siliconflow',
+    name: '硅基流动',
+    baseUrl: 'https://api.siliconflow.cn/v1',
+    models: ['deepseek-ai/DeepSeek-V3', 'Qwen/Qwen2.5-72B-Instruct'],
+    desc: '聚合平台 · 一把 Key 多家模型 · 有免费额度',
+    keyUrl: 'https://cloud.siliconflow.cn/account/ak',
+    category: 'cn',
   },
   {
     id: 'xiaomi',
@@ -63,29 +155,141 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     models: ['MiMo-V2-Flash', 'mimo-pro'],
     desc: '新玩家 · 有免费额度',
     keyUrl: 'https://platform.xiaomimimo.com/',
+    category: 'cn',
+  },
+  // ===== 海外 =====
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    baseUrl: 'https://api.openai.com/v1',
+    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'],
+    desc: 'GPT 系列 · 需海外支付',
+    keyUrl: 'https://platform.openai.com/api-keys',
+    category: 'global',
   },
   {
-    id: 'siliconflow',
-    name: '硅基流动',
-    baseUrl: 'https://api.siliconflow.cn/v1',
-    models: ['deepseek-ai/DeepSeek-V3', 'Qwen/Qwen2.5-72B-Instruct'],
-    desc: '国内聚合平台 · 一把 Key 多家模型',
-    keyUrl: 'https://cloud.siliconflow.cn/account/ak',
+    id: 'anthropic',
+    name: 'Anthropic Claude',
+    baseUrl: 'https://api.anthropic.com/v1',
+    models: ['claude-sonnet-4-20250514', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'],
+    desc: 'Claude 系列 · 写作质量佳',
+    keyUrl: 'https://console.anthropic.com/settings/keys',
+    category: 'global',
+  },
+  {
+    id: 'gemini',
+    name: 'Google Gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
+    models: ['gemini-2.0-flash', 'gemini-1.5-pro'],
+    desc: '有免费额度 · 需海外网络',
+    keyUrl: 'https://aistudio.google.com/app/apikey',
+    category: 'global',
+  },
+  {
+    id: 'groq',
+    name: 'Groq',
+    baseUrl: 'https://api.groq.com/openai/v1',
+    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
+    desc: '极速推理 · 有免费额度',
+    keyUrl: 'https://console.groq.com/keys',
+    category: 'global',
   },
   {
     id: 'openrouter',
     name: 'OpenRouter',
     baseUrl: 'https://openrouter.ai/api/v1',
-    models: ['anthropic/claude-3.5-sonnet', 'google/gemini-2.0-flash-001'],
-    desc: '海外聚合平台 · 数百模型任选',
+    models: ['openai/gpt-4o-mini', 'anthropic/claude-3.5-sonnet', 'google/gemini-2.0-flash-001'],
+    desc: '聚合平台 · 数百模型一个 Key',
     keyUrl: 'https://openrouter.ai/keys',
+    category: 'global',
   },
   {
+    id: 'mistral',
+    name: 'Mistral',
+    baseUrl: 'https://api.mistral.ai/v1',
+    models: ['mistral-large-latest', 'mistral-small-latest'],
+    desc: '欧洲代表厂商',
+    keyUrl: 'https://console.mistral.ai/api-keys',
+    category: 'global',
+  },
+  {
+    id: 'xai',
+    name: 'xAI Grok',
+    baseUrl: 'https://api.x.ai/v1',
+    models: ['grok-2-latest', 'grok-2-mini'],
+    desc: '马斯克旗下 xAI',
+    keyUrl: 'https://console.x.ai',
+    category: 'global',
+  },
+  {
+    id: 'together',
+    name: 'Together AI',
+    baseUrl: 'https://api.together.xyz/v1',
+    models: ['meta-llama/Llama-3.3-70B-Instruct-Turbo', 'Qwen/Qwen2.5-72B-Instruct-Turbo'],
+    desc: '开源模型云托管',
+    keyUrl: 'https://api.together.ai/settings/api-keys',
+    category: 'global',
+  },
+  {
+    id: 'fireworks',
+    name: 'Fireworks AI',
+    baseUrl: 'https://api.fireworks.ai/inference/v1',
+    models: ['accounts/fireworks/models/llama-v3p3-70b-instruct'],
+    desc: '高速开源模型推理',
+    keyUrl: 'https://fireworks.ai/account/api-keys',
+    category: 'global',
+  },
+  {
+    id: 'cerebras',
+    name: 'Cerebras',
+    baseUrl: 'https://api.cerebras.ai/v1',
+    models: ['llama3.1-70b', 'llama3.1-8b'],
+    desc: '晶圆级加速 · 极快',
+    keyUrl: 'https://cloud.cerebras.ai',
+    category: 'global',
+  },
+  {
+    id: 'perplexity',
+    name: 'Perplexity',
+    baseUrl: 'https://api.perplexity.ai',
+    models: ['sonar', 'sonar-pro'],
+    desc: '带联网搜索能力',
+    keyUrl: 'https://www.perplexity.ai/settings/api',
+    category: 'global',
+  },
+  {
+    id: 'deepinfra',
+    name: 'DeepInfra',
+    baseUrl: 'https://api.deepinfra.com/v1/openai',
+    models: ['meta-llama/Llama-3.3-70B-Instruct', 'deepseek-ai/DeepSeek-V3'],
+    desc: '低价开源模型',
+    keyUrl: 'https://deepinfra.com/dash/api_keys',
+    category: 'global',
+  },
+  // ===== 本地 =====
+  {
     id: 'ollama',
-    name: '本地 Ollama',
+    name: 'Ollama',
     baseUrl: 'http://localhost:11434/v1',
     models: ['qwen2.5', 'llama3.1'],
-    desc: '完全免费 · 模型跑在你自己电脑上',
+    desc: '完全免费 · 模型跑在你电脑上',
+    category: 'local',
+  },
+  {
+    id: 'lmstudio',
+    name: 'LM Studio',
+    baseUrl: 'http://localhost:1234/v1',
+    models: ['local-model'],
+    desc: '本地图形化模型管理',
+    category: 'local',
+  },
+  {
+    id: 'vllm',
+    name: 'vLLM',
+    baseUrl: 'http://localhost:8000/v1',
+    models: ['local-model'],
+    desc: '自建推理服务',
+    category: 'local',
   },
 ];
 

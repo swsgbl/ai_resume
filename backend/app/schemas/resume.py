@@ -14,7 +14,7 @@ class BasicInfo(BaseModel):
 
     name: str = Field(..., description="姓名")
     gender: Optional[str] = Field(None, description="性别")
-    birth_date: Optional[date] = Field(None, description="出生日期")
+    birth_date: Optional[str] = Field(None, description="出生日期(YYYY-MM-DD 或 YYYY-MM)")
     phone: Optional[str] = Field(None, description="手机号")
     email: Optional[str] = Field(None, description="邮箱")
     location: Optional[str] = Field(None, description="所在城市")
@@ -30,8 +30,8 @@ class Education(BaseModel):
     school: str = Field(..., description="学校名称")
     major: Optional[str] = Field(None, description="专业")
     degree: Optional[str] = Field(None, description="学历")
-    start_date: Optional[date] = Field(None, description="开始时间")
-    end_date: Optional[date] = Field(None, description="结束时间")
+    start_date: Optional[str] = Field(None, description="开始时间(YYYY-MM 或 YYYY-MM-DD)")
+    end_date: Optional[str] = Field(None, description="结束时间(YYYY-MM 或 YYYY-MM-DD)")
     gpa: Optional[str] = Field(None, description="GPA")
     description: Optional[str] = Field(None, description="描述")
 
@@ -42,8 +42,8 @@ class WorkExperience(BaseModel):
     company: str = Field(..., description="公司名称")
     position: str = Field(..., description="职位")
     department: Optional[str] = Field(None, description="部门")
-    start_date: Optional[date] = Field(None, description="开始时间")
-    end_date: Optional[date] = Field(None, description="结束时间")
+    start_date: Optional[str] = Field(None, description="开始时间(YYYY-MM 或 YYYY-MM-DD)")
+    end_date: Optional[str] = Field(None, description="结束时间(YYYY-MM 或 YYYY-MM-DD)")
     is_current: bool = Field(False, description="是否在职")
     description: Optional[str] = Field(None, description="工作描述")
     achievements: Optional[List[str]] = Field(None, description="工作成就")
@@ -54,8 +54,8 @@ class Project(BaseModel):
 
     name: str = Field(..., description="项目名称")
     role: Optional[str] = Field(None, description="担任角色")
-    start_date: Optional[date] = Field(None, description="开始时间")
-    end_date: Optional[date] = Field(None, description="结束时间")
+    start_date: Optional[str] = Field(None, description="开始时间(YYYY-MM 或 YYYY-MM-DD)")
+    end_date: Optional[str] = Field(None, description="结束时间(YYYY-MM 或 YYYY-MM-DD)")
     description: Optional[str] = Field(None, description="项目描述")
     tech_stack: Optional[List[str]] = Field(None, description="技术栈")
     achievements: Optional[List[str]] = Field(None, description="项目成果")
@@ -75,8 +75,8 @@ class Certification(BaseModel):
 
     name: str = Field(..., description="证书名称")
     issuer: Optional[str] = Field(None, description="颁发机构")
-    issue_date: Optional[date] = Field(None, description="获得时间")
-    expiry_date: Optional[date] = Field(None, description="有效期")
+    issue_date: Optional[str] = Field(None, description="获得时间(YYYY-MM 或 YYYY-MM-DD)")
+    expiry_date: Optional[str] = Field(None, description="有效期")
     credential_id: Optional[str] = Field(None, description="证书编号")
 
 

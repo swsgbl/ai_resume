@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   PROVIDER_PRESETS,
+  PROVIDER_CATEGORY_LABELS,
   presetToConfig,
   loadProviderStore,
   saveProviderConfig,
@@ -29,6 +30,7 @@ export default function ModelConfigCard({ compact = false }: Props) {
   const [draft, setDraft] = useState<ProviderConfig | null>(null);
   const [justSaved, setJustSaved] = useState(false);
   const [open, setOpen] = useState(!compact);
+  const [presetSearch, setPresetSearch] = useState('');
 
   const defaultProvider = store.providers.find((p) => p.id === store.defaultId) ?? null;
   const routeReady = !!defaultProvider && defaultProvider.apiKey.trim() !== '';
@@ -226,20 +228,45 @@ export default function ModelConfigCard({ compact = false }: Props) {
         </div>
       )}
 
-      {/* 预设目录:一键接入 */}
+      {/* 预设目录:搜索 + 分组一键接入 */}
       <div>
-        <p className="mb-2 text-xs font-medium text-slate-300">接入新厂商</p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {PROVIDER_PRESETS.filter((preset) => !store.providers.some((p) => p.id === preset.id)).map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => startAddPreset(preset.id)}
-              className="rounded-lg border border-slate-700 p-2.5 text-left transition-colors hover:border-primary-400/40"
-            >
-              <span className="block truncate text-xs font-semibold text-slate-200">{preset.name}</span>
-              <span className="mt-1 block truncate text-[10px] text-slate-500">{preset.desc}</span>
-            </button>
-          ))}
+        <p className="mb-2 text-xs font-medium text-slate-300">接入新厂商({PROVIDER_PRESETS.length} 家可选)</p>
+        <input
+          className="input mb-2 text-xs"
+          placeholder="搜索厂商,如 DeepSeek / Kimi / Groq / Ollama…"
+          value={presetSearch}
+          onChange={(e) => setPresetSearch(e.target.value)}
+        />
+        <div className="max-h-64 space-y-3 overflow-y-auto pr-1">
+          {(['cn', 'global', 'local'] as const).map((cat) => {
+            const list = PROVIDER_PRESETS.filter(
+              (preset) =>
+                preset.category === cat &&
+                !store.providers.some((p) => p.id === preset.id) &&
+                (presetSearch.trim() === '' ||
+                  `${preset.name}${preset.desc}`.toLowerCase().includes(presetSearch.trim().toLowerCase()))
+            );
+            if (list.length === 0) return null;
+            return (
+              <div key={cat}>
+                <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                  {PROVIDER_CATEGORY_LABELS[cat]}
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {list.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => startAddPreset(preset.id)}
+                      className="rounded-lg border border-slate-700 p-2.5 text-left transition-colors hover:border-primary-400/40"
+                    >
+                      <span className="block truncate text-xs font-semibold text-slate-200">{preset.name}</span>
+                      <span className="mt-1 block truncate text-[10px] text-slate-500">{preset.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

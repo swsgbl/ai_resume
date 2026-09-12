@@ -14,6 +14,7 @@ export const extractAgent: AgentDefinition<unknown> = {
   system: `你是简历数据抽取引擎。把用户提供的任意文本(旧简历、经历自述、领英档案等)
 转换为 JSON Resume 开放标准对象。字段映射规则:
 - basics.name/label/email/phone/summary/location
+- basics.location: {address: "城市名"}(必须对象,不要字符串)
 - basics.profiles: [{network: "github"|"linkedin"|"website", url}]
 - work[]: {name:公司, position, startDate:"YYYY-MM", endDate, summary, highlights:字符串数组(成就,量化优先)}
 - education[]: {institution, area:专业, studyType:学位, startDate, endDate, score:GPA}

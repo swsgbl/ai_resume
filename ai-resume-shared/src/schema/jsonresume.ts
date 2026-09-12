@@ -17,11 +17,15 @@ export const jsonResumeBasics = z.object({
   url: z.string().optional(),
   summary: z.string().optional(),
   location: z
-    .object({
-      address: z.string().optional(),
-      city: z.string().optional(),
-      region: z.string().optional(),
-    })
+    .union([
+      z.object({
+        address: z.string().optional(),
+        city: z.string().optional(),
+        region: z.string().optional(),
+      }),
+      // 容错:LLM 常把 location 输出为字符串,归一化时转 {address}
+      z.string().transform((s) => ({ address: s })),
+    ])
     .optional(),
   profiles: z
     .array(
