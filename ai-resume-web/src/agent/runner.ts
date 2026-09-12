@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import { loadProviderStore, saveProviderConfig } from './providers';
 
 /**
  * 结构化输出 Agent 引擎 — AI 简历 OS 的执行层
@@ -19,32 +20,33 @@ export interface AgentModelConfig {
 
 export const MODEL_CONFIG_STORAGE_KEY = 'os_model_config';
 
-let runtimeApiKey: string | null = null;
-
-interface StoredModelConfig {
-  baseUrl: string;
-  model: string;
-}
-
+/**
+ * 读取当前路由配置(多厂商方案的默认厂商)。
+ * 迁移说明:旧版 apiKey 只存页面内存(刷新即丢,可用性缺陷),
+ * 现按产品「仅存本机浏览器」承诺持久化到多厂商存储。
+ */
 export function loadModelConfig(): AgentModelConfig | null {
-  try {
-    const raw = localStorage.getItem(MODEL_CONFIG_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredModelConfig;
-    if (!parsed.baseUrl || !parsed.model) return null;
-    return { ...parsed, apiKey: runtimeApiKey ?? '' };
-  } catch {
-    return null;
-  }
+  const store = loadProviderStore();
+  const current = store.providers.find((p) => p.id === store.defaultId);
+  if (!current || !current.baseUrl || !current.model) return null;
+  return { baseUrl: current.baseUrl, apiKey: current.apiKey, model: current.model };
 }
 
+/** 保存到默认路由对应的厂商(无则创建/更新该端点的厂商条目) */
 export function saveModelConfig(config: AgentModelConfig): void {
-  const storedConfig: StoredModelConfig = {
-    baseUrl: config.baseUrl,
-    model: config.model,
-  };
-  runtimeApiKey = config.apiKey;
-  localStorage.setItem(MODEL_CONFIG_STORAGE_KEY, JSON.stringify(storedConfig));
+  const store = loadProviderStore();
+  const current = store.providers.find((p) => p.id === store.defaultId);
+  if (current) {
+    saveProviderConfig({ ...current, baseUrl: config.baseUrl, apiKey: config.apiKey, model: config.model });
+  } else {
+    saveProviderConfig({
+      id: `provider-${Date.now()}`,
+      name: '默认厂商',
+      baseUrl: config.baseUrl,
+      apiKey: config.apiKey,
+      model: config.model,
+    });
+  }
 }
 
 interface ChatMessage {

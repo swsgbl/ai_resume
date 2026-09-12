@@ -1,300 +1,210 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { storage, } from '@ai-resume/shared';
+import { storage } from '@ai-resume/shared';
 import { getApiClient } from '@ai-resume/shared/api';
+import { SEO } from '../components/SEO';
+import { GradientText, Orb } from '../components/UIComponents';
 import ModelConfigCard from '../agent/ModelConfigCard';
 
-type AIProvider = 'openai' | 'deepseek' | 'xiaomi';
+const DEFAULT_BASE_URL = '/api/v1';
 
+/**
+ * 设置页 — 全站 hm 设计系统
+ * ① AI 模型(多厂商路由,唯一活跃的 AI 配置) ② 服务器地址(高级) ③ 数据与隐私
+ * 旧版「AI 提供商配置」(openai/deepseek/xiaomi 三份 Key)无任何消费方,已移除。
+ */
 export default function SettingsPage() {
-  const [provider, setProvider] = useState<AIProvider>('openai' as AIProvider);
-  const [baseUrl, setBaseUrl] = useState('http://127.0.0.1:8000/api/v1');
-
-  const [openaiModel, setOpenaiModel] = useState('gpt-4');
-
-  const [deepseekModel, setDeepseekModel] = useState('deepseek-chat');
-
-  const [xiaomiModel, setXiaomiModel] = useState('MiMo-V2-Flash');
-
-  const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState('');
-  const [switchingProvider, setSwitchingProvider] = useState<AIProvider | null>(null);
+  const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
+  const [savedUrl, setSavedUrl] = useState(DEFAULT_BASE_URL);
+  const [saving, setSaving] = useState(false);
+  const [urlMsg, setUrlMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
-    // 加载配置
-    setBaseUrl(storage.getBaseURL());
-    setProvider(storage.getAIProvider() as AIProvider);
-    setOpenaiModel(storage.getOpenAIModel() ?? 'gpt-4');
-    setDeepseekModel(storage.getDeepSeekModel() ?? 'deepseek-chat');
-    setXiaomiModel(storage.getXiaomiModel() ?? 'MiMo-V2-Flash');
+    const current = storage.getBaseURL();
+    setBaseUrl(current);
+    setSavedUrl(current);
   }, []);
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    setMessage('');
+  const urlDirty = baseUrl.trim() !== savedUrl;
 
+  const handleSaveUrl = async () => {
+    setSaving(true);
+    setUrlMsg(null);
+    const next = baseUrl.trim();
+    // 允许同域相对路径或完整 http(s) 地址
+    const isRelative = next.startsWith('/') && !next.startsWith('//');
+    let hostValid = false;
     try {
-      // 验证基础 URL
-      try {
-        new URL(baseUrl.replace('/api/v1', ''));
-      } catch {
-        setMessage('请输入有效的服务器地址');
-        setIsSaving(false);
-        return;
-      }
-
-      // 保存配置
-      storage.setBaseURL(baseUrl);
-      storage.setAIProvider(provider);
-      storage.setOpenAIModel(openaiModel);
-      storage.setDeepSeekModel(deepseekModel);
-      storage.setXiaomiModel(xiaomiModel);
-
-      // 更新 API 客户端
-      const client = getApiClient();
-      client.setBaseURL(baseUrl);
-
-      setMessage('配置已保存');
-    } catch (error) {
-      setMessage('保存失败');
+      new URL(next);
+      hostValid = true;
+    } catch {
+      hostValid = false;
+    }
+    if (!next || (!isRelative && !hostValid)) {
+      setUrlMsg({ ok: false, text: '地址格式不对:请以 / 开头(同域)或输入完整 http(s) 地址' });
+      setSaving(false);
+      return;
+    }
+    try {
+      storage.setBaseURL(next);
+      getApiClient().setBaseURL(next);
+      setSavedUrl(next);
+      setBaseUrl(next);
+      setUrlMsg({ ok: true, text: '已保存,立即生效' });
+    } catch {
+      setUrlMsg({ ok: false, text: '保存失败,请重试' });
     } finally {
-      setIsSaving(false);
+      setSaving(false);
     }
   };
 
-  const handleClear = () => {
-    if (confirm('确定要清除所有配置吗？将恢复默认设置。')) {
-      storage.clearAll();
-      window.location.reload();
-    }
+  const handleResetUrl = () => {
+    storage.setBaseURL(DEFAULT_BASE_URL);
+    getApiClient().setBaseURL(DEFAULT_BASE_URL);
+    setBaseUrl(DEFAULT_BASE_URL);
+    setSavedUrl(DEFAULT_BASE_URL);
+    setUrlMsg({ ok: true, text: '已恢复默认地址' });
+  };
+
+  const handleClearAll = () => {
+    if (!confirm('确定清除本机保存的全部配置吗?模型密钥、服务器地址等将被删除,此操作不可撤销。')) return;
+    storage.clearAll();
+    window.location.reload();
   };
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      {/* 顶部导航栏 */}
-      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/dashboard" className="text-xl font-bold text-amber-400">
-              AI 简历
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link to="/resumes" className="text-slate-300 hover:text-amber-400">
-                我的简历
-              </Link>
-              <Link to="/templates" className="text-slate-300 hover:text-amber-400">
-                模板库
-              </Link>
-            </div>
-          </div>
+    <>
+      <SEO title="设置" description="管理 AI 模型多厂商路由与服务器地址,数据仅存本机。" noIndex />
+      <div className="min-h-screen relative overflow-x-hidden bg-slate-950">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <Orb color="primary" size={200} className="top-0 left-0 -translate-x-1/2 -translate-y-1/2 opacity-20" />
+          <Orb color="accent" size={150} className="bottom-0 right-0 translate-x-1/2 translate-y-1/2 opacity-10" />
         </div>
-      </header>
+        <div className="fixed inset-0 bg-grid pointer-events-none opacity-5" />
 
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6 text-slate-100">设置</h1>
-
-        {/* 配置说明 */}
-        <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-lg mb-6">
-          <p className="text-sm text-slate-300">
-            配置后端服务器地址和 AI 提供商。API 密钥不会写入浏览器持久化存储。
-          </p>
-        </div>
-
-        {/* 服务器配置 */}
-        <div className="card p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-100">
-            <span>🌐</span>
-            服务器配置
-          </h2>
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              后端服务器地址
-            </label>
-            <input
-              type="text"
-              value={baseUrl}
-              onChange={(e) => setBaseUrl(e.target.value)}
-              className="input"
-              placeholder="http://127.0.0.1:8000/api/v1"
-            />
-          </div>
-        </div>
-
-        {/* AI 提供商配置 */}
-        <div className="card p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-100">
-            <span>🤖</span>
-            AI 模型配置
-          </h2>
-
-          {/* 提供商选择 */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              选择 AI 提供商
-            </label>
-            <div className="flex gap-2">
-              {[
-                { value: 'openai' as const, label: 'OpenAI', icon: '🌟' },
-                { value: 'deepseek' as const, label: 'DeepSeek', icon: '🧠' },
-                { value: 'xiaomi' as const, label: '小米AI', icon: '📱' },
-              ].map((item) => (
-                <button
-                  key={item.value}
-                  onClick={() => {
-                    setSwitchingProvider(item.value);
-                    setProvider(item.value);
-                    setTimeout(() => setSwitchingProvider(null), 300);
-                  }}
-                  disabled={switchingProvider !== null}
-                  className={`flex-1 p-3 rounded-lg border-2 transition-all duration-300 ${
-                    provider === item.value
-                      ? 'border-amber-500 bg-amber-500/10 scale-105 shadow-sm'
-                      : 'border-white/10 hover:border-white/20'
-                  } ${switchingProvider !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <span className="mr-1">{item.icon}</span>
-                  {item.label}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-slate-500 mt-2">
-              密钥只在本次页面会话中生效，刷新后需重新输入
+        <main className="relative z-10 mx-auto w-full max-w-3xl px-4 pb-20 pt-10">
+          {/* 页头 */}
+          <header className="mb-8">
+            <h1 className="text-3xl font-bold">
+              <GradientText>设置</GradientText>
+            </h1>
+            <p className="mt-2 text-sm text-slate-400">
+              所有配置仅保存在这台设备的浏览器里,不会上传服务器
             </p>
-          </div>
+          </header>
 
-          {/* OpenAI 配置 */}
-          {provider === 'openai' && (
-            <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg">
-              <h3 className="font-medium text-amber-400">OpenAI 配置</h3>
+          {/* ① AI 模型 — 多厂商路由 */}
+          <section className="card-glass mb-5 rounded-2xl p-6" data-testid="section-models">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  模型
-                </label>
-                <input
-                  type="text"
-                  value={openaiModel}
-                  onChange={(e) => setOpenaiModel(e.target.value)}
-                  className="input"
-                  placeholder="gpt-4"
-                />
+                <h2 className="flex items-center gap-2 text-base font-semibold text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary-400/30 bg-primary-500/10 text-sm">
+                    🤖
+                  </span>
+                  AI 模型 · 多厂商路由
+                </h2>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                  「简历生成车间」与演练场使用的 AI;可接入多家,⭐ 切换默认路由
+                </p>
+              </div>
+              <Link
+                to="/os"
+                className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-400 transition-colors hover:border-primary-400/40 hover:text-primary-300"
+              >
+                去车间使用 →
+              </Link>
+            </div>
+            <ModelConfigCard />
+          </section>
+
+          {/* ② 服务器地址 — 高级 */}
+          <section className="card-glass mb-5 rounded-2xl p-6" data-testid="section-server">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 text-sm">
+                🌐
+              </span>
+              <div>
+                <h2 className="text-base font-semibold text-white">服务器地址</h2>
+                <p className="mt-0.5 text-xs text-slate-500">高级选项 · 已有默认值,一般不用改</p>
+              </div>
+              {savedUrl === DEFAULT_BASE_URL ? (
+                <span className="ml-auto rounded-full bg-slate-800 px-2.5 py-1 text-[11px] text-slate-400">默认</span>
+              ) : (
+                <span className="ml-auto rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-400">自定义</span>
+              )}
+            </div>
+
+            <label className="mb-1.5 block text-xs font-medium text-slate-300" htmlFor="server-url-input">
+              后端 API 地址
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <input
+                id="server-url-input"
+                type="text"
+                value={baseUrl}
+                onChange={(e) => {
+                  setBaseUrl(e.target.value);
+                  setUrlMsg(null);
+                }}
+                placeholder="/api/v1 或 https://your-server.com/api/v1"
+                className="input min-w-0 flex-1 font-mono text-xs"
+                data-testid="server-url-input"
+              />
+              <button
+                className="btn btn-primary text-sm"
+                onClick={handleSaveUrl}
+                disabled={saving || !urlDirty}
+                data-testid="save-url-button"
+              >
+                {saving ? '保存中…' : '保存'}
+              </button>
+              {savedUrl !== DEFAULT_BASE_URL && (
+                <button className="btn btn-secondary text-sm" onClick={handleResetUrl} data-testid="reset-url-button">
+                  恢复默认
+                </button>
+              )}
+            </div>
+            {urlDirty && !urlMsg?.ok && <p className="mt-2 text-xs text-amber-400/90">有未保存的修改</p>}
+            {urlMsg && (
+              <p
+                className={`mt-2 text-xs ${urlMsg.ok ? 'text-emerald-400' : 'text-rose-400'}`}
+                data-testid="url-message"
+              >
+                {urlMsg.text}
+              </p>
+            )}
+          </section>
+
+          {/* ③ 数据与隐私 */}
+          <section className="card-glass rounded-2xl p-6" data-testid="section-privacy">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 text-sm">
+                🔒
+              </span>
+              <div>
+                <h2 className="text-base font-semibold text-white">数据与隐私</h2>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  你的简历原料、故事库、投递记录、模型密钥都只存在本机浏览器
+                </p>
               </div>
             </div>
-          )}
-
-          {/* DeepSeek 配置 */}
-          {provider === 'deepseek' && (
-            <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg">
-              <h3 className="font-medium text-amber-400">DeepSeek 配置</h3>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  模型
-                </label>
-                <input
-                  type="text"
-                  value={deepseekModel}
-                  onChange={(e) => setDeepseekModel(e.target.value)}
-                  className="input"
-                  placeholder="deepseek-chat"
-                />
-              </div>
+            <div className="mb-5 rounded-lg border border-slate-700/50 bg-slate-900/40 p-3 text-xs leading-relaxed text-slate-400">
+              清除配置会删除本机保存的服务器地址与模型密钥;简历数据请在各功能页内单独管理。更多说明见
+              <Link to="/about" className="mx-1 text-primary-400 hover:text-primary-300">
+                关于页
+              </Link>
+              的隐私章节。
             </div>
-          )}
-
-          {/* 小米 AI 配置 */}
-          {provider === 'xiaomi' && (
-            <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg">
-              <h3 className="font-medium text-amber-400">小米 AI 配置</h3>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  模型
-                </label>
-                <input
-                  type="text"
-                  value={xiaomiModel}
-                  onChange={(e) => setXiaomiModel(e.target.value)}
-                  className="input"
-                  placeholder="MiMo-V2-Flash"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 简历 OS · 模型配置(本机) */}
-        <div className="card p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-slate-100">
-            <span>🛠️</span>
-            简历 OS · 模型配置(本机)
-          </h2>
-          <p className="text-xs text-slate-500 mb-4">
-            给「简历生成车间」(/os)三个工位供能的 AI 模型:选厂商 → 粘贴密钥 → 保存,密钥仅在本页会话内使用。
-          </p>
-          <ModelConfigCard />
-        </div>
-
-        {/* 操作按钮 */}
-        <div className="space-y-4">
-          {message && (
-            <div className={`p-3 rounded-lg text-center ${
-              message.includes('保存') ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
-            }`}>
-              {message}
-            </div>
-          )}
-
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="btn btn-primary w-full py-3"
-          >
-            {isSaving ? '保存中...' : '保存配置'}
-          </button>
-
-          <button
-            onClick={handleClear}
-            className="btn btn-outline w-full py-3 border-red-500/30 text-red-400 hover:bg-red-500/10"
-          >
-            清除配置
-          </button>
-        </div>
-
-        {/* 其他设置 */}
-        <div className="card divide-y mt-6">
-          <button className="flex items-center justify-between p-4 hover:bg-white/5 w-full text-left">
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>关于</span>
-            </div>
-            <span className="text-sm text-slate-500">版本 1.0.0</span>
-          </button>
-
-          <Link to="/help" className="flex items-center justify-between p-4 hover:bg-white/5 w-full text-left">
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>帮助</span>
-            </div>
-            <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-
-          <Link to="/privacy" className="flex items-center justify-between p-4 hover:bg-white/5 w-full text-left">
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              <span>隐私政策</span>
-            </div>
-            <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
-      </main>
-    </div>
+            <button
+              className="btn border border-rose-500/40 text-sm text-rose-400 transition-colors hover:bg-rose-500/10"
+              onClick={handleClearAll}
+              data-testid="clear-all-button"
+            >
+              清除本机全部配置
+            </button>
+          </section>
+        </main>
+      </div>
+    </>
   );
 }
