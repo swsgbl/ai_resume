@@ -76,3 +76,86 @@ export const tailorAgent: AgentDefinition<TailorResult> = {
 };
 
 export type { AgentRunEvent } from './runner';
+
+/**
+ * 演练场 Agent 组(借鉴 interview-coach-skill 方法论):
+ *   storyExtract — 简历文本 → STAR 故事库(带能力标签)
+ *   questionGen  — 简历 × JD × 故事库 → 定向面试题(建议用哪个故事作答)
+ *   answerScore  — 问题 × 答案 → 五维评分 + 改写示范
+ */
+
+export const storyExtractSchema = z.object({
+  stories: z
+    .array(
+      z.object({
+        title: z.string(),
+        situation: z.string(),
+        task: z.string(),
+        action: z.string(),
+        result: z.string(),
+        tags: z.array(z.string()),
+      })
+    )
+    .min(1)
+    .max(8),
+});
+export type StoryExtractResult = z.infer<typeof storyExtractSchema>;
+
+export const storyExtractAgent: AgentDefinition<StoryExtractResult> = {
+  name: '故事库提炼',
+  system: `你是面试故事教练。从简历/经历文本中提炼 3-6 个可复用的 STAR 面试故事,输出 JSON:
+- title: 故事短标题(15字内,如"零停机迁移数据库")
+- situation: 背景(S)一句、task: 任务(T)一句、action: 行动(A)两三句、result: 结果(R)一句(量化优先)
+- tags: 能力标签数组,从这些里选:技术攻坚/领导力/跨团队协作/冲突解决/创新/抗压/沟通/业务思维/项目管理/失败复盘
+严格基于文本事实,禁止编造经历。文本太薄时可以少给,但每个故事必须四要素齐全。`,
+  schema: storyExtractSchema,
+};
+
+export const questionGenSchema = z.object({
+  questions: z
+    .array(
+      z.object({
+        question: z.string(),
+        type: z.string(),
+        suggestedStory: z.string().nullable(),
+      })
+    )
+    .min(3)
+    .max(8),
+});
+export type QuestionGenResult = z.infer<typeof questionGenSchema>;
+
+export const questionGenAgent: AgentDefinition<QuestionGenResult> = {
+  name: '面试题生成',
+  system: `你是目标公司的面试官。根据候选人简历、岗位 JD 和其故事库,出 5 道最可能被问到的面试题,输出 JSON:
+- question: 问题原文(像真实面试官的口吻)
+- type: "行为"|"情境"|"技术"|"动机"|"压力" 之一
+- suggestedStory: 建议候选人用哪个故事作答(必须是故事库里的标题;没有合适的填 null)
+组成:2-3 道行为题(优先考察 JD 强调的能力)、1-2 道与 JD 技术栈相关的情境/技术题、1 道动机题(为什么这个岗位)。`,
+  schema: questionGenSchema,
+};
+
+export const answerScoreSchema = z.object({
+  overall: z.number().min(0).max(100),
+  dimensions: z
+    .array(
+      z.object({
+        name: z.string(),
+        score: z.number().min(0).max(100),
+        comment: z.string(),
+      })
+    )
+    .length(5),
+  improved: z.string(),
+});
+export type AnswerScoreResult = z.infer<typeof answerScoreSchema>;
+
+export const answerScoreAgent: AgentDefinition<AnswerScoreResult> = {
+  name: '答案五维批改',
+  system: `你是严格的面试教练。按五个维度给候选人的面试答案打分,输出 JSON:
+五维固定为:具体性(有事实数字细节)、结构(STAR清晰)、相关性(紧扣问题)、可信度(细节可验证)、差异化(独特亮点)。
+- dimensions: 恰好五项 {name, score, comment},comment 指出具体问题并给一句可操作的改进指令(40字内)
+- overall: 0-100 总分(加权平均,相关性权重最高)
+- improved: 不改变事实、仅优化表达后的示范答案(150-250字),保留原答案的所有数字与事实,禁止编造新事实`,
+  schema: answerScoreSchema,
+};

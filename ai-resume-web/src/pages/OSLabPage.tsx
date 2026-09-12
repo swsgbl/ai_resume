@@ -7,6 +7,7 @@ import { loadModelConfig, runAgent, type AgentRunEvent } from '../agent/runner';
 import { extractAgent, evaluateAgent, tailorAgent, type EvaluateResult, type TailorResult } from '../agent/agents';
 import { addApplication } from '../agent/applications';
 import ApplicationsPanel from '../agent/ApplicationsPanel';
+import InterviewDrill from '../agent/InterviewDrill';
 import ModelConfigCard from '../agent/ModelConfigCard';
 import { jsonResumeSchema } from '@ai-resume/shared/schema';
 
@@ -312,7 +313,7 @@ export default function OSLabPage() {
                   <GradientText>简历生成车间</GradientText>
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm text-slate-400 lg:text-base">
-                  原料 → 质检 → 加工,一条流水线产出定制简历 · JSON Resume 开放标准 · 密钥与数据仅存本机
+                  原料 → 质检 → 加工 → 演练:产出定制简历并备战面试 · JSON Resume 开放标准 · 密钥与数据仅存本机
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -564,6 +565,11 @@ export default function OSLabPage() {
                 </div>
               )}
             </StationCard>
+          </div>
+
+          {/* ④ 演练场:面试备战(故事库 → 模拟面试 → 五维批改) */}
+          <div className="mt-6">
+            <InterviewDrill resumeText={resumeText} jdText={jdText} onEvent={pushEvent} />
           </div>
 
           {/* Agent 运行时间线 */}
