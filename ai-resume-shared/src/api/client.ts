@@ -2,13 +2,18 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 
 /**
  * 获取默认API基础URL
- * 尝试从localStorage读取用户配置的API地址，否则使用默认值
+ * 优先级: 构建时注入的 VITE_API_URL > 用户本地配置 > 同域相对路径(生产兜底)
+ * 注意:兜底必须是同域相对路径 —— 早期硬编码 http://127.0.0.1:8000 会导致
+ * 生产站点新访客的所有 API 请求打到用户自己电脑上而全部失败。
  */
 function getDefaultBaseURL(): string {
+  const envUrl = (import.meta as { env?: Record<string, string> }).env?.VITE_API_URL;
+  if (envUrl) return envUrl;
   if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem('api_base_url') || 'http://127.0.0.1:8000/api/v1';
+    const saved = localStorage.getItem('api_base_url');
+    if (saved) return saved;
   }
-  return 'http://127.0.0.1:8000/api/v1';
+  return '/api/v1';
 }
 
 /**

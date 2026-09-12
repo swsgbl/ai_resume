@@ -37,6 +37,14 @@ export default defineConfig(({ mode }) => {
     preview: {
       port: 3000,
       host: true,
+      // 本地预览(dist 构建产物)同样代理 API,默认走生产后端,便于本地真机测试登录链路
+      // 注意:QQ 等 OAuth 回调固定跳生产域名,第三方登录请在 https://ndtool.cn 完整测试
+      proxy: {
+        '/api': {
+          target: env.VITE_API_PROXY_TARGET || 'https://ndtool.cn',
+          changeOrigin: true,
+        },
+      },
     },
 
     optimizeDeps: {
